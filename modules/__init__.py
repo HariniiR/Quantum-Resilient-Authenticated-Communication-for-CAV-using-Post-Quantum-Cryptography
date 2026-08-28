@@ -1,0 +1,1 @@
+"""Educational cryptography demonstration modules."""
