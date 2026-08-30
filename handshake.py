@@ -363,29 +363,29 @@ def handshake(initiator, responder, ta):
 
 def main():
  
-    print("\n" + "=" * 75)
+    print("\n")
     print(" " * 15 + "QUANTUM RESILIENT V2X COMMUNICATION")
     print(" " * 20 + "DETAILED CRYPTOGRAPHIC DEMO")
     print(" " * 15 + "ML-KEM-1024 + ML-DSA-65 + AES-256-GCM")
-    print("=" * 75)
+   
  
     # 1. Create TA, CAV and RSU
  
     print("\n[STEP 1] CREATING ENTITIES")
-    print("-" * 75)
+    
  
     ta = TrustedAuthority()
  
     vehicle = Entity("CAV_001")
     rsu = Entity("RSU_042")
  
-    print("  ✓ Trusted Authority      : created")
-    print("  ✓ CAV_001               : created")
-    print("  ✓ RSU_042               : created")
+    print("   Trusted Authority      : created")
+    print("   CAV_001               : created")
+    print("   RSU_042               : created")
  
     # 2. Register CAV and RSU
     print("\n[STEP 2] ENTITY REGISTRATION WITH TRUSTED AUTHORITY")
-    print("-" * 75)
+    
  
     start = time.perf_counter()
  
@@ -399,8 +399,8 @@ def main():
         time.perf_counter() - start
     ) * 1000
  
-    print(f"  ✓ CAV_001               : REGISTERED")
-    print(f"  ✓ RSU_042               : REGISTERED")
+    print(f"   CAV_001               : REGISTERED")
+    print(f"   RSU_042               : REGISTERED")
     print(f"\n  Algorithm               : ML-DSA-65 (lattice-based signatures)")
     print(f"  Public key size         : {len(rsu.sig_pk)} bytes")
     print(f"  Registration token      : {len(rsu.token)} bytes")
@@ -410,7 +410,7 @@ def main():
     # 3. Authenticated handshake
  
     print("\n[STEP 3] AUTHENTICATED HANDSHAKE (CAV ↔ RSU)")
-    print("-" * 75)
+   
  
     start = time.perf_counter()
  
@@ -434,28 +434,28 @@ def main():
             time.perf_counter() - start
         ) * 1000
  
-        print("  ✓ Step 1: RSU generates ephemeral ML-KEM keypair")
-        print("  ✓ Step 2: RSU signs (identity || token || timestamp || ephemeral_key)")
-        print("  ✓ Step 3: CAV verifies TA token")
-        print("  ✓ Step 4: CAV verifies RSU's ML-DSA signature")
-        print("  ✓ Step 5: CAV performs ML-KEM encapsulation")
-        print("  ✓ Step 6: RSU performs ML-KEM decapsulation")
-        print("  ✓ Step 7: Both derive shared secret (identical)")
-        print("  ✓ Step 8: Both derive session keys (transcript-bound HKDF)")
-        print("  ✓ Step 9: Key confirmation (implicit)")
+        print("   Step 1: RSU generates ephemeral ML-KEM keypair")
+        print("   Step 2: RSU signs (identity || token || timestamp || ephemeral_key)")
+        print("   Step 3: CAV verifies TA token")
+        print("   Step 4: CAV verifies RSU's ML-DSA signature")
+        print("   Step 5: CAV performs ML-KEM encapsulation")
+        print("   Step 6: RSU performs ML-KEM decapsulation")
+        print("   Step 7: Both derive shared secret (identical)")
+        print("   Step 8: Both derive session keys (transcript-bound HKDF)")
+        print("   Step 9: Key confirmation (implicit)")
  
     except HandshakeError as e:
  
-        print("  ✗ Handshake failed!")
+        print("   Handshake failed!")
         return
  
     print(f"\n  Handshake time          : {handshake_time:.2f} ms")
     print(f"  Data exchanged          : {handshake_bytes} bytes")
-    print(f"  Within 100 ms budget?   : {'YES ✓' if handshake_time < 100 else 'NO ✗'}")
+    print(f"  Within 100 ms budget?   : {'YES ' if handshake_time < 100 else 'NO '}")
  
     # Display cryptographic values
     print("\n[STEP 4] CRYPTOGRAPHIC VALUES")
-    print("-" * 75)
+    
  
     print(f"\n  Shared Secret:")
     print(f"    Length              : {len(shared_secret)} bytes")
@@ -465,12 +465,12 @@ def main():
     print(f"    Length              : {len(transcript_hash)} bytes")
     print(f"    Value (hex)         : {transcript_hash.hex()}")
  
-    print(f"\n  CAV → RSU Direction:")
+    print(f"\n  CAV - RSU Direction:")
     print(f"    Encryption key      : {cav_key.hex()}")
     print(f"    Base IV             : {cav_iv.hex()}")
     print(f"    Nonce counter       : 0 (will increment per message)")
  
-    print(f"\n  RSU → CAV Direction:")
+    print(f"\n  RSU - CAV Direction:")
     print(f"    Encryption key      : {rsu_key.hex()}")
     print(f"    Base IV             : {rsu_iv.hex()}")
     print(f"    Nonce counter       : 0 (will increment per message)")
@@ -478,7 +478,7 @@ def main():
     # 4. Send a V2X beacon from CAV to RSU
  
     print("\n[STEP 5] SECURE V2X MESSAGE (CAV → RSU)")
-    print("-" * 75)
+    
  
     beacon = (
         b'{"id":"CAV_001",'
@@ -522,18 +522,18 @@ def main():
  
     print(f"\n  Decryption Process (AES-256-GCM):")
     print(f"    Decryption time     : {decryption_time:.3f} ms")
-    print(f"    Authentication      : VERIFIED ✓")
+    print(f"    Authentication      : VERIFIED ")
  
     print(f"\n  Recovered Plaintext:")
     print(f"    {recovered.decode()}")
     print(f"    Length              : {len(recovered)} bytes")
     print(f"    Hex                 : {recovered.hex()}")
-    print(f"    Matches original?   : {'YES ✓' if recovered == beacon else 'NO ✗'}")
+    print(f"    Matches original?   : {'YES ' if recovered == beacon else 'NO '}")
  
     # 5. Send a response from RSU to CAV
  
-    print("\n[STEP 6] SECURE V2X MESSAGE (RSU → CAV)")
-    print("-" * 75)
+    print("\n[STEP 6] SECURE V2X MESSAGE (RSU - CAV)")
+  
  
     command = b'{"cmd":"reduce_speed","value":10.0}'
  
@@ -571,18 +571,18 @@ def main():
  
     print(f"\n  Decryption Process (AES-256-GCM):")
     print(f"    Decryption time     : {decryption_time_resp:.3f} ms")
-    print(f"    Authentication      : VERIFIED ✓")
+    print(f"    Authentication      : VERIFIED ")
  
     print(f"\n  Recovered Plaintext:")
     print(f"    {recovered_resp.decode()}")
     print(f"    Length              : {len(recovered_resp)} bytes")
     print(f"    Hex                 : {recovered_resp.hex()}")
-    print(f"    Matches original?   : {'YES ✓' if recovered_resp == command else 'NO ✗'}")
+    print(f"    Matches original?   : {'YES ' if recovered_resp == command else 'NO '}")
  
     # 6. Summary
-    print("\n" + "=" * 75)
+    print("\n")
     print(" " * 30 + "DEMO SUMMARY")
-    print("=" * 75)
+    
  
     print("\nCryptographic Algorithms Used:")
     print("  • ML-KEM-1024         : Key establishment (NIST FIPS 203)")
@@ -591,33 +591,33 @@ def main():
     print("  • AES-256-GCM         : Record protection (symmetric encryption)")
  
     print("\nSecurity Properties Demonstrated:")
-    print("  ✓ Quantum resistance  : Lattice-based cryptography")
-    print("  ✓ Authentication      : ML-DSA-65 signatures + TA tokens")
-    print("  ✓ Key agreement       : ML-KEM-1024 encapsulation")
-    print("  ✓ Transcript binding  : Keys include handshake hash")
-    print("  ✓ Confidentiality     : AES-256 (256-bit symmetric)")
-    print("  ✓ Integrity           : GCM authentication tags")
-    print("  ✓ Replay prevention   : Monotonic nonce counter")
-    print("  ✓ Forward secrecy     : Ephemeral key erasure")
+    print("   Quantum resistance  : Lattice-based cryptography")
+    print("   Authentication      : ML-DSA-65 signatures + TA tokens")
+    print("   Key agreement       : ML-KEM-1024 encapsulation")
+    print("   Transcript binding  : Keys include handshake hash")
+    print("   Confidentiality     : AES-256 (256-bit symmetric)")
+    print("   Integrity           : GCM authentication tags")
+    print("   Replay prevention   : Monotonic nonce counter")
+    print("   Forward secrecy     : Ephemeral key erasure")
  
     print("\nOperations Completed:")
-    print(f"  ✓ Entity registration           : {registration_time:.2f} ms")
-    print(f"  ✓ Handshake (7 steps)           : {handshake_time:.2f} ms")
-    print(f"  ✓ Message encryption            : {encryption_time:.3f} ms")
-    print(f"  ✓ Message decryption            : {decryption_time:.3f} ms")
-    print(f"  ✓ Response encryption           : {encryption_time_resp:.3f} ms")
-    print(f"  ✓ Response decryption           : {decryption_time_resp:.3f} ms")
-    print(f"  ✓ Total demo time               : {handshake_time + encryption_time + decryption_time + encryption_time_resp + decryption_time_resp:.2f} ms")
+    print(f"   Entity registration           : {registration_time:.2f} ms")
+    print(f"   Handshake (7 steps)           : {handshake_time:.2f} ms")
+    print(f"   Message encryption            : {encryption_time:.3f} ms")
+    print(f"   Message decryption            : {decryption_time:.3f} ms")
+    print(f"   Response encryption           : {encryption_time_resp:.3f} ms")
+    print(f"   Response decryption           : {decryption_time_resp:.3f} ms")
+    print(f"   Total demo time               : {handshake_time + encryption_time + decryption_time + encryption_time_resp + decryption_time_resp:.2f} ms")
  
     print("\nPerformance Metrics:")
-    print(f"  • Handshake size                : {handshake_bytes} bytes")
-    print(f"  • Message encryption overhead   : {len(tag)} bytes (GCM tag)")
-    print(f"  • 802.11p frame size            : 1500 bytes max")
-    print(f"  • Frames needed for handshake   : {-(-handshake_bytes // 1500)} frames")
+    print(f"   Handshake size                : {handshake_bytes} bytes")
+    print(f"   Message encryption overhead   : {len(tag)} bytes (GCM tag)")
+    print(f"   802.11p frame size            : 1500 bytes max")
+    print(f"   Frames needed for handshake   : {-(-handshake_bytes // 1500)} frames")
  
-    print("\n" + "=" * 75)
+    print("\n")
     print(" " * 25 + "QUANTUM-RESILIENT V2X READY ✓")
-    print("=" * 75 + "\n")
+    
  
  
 if __name__ == "__main__":
