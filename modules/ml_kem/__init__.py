@@ -1,14 +1,6 @@
-"""ML-KEM operations and Shor applicability demonstration."""
+"""ML-KEM demonstration module."""
 
-from .backend import MLKEMBackend, PQCBackendUnavailable, load_backend
 from .demo import run_demo
-from .shor_analysis import ShorApplicability, analyze_shor_applicability
+from .ml_kem import get_algorithm, run_ml_kem, shor_has_direct_attack
 
-__all__ = [
-    "MLKEMBackend",
-    "PQCBackendUnavailable",
-    "ShorApplicability",
-    "analyze_shor_applicability",
-    "load_backend",
-    "run_demo",
-]
+__all__ = ["get_algorithm", "run_demo", "run_ml_kem", "shor_has_direct_attack"]

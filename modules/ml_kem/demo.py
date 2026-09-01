@@ -1,132 +1,81 @@
-"""Console presentation for Module 3: ML-KEM vs Shor's algorithm."""
+"""Interactive ML-KEM versus Shor demonstration."""
 
 from hashlib import sha256
 
-from .backend import PARAMETER_SETS, PQCBackendUnavailable, MLKEMBackend, load_backend
-from .shor_analysis import analyze_shor_applicability
+from .ml_kem import run_ml_kem, shor_has_direct_attack
 
 
-WIDTH = 60
+LINE = "=" * 60
 
 
-def _section(title: str) -> None:
-    print()
-    print("=" * WIDTH)
-    print(title)
-    print("=" * WIDTH)
+def heading(title: str) -> None:
+    print(f"\n{LINE}\n{title}\n{LINE}")
 
 
-def _fingerprint(data: bytes) -> str:
-    """Return a short non-secret identifier instead of dumping binary values."""
+def fingerprint(data: bytes) -> str:
+    """Show a short hash instead of printing large binary keys."""
 
     return sha256(data).hexdigest()[:16] + "..."
 
 
-def _read_backend() -> MLKEMBackend:
-    """Prompt for an ML-KEM parameter set and load its backend."""
+def read_choice() -> str:
+    """Ask the user to select an ML-KEM parameter set."""
 
     while True:
-        print("Choose a standardized parameter set:")
-        print("  1. ML-KEM-512")
-        print("  2. ML-KEM-768")
-        print("  3. ML-KEM-1024")
-        selection = input("Enter 1, 2, or 3: ").strip()
-        if selection not in PARAMETER_SETS:
-            print("Invalid selection. Please enter 1, 2, or 3.\n")
-            continue
-        return load_backend(selection)
+        print("1. ML-KEM-512")
+        print("2. ML-KEM-768")
+        print("3. ML-KEM-1024")
+        choice = input("Choose 1, 2, or 3: ").strip()
+        if choice in ("1", "2", "3"):
+            return choice
+        print("Invalid choice.\n")
 
 
 def run_demo() -> None:
-    """Run real ML-KEM operations and explain Shor's lack of a direct attack."""
+    """Run ML-KEM and explain why Shor does not directly attack it."""
 
-    _section("ML-KEM VS SHOR'S ALGORITHM - MODULE 3")
-    print("This module performs standardized ML-KEM key generation,")
-    print("encapsulation, and decapsulation using the pqcrypto backend.")
-    print("It does not implement or simulate a quantum circuit.")
+    heading("ML-KEM VS SHOR'S ALGORITHM")
+    print("ML-KEM creates a shared secret between a sender and receiver.")
+    print("It is based on Module-LWE, not factoring or discrete logarithms.")
 
-    _section("[1] WHAT ML-KEM DOES")
-    print("ML-KEM is a key-encapsulation mechanism, not direct message encryption.")
-    print("It allows two parties to establish the same 32-byte shared secret:")
-    print("  (encapsulation key, decapsulation key) = KeyGen()")
-    print("  (ciphertext, sender secret) = Encaps(encapsulation key)")
-    print("  receiver secret = Decaps(decapsulation key, ciphertext)")
-    print()
-    print("The shared secret can then be used with symmetric encryption in a")
-    print("complete protocol; symmetric message encryption is outside this demo.")
+    heading("1. SELECT ML-KEM VERSION")
+    choice = read_choice()
 
-    _section("[2] SECURITY FOUNDATION")
-    print("ML-KEM is based on module-lattice mathematics, principally Module-LWE.")
-    print("Its public equations include carefully sampled error/noise, so recovering")
-    print("the short secret is not an integer-factorization or discrete-log problem.")
-    print("The public modulus q = 3329 is not a secret RSA-style product; factoring")
-    print("that public constant does not reveal the ML-KEM decapsulation key.")
-
-    _section("[3] PARAMETER SELECTION")
     try:
-        backend = _read_backend()
-    except PQCBackendUnavailable as error:
-        print(f"Backend unavailable: {error}")
+        result = run_ml_kem(choice)
+    except RuntimeError as error:
+        print(error)
         return
-    print(f"Selected: {backend.display_name}")
 
-    _section("[4] STANDARDIZED KEY GENERATION")
-    public_key, secret_key = backend.keygen()
-    print(f"Encapsulation key (public) size: {len(public_key)} bytes")
-    print(f"Decapsulation key (private) size: {len(secret_key)} bytes")
-    print(f"Public-key fingerprint: {_fingerprint(public_key)}")
-    print("The private decapsulation key is retained by the receiver and not shown.")
+    heading("2. KEY GENERATION")
+    print(f"Algorithm = {result['name']}")
+    print(f"Public key size  = {len(result['public_key'])} bytes")
+    print(f"Private key size = {len(result['private_key'])} bytes")
+    print(f"Public key hash  = {fingerprint(result['public_key'])}")
 
-    _section("[5] SENDER ENCAPSULATION")
-    ciphertext, sender_secret = backend.encaps(public_key)
-    print("The sender uses only the public encapsulation key.")
-    print(f"Ciphertext size: {len(ciphertext)} bytes")
-    print(f"Ciphertext fingerprint: {_fingerprint(ciphertext)}")
-    print(f"Sender shared-secret fingerprint: {_fingerprint(sender_secret)}")
+    heading("3. ENCAPSULATION")
+    print("The sender uses the public key to create a ciphertext and shared secret.")
+    print(f"Ciphertext size = {len(result['ciphertext'])} bytes")
+    print(f"Ciphertext hash = {fingerprint(result['ciphertext'])}")
+    print(f"Sender secret   = {fingerprint(result['sender_secret'])}")
 
-    _section("[6] RECEIVER DECAPSULATION")
-    receiver_secret = backend.decaps(secret_key, ciphertext)
-    secrets_match = sender_secret == receiver_secret
-    print("The receiver uses the private decapsulation key and ciphertext.")
-    print(f"Receiver shared-secret fingerprint: {_fingerprint(receiver_secret)}")
-    print(f"Shared secrets match: {secrets_match}")
-    if not secrets_match:
-        raise RuntimeError("ML-KEM encapsulation and decapsulation did not agree")
+    heading("4. DECAPSULATION")
+    print("The receiver uses the private key and ciphertext.")
+    print(f"Receiver secret = {fingerprint(result['receiver_secret'])}")
+    print(f"Secrets match   = "
+          f"{result['sender_secret'] == result['receiver_secret']}")
 
-    _section("[7] INFORMATION BOUNDARY")
-    print("RECEIVER KEEPS SECRET:")
-    print(f"  Decapsulation key ({len(secret_key)} bytes)")
-    print(f"  Shared secret ({len(receiver_secret)} bytes)")
-    print()
-    print("ATTACKER MAY KNOW:")
-    print(f"  {backend.display_name} algorithm and public parameters")
-    print(f"  Encapsulation key ({len(public_key)} bytes)")
-    print(f"  Intercepted ciphertext ({len(ciphertext)} bytes)")
-    print()
-    print("The attacker does not receive the decapsulation key or shared secret.")
+    heading("5. WHAT THE ATTACKER KNOWS")
+    print("Attacker may know the algorithm, public key, and ciphertext.")
+    print("Attacker does not know the private key or shared secret.")
 
-    _section("[8] SHOR APPLICABILITY CHECK")
-    analysis = analyze_shor_applicability()
-    print(f"Underlying target: {analysis.target_problem}")
-    print(f"Depends on integer factorization: {analysis.uses_integer_factorization}")
-    print(f"Depends on discrete logarithms: {analysis.uses_discrete_logarithms}")
-    print(f"Known direct Shor attack: {analysis.direct_shor_attack_known}")
-    print()
-    print("Shor efficiently addresses factoring and discrete logarithms. ML-KEM")
-    print("does not expose either of those structures as its security problem.")
-    print("Shor's algorithm has no known direct efficient attack on the")
-    print("Module-LWE problem underlying ML-KEM.")
-    print()
-    print("This is not a proof of immunity to every possible future quantum attack;")
-    print("it states that Shor's known method does not directly solve Module-LWE.")
+    heading("6. SHOR CHECK")
+    print("RSA depends on factoring. ECC depends on discrete logarithms.")
+    print("ML-KEM instead depends on noisy module-lattice equations (Module-LWE).")
+    print(f"Known direct Shor attack = {shor_has_direct_attack()}")
+    print("Factoring the public ML-KEM modulus q = 3329 reveals no private key.")
 
-    _section("MODULE 3 RESULT")
-    print(f"{backend.display_name} encapsulation/decapsulation: SUCCESSFUL")
-    print("SHOR RESULT: NO KNOWN DIRECTLY APPLICABLE ATTACK")
-
-    _section("[9] FINAL CONCLUSION")
-    print("Unlike RSA and ECC, ML-KEM was designed around module-lattice problems")
-    print("rather than factorization or discrete logarithms. Shor's algorithm does")
-    print("not provide a known efficient method for recovering an ML-KEM private")
-    print("key. This module used real ML-KEM operations and made no quantum-")
-    print("security claim beyond the absence of a known direct Shor attack.")
+    heading("MODULE 3 SUCCESSFUL")
+    print("ML-KEM key generation, encapsulation, and decapsulation worked.")
+    print("Shor's algorithm has no known direct efficient attack on Module-LWE.")
+    print("This does not prove protection from every possible future attack.")

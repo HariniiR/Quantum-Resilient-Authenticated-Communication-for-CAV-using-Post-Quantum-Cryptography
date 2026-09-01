@@ -1,221 +1,159 @@
-"""Educational elliptic-curve arithmetic and toy EC ElGamal encryption.
+"""Small elliptic-curve functions for the classroom demonstration."""
 
-The implementation uses tiny prime fields and is intentionally transparent.
-It is not constant-time and must not be used to protect real information.
-"""
-
-from dataclasses import dataclass
 from math import gcd, isqrt
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 
+Curve = Tuple[int, int, int]  # (field prime p, coefficient a, coefficient b)
 Point = Optional[Tuple[int, int]]
-INFINITY: Point = None
 
 
-def is_prime(value: int) -> bool:
-    """Return whether ``value`` is prime using trial division."""
+def is_prime(number: int) -> bool:
+    """Check whether a number is prime."""
 
-    if value < 2:
+    if number < 2:
         return False
-    if value == 2:
-        return True
-    if value % 2 == 0:
-        return False
-    return all(value % divisor for divisor in range(3, isqrt(value) + 1, 2))
-
-
-@dataclass(frozen=True)
-class Curve:
-    """A short-Weierstrass curve ``y^2 = x^3 + ax + b (mod p)``."""
-
-    p: int
-    a: int
-    b: int
-
-    def __post_init__(self) -> None:
-        if self.p <= 3 or not is_prime(self.p):
-            raise ValueError("field modulus p must be a prime greater than 3")
-        if (4 * self.a**3 + 27 * self.b**2) % self.p == 0:
-            raise ValueError("curve discriminant must be non-zero modulo p")
-
-    def contains(self, point: Point) -> bool:
-        """Return whether a point lies on this curve."""
-
-        if point is INFINITY:
-            return True
-        x, y = point
-        if not 0 <= x < self.p or not 0 <= y < self.p:
+    for divisor in range(2, isqrt(number) + 1):
+        if number % divisor == 0:
             return False
-        return (y * y - (x**3 + self.a * x + self.b)) % self.p == 0
+    return True
 
 
-@dataclass(frozen=True)
-class ECCKeyPair:
-    """An educational ECC private scalar and public point."""
+def make_curve(p: int, a: int, b: int) -> Curve:
+    """Create and validate y^2 = x^3 + ax + b modulo p."""
 
-    curve: Curve
-    generator: Point
-    generator_order: int
-    private_scalar: int
-    public_point: Point
-
-
-@dataclass(frozen=True)
-class ECCCiphertext:
-    """The two public points in a toy elliptic-curve ElGamal ciphertext."""
-
-    c1: Point
-    c2: Point
+    if p <= 3 or not is_prime(p):
+        raise ValueError("p must be a prime greater than 3")
+    if (4 * a**3 + 27 * b**2) % p == 0:
+        raise ValueError("the curve is singular")
+    return p, a % p, b % p
 
 
-@dataclass(frozen=True)
-class ECCEncryptionResult:
-    """Legitimate-side values produced while encrypting a message point."""
+def on_curve(curve: Curve, point: Point) -> bool:
+    """Check whether a point belongs to the curve."""
 
-    message_scalar: int
-    message_point: Point
-    ephemeral_scalar: int
-    shared_point: Point
-    ciphertext: ECCCiphertext
+    if point is None:
+        return True
 
-
-def format_point(point: Point) -> str:
-    """Return a compact, console-friendly representation of a curve point."""
-
-    return "O (point at infinity)" if point is INFINITY else f"({point[0]}, {point[1]})"
+    p, a, b = curve
+    x, y = point
+    return 0 <= x < p and 0 <= y < p and (y * y - x**3 - a * x - b) % p == 0
 
 
-def negate_point(curve: Curve, point: Point) -> Point:
-    """Return the additive inverse of ``point``."""
+def add_points(curve: Curve, point1: Point, point2: Point) -> Point:
+    """Add two elliptic-curve points."""
 
-    if not curve.contains(point):
+    if not on_curve(curve, point1) or not on_curve(curve, point2):
         raise ValueError("point is not on the curve")
-    if point is INFINITY:
-        return INFINITY
-    return point[0], (-point[1]) % curve.p
+    if point1 is None:
+        return point2
+    if point2 is None:
+        return point1
 
+    p, a, _ = curve
+    x1, y1 = point1
+    x2, y2 = point2
 
-def add_points(curve: Curve, left: Point, right: Point) -> Point:
-    """Add two points using the elliptic-curve group law."""
+    if x1 == x2 and (y1 + y2) % p == 0:
+        return None
 
-    if not curve.contains(left) or not curve.contains(right):
-        raise ValueError("both points must lie on the curve")
-    if left is INFINITY:
-        return right
-    if right is INFINITY:
-        return left
-
-    x1, y1 = left
-    x2, y2 = right
-    if x1 == x2 and (y1 + y2) % curve.p == 0:
-        return INFINITY
-
-    if left == right:
-        slope = (3 * x1 * x1 + curve.a) * pow(2 * y1, -1, curve.p)
+    if point1 == point2:
+        slope = (3 * x1 * x1 + a) * pow(2 * y1, -1, p)
     else:
-        slope = (y2 - y1) * pow(x2 - x1, -1, curve.p)
-    slope %= curve.p
+        slope = (y2 - y1) * pow(x2 - x1, -1, p)
 
-    x3 = (slope * slope - x1 - x2) % curve.p
-    y3 = (slope * (x1 - x3) - y1) % curve.p
-    result = x3, y3
-    if not curve.contains(result):
-        raise RuntimeError("point addition produced a point outside the curve")
-    return result
+    slope %= p
+    x3 = (slope * slope - x1 - x2) % p
+    y3 = (slope * (x1 - x3) - y1) % p
+    return x3, y3
 
 
-def scalar_multiply(curve: Curve, scalar: int, point: Point) -> Point:
-    """Compute ``scalar * point`` with double-and-add."""
+def multiply(curve: Curve, number: int, point: Point) -> Point:
+    """Calculate number * point using repeated doubling."""
 
-    if not curve.contains(point):
-        raise ValueError("point is not on the curve")
-    if scalar < 0:
-        return scalar_multiply(curve, -scalar, negate_point(curve, point))
+    result = None
+    current = point
 
-    result = INFINITY
-    addend = point
-    remaining = scalar
-    while remaining:
-        if remaining & 1:
-            result = add_points(curve, result, addend)
-        addend = add_points(curve, addend, addend)
-        remaining >>= 1
+    while number > 0:
+        if number % 2 == 1:
+            result = add_points(curve, result, current)
+        current = add_points(curve, current, current)
+        number //= 2
+
     return result
 
 
 def point_order(curve: Curve, point: Point) -> int:
-    """Find a point's order with a classical loop suitable for tiny curves."""
+    """Find the first n for which nG is the point at infinity."""
 
-    if point is INFINITY or not curve.contains(point):
-        raise ValueError("generator must be a finite point on the curve")
+    if point is None or not on_curve(curve, point):
+        raise ValueError("G must be a point on the curve")
 
-    # Hasse's theorem bounds the number of points, and therefore point order.
-    upper_bound = curve.p + 1 + 2 * isqrt(curve.p) + 2
-    running = INFINITY
-    for order in range(1, upper_bound + 1):
-        running = add_points(curve, running, point)
-        if running is INFINITY:
+    p = curve[0]
+    result = None
+    limit = p + 1 + 2 * isqrt(p)  # Hasse bound
+
+    for order in range(1, limit + 1):
+        result = add_points(curve, result, point)
+        if result is None:
             return order
-    raise RuntimeError("point order was not found inside the Hasse bound")
+
+    raise ValueError("could not find the order of G")
 
 
-def generate_keypair(curve: Curve, generator: Point, private_scalar: int) -> ECCKeyPair:
-    """Generate an educational ECC key pair from a public generator point."""
+def create_keypair(curve: Curve, generator: Point, private_key: int):
+    """Return the order of G and public point Q = dG."""
 
     order = point_order(curve, generator)
-    if order < 5:
-        raise ValueError("generator order is too small for this demonstration")
-    if not 1 <= private_scalar < order:
-        raise ValueError(f"private scalar d must satisfy 1 <= d < {order}")
-    if gcd(private_scalar, order) != 1:
-        raise ValueError("private scalar d must be coprime with the generator order")
+    if not 1 <= private_key < order:
+        raise ValueError(f"d must satisfy 1 <= d < {order}")
+    if gcd(private_key, order) != 1:
+        raise ValueError("d must be coprime with the order of G")
 
-    public_point = scalar_multiply(curve, private_scalar, generator)
-    return ECCKeyPair(curve, generator, order, private_scalar, public_point)
+    public_key = multiply(curve, private_key, generator)
+    return order, public_key
 
 
-def encrypt_message(
-    keypair: ECCKeyPair,
-    message_scalar: int,
-    ephemeral_scalar: int,
-) -> ECCEncryptionResult:
-    """Encrypt a toy scalar-encoded message using EC ElGamal point operations."""
+def encrypt(curve: Curve, generator: Point, public_key: Point,
+            order: int, message: int, one_time_key: int) -> Dict[str, object]:
+    """Encrypt a small message using educational EC ElGamal."""
 
-    order = keypair.generator_order
-    if not 1 <= message_scalar < order:
-        raise ValueError(f"message scalar m must satisfy 1 <= m < {order}")
-    if not 1 <= ephemeral_scalar < order:
-        raise ValueError(f"ephemeral scalar k must satisfy 1 <= k < {order}")
-    if gcd(ephemeral_scalar, order) != 1:
-        raise ValueError("ephemeral scalar k must be coprime with the generator order")
+    if not 1 <= message < order:
+        raise ValueError(f"m must satisfy 1 <= m < {order}")
+    if not 1 <= one_time_key < order or gcd(one_time_key, order) != 1:
+        raise ValueError(f"k must be coprime with {order} and satisfy 1 <= k < {order}")
 
-    message_point = scalar_multiply(keypair.curve, message_scalar, keypair.generator)
-    c1 = scalar_multiply(keypair.curve, ephemeral_scalar, keypair.generator)
-    shared_point = scalar_multiply(
-        keypair.curve, ephemeral_scalar, keypair.public_point
-    )
-    c2 = add_points(keypair.curve, message_point, shared_point)
-    return ECCEncryptionResult(
-        message_scalar,
-        message_point,
-        ephemeral_scalar,
-        shared_point,
-        ECCCiphertext(c1, c2),
-    )
+    message_point = multiply(curve, message, generator)
+    c1 = multiply(curve, one_time_key, generator)
+    shared_point = multiply(curve, one_time_key, public_key)
+    c2 = add_points(curve, message_point, shared_point)
+
+    return {"message_point": message_point, "shared": shared_point,
+            "c1": c1, "c2": c2}
 
 
-def decrypt_point(curve: Curve, ciphertext: ECCCiphertext, private_scalar: int) -> Point:
-    """Decrypt an EC ElGamal ciphertext to its original message point."""
+def decrypt(curve: Curve, c1: Point, c2: Point, private_key: int) -> Point:
+    """Recover M = C2 - dC1."""
 
-    shared_point = scalar_multiply(curve, private_scalar, ciphertext.c1)
-    return add_points(curve, ciphertext.c2, negate_point(curve, shared_point))
+    shared_point = multiply(curve, private_key, c1)
+    if shared_point is None:
+        return c2
+
+    negative_shared = shared_point[0], (-shared_point[1]) % curve[0]
+    return add_points(curve, c2, negative_shared)
 
 
-def decode_message_scalar(curve: Curve, generator: Point, order: int, point: Point) -> int:
-    """Decode the toy ``m * G`` mapping with a tiny classical lookup loop."""
+def decode_message(curve: Curve, generator: Point, order: int,
+                   message_point: Point) -> int:
+    """Convert the toy point M = mG back to the small integer m."""
 
-    for scalar in range(1, order):
-        if scalar_multiply(curve, scalar, generator) == point:
-            return scalar
-    raise ValueError("message point is not in the generator subgroup")
+    for message in range(1, order):
+        if multiply(curve, message, generator) == message_point:
+            return message
+    raise ValueError("message point is not generated by G")
+
+
+def show_point(point: Point) -> str:
+    """Format a point for the console."""
+
+    return "O" if point is None else f"({point[0]}, {point[1]})"

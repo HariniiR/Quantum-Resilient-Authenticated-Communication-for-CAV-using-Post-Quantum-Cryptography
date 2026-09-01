@@ -1,156 +1,102 @@
-"""Console presentation for Module 4: ML-DSA vs Shor's algorithm."""
+"""Interactive ML-DSA versus Shor demonstration."""
 
 from hashlib import sha256
 
-from .backend import PARAMETER_SETS, MLDSABackend, PQCBackendUnavailable, load_backend
-from .shor_analysis import analyze_shor_applicability
+from .ml_dsa import run_ml_dsa, shor_has_direct_attack
 
 
-WIDTH = 60
+LINE = "=" * 60
 
 
-def _section(title: str) -> None:
-    print()
-    print("=" * WIDTH)
-    print(title)
-    print("=" * WIDTH)
+def heading(title: str) -> None:
+    print(f"\n{LINE}\n{title}\n{LINE}")
 
 
-def _fingerprint(data: bytes) -> str:
-    """Return a short identifier instead of dumping large binary objects."""
+def fingerprint(data: bytes) -> str:
+    """Show a short hash instead of printing large binary values."""
 
     return sha256(data).hexdigest()[:16] + "..."
 
 
-def _read_backend() -> MLDSABackend:
-    """Prompt for an ML-DSA parameter set and load its backend."""
+def read_choice() -> str:
+    """Ask the user to select an ML-DSA parameter set."""
 
     while True:
-        print("Choose a standardized parameter set:")
-        print("  1. ML-DSA-44")
-        print("  2. ML-DSA-65")
-        print("  3. ML-DSA-87")
-        selection = input("Enter 1, 2, or 3: ").strip()
-        if selection not in PARAMETER_SETS:
-            print("Invalid selection. Please enter 1, 2, or 3.\n")
-            continue
-        return load_backend(selection)
+        print("1. ML-DSA-44")
+        print("2. ML-DSA-65")
+        print("3. ML-DSA-87")
+        choice = input("Choose 1, 2, or 3: ").strip()
+        if choice in ("1", "2", "3"):
+            return choice
+        print("Invalid choice.\n")
 
 
-def _read_message() -> bytes:
-    """Prompt for a non-empty UTF-8 message."""
+def read_message() -> bytes:
+    """Ask for a non-empty message."""
 
     while True:
-        message = input("Enter the message to sign: ")
+        message = input("Enter message to sign: ")
         if message:
             return message.encode("utf-8")
-        print("The message must not be empty.")
+        print("Message cannot be empty.")
 
 
-def _read_context() -> bytes:
-    """Prompt for a FIPS 204 context of at most 255 bytes."""
+def read_context() -> bytes:
+    """Ask for an optional context no longer than 255 bytes."""
 
     while True:
-        context = input("Enter optional signing context (press Enter for none): ").encode(
-            "utf-8"
-        )
+        context = input("Optional context (press Enter for none): ").encode("utf-8")
         if len(context) <= 255:
             return context
-        print("The UTF-8 context must be at most 255 bytes.")
+        print("Context must be at most 255 bytes.")
 
 
 def run_demo() -> None:
-    """Run real ML-DSA operations and explain Shor's lack of a direct attack."""
+    """Run ML-DSA and explain why Shor does not directly attack it."""
 
-    _section("ML-DSA VS SHOR'S ALGORITHM - MODULE 4")
-    print("This module performs standardized ML-DSA key generation, signing,")
-    print("and verification using the pqcrypto backend.")
-    print("It does not implement or simulate a quantum circuit.")
+    heading("ML-DSA VS SHOR'S ALGORITHM")
+    print("ML-DSA signs messages so that changes can be detected.")
+    print("It uses module-lattice problems, not factoring or discrete logarithms.")
 
-    _section("[1] WHAT ML-DSA DOES")
-    print("ML-DSA is a digital-signature algorithm.")
-    print("The signer keeps a private signing key and publishes a verification key.")
-    print("A valid signature authenticates a message and detects modification;")
-    print("it does not encrypt or hide the message.")
+    heading("1. INPUT")
+    choice = read_choice()
+    message = read_message()
+    context = read_context()
 
-    _section("[2] SECURITY FOUNDATION")
-    print("ML-DSA is built from module-lattice problems, including assumptions")
-    print("related to Module-LWE and Module-SIS, plus cryptographic hashing.")
-    print("There is no RSA modulus to factor and no relation Q = dG whose")
-    print("discrete logarithm reveals the signing key.")
-
-    _section("[3] PARAMETER AND MESSAGE INPUT")
     try:
-        backend = _read_backend()
-    except PQCBackendUnavailable as error:
-        print(f"Backend unavailable: {error}")
+        result = run_ml_dsa(choice, message, context)
+    except RuntimeError as error:
+        print(error)
         return
-    message = _read_message()
-    context = _read_context()
-    print(f"Selected: {backend.display_name}")
-    print(f"Message length: {len(message)} bytes")
-    print(f"Context length: {len(context)} bytes")
 
-    _section("[4] STANDARDIZED KEY GENERATION")
-    public_key, secret_key = backend.keygen()
-    print(f"Verification key (public) size: {len(public_key)} bytes")
-    print(f"Signing key (private) size: {len(secret_key)} bytes")
-    print(f"Public-key fingerprint: {_fingerprint(public_key)}")
-    print("The private signing key is retained by the signer and not shown.")
+    heading("2. KEY GENERATION")
+    print(f"Algorithm = {result['name']}")
+    print(f"Public key size  = {len(result['public_key'])} bytes")
+    print(f"Private key size = {len(result['private_key'])} bytes")
+    print(f"Public key hash  = {fingerprint(result['public_key'])}")
 
-    _section("[5] MESSAGE SIGNING")
-    signature = backend.sign(secret_key, message, context)
-    print("The signer combines the private key, message, and context.")
-    print(f"Signature size: {len(signature)} bytes")
-    print(f"Message fingerprint: {_fingerprint(message)}")
-    print(f"Signature fingerprint: {_fingerprint(signature)}")
+    heading("3. SIGN MESSAGE")
+    print("The signer uses the private key to create the signature.")
+    print(f"Message hash   = {fingerprint(message)}")
+    print(f"Signature size = {len(result['signature'])} bytes")
+    print(f"Signature hash = {fingerprint(result['signature'])}")
 
-    _section("[6] SIGNATURE VERIFICATION")
-    valid = backend.verify(public_key, message, signature, context)
-    tampered_message = message + b" [tampered]"
-    tampered_valid = backend.verify(public_key, tampered_message, signature, context)
-    print("Verifier uses only the public key, message, signature, and context.")
-    print(f"Original message verifies: {valid}")
-    print(f"Modified message verifies with same signature: {tampered_valid}")
-    if not valid or tampered_valid:
-        raise RuntimeError("ML-DSA verification behavior was unexpected")
+    heading("4. VERIFY SIGNATURE")
+    print("The verifier uses the public key, message, signature, and context.")
+    print(f"Original message valid = {result['valid']}")
+    print(f"Changed message valid  = {result['tampered_valid']}")
 
-    _section("[7] INFORMATION BOUNDARY")
-    print("SIGNER KEEPS SECRET:")
-    print(f"  Signing key ({len(secret_key)} bytes)")
-    print()
-    print("VERIFIER OR ATTACKER MAY KNOW:")
-    print(f"  {backend.display_name} algorithm and public parameters")
-    print(f"  Verification key ({len(public_key)} bytes)")
-    print(f"  Message ({len(message)} bytes)")
-    print(f"  Signature ({len(signature)} bytes)")
-    print(f"  Context ({len(context)} bytes)")
-    print()
-    print("Public signatures do not reveal the private signing key through a")
-    print("known factorization or discrete-logarithm relation.")
+    heading("5. WHAT THE ATTACKER KNOWS")
+    print("Attacker may know the public key, message, signature, and context.")
+    print("Attacker does not know the private signing key.")
 
-    _section("[8] SHOR APPLICABILITY CHECK")
-    analysis = analyze_shor_applicability()
-    print("Underlying targets: module-lattice problems including")
-    print("  Module-LWE and Module-SIS")
-    print(f"Depends on integer factorization: {analysis.uses_integer_factorization}")
-    print(f"Depends on discrete logarithms: {analysis.uses_discrete_logarithms}")
-    print(f"Known direct Shor attack: {analysis.direct_shor_attack_known}")
-    print()
-    print("Shor's algorithm has no known direct efficient attack on the")
-    print("module-lattice assumptions underlying ML-DSA.")
-    print("Therefore this module does not fabricate an attacker key-recovery step.")
-    print("This is not a proof against every possible future quantum technique;")
-    print("it is the scientifically limited conclusion about Shor's algorithm.")
+    heading("6. SHOR CHECK")
+    print("ML-DSA relies on Module-LWE and Module-SIS-type lattice problems.")
+    print(f"Known direct Shor attack = {shor_has_direct_attack()}")
+    print("There is no RSA number to factor and no ECC discrete log to solve.")
 
-    _section("MODULE 4 RESULT")
-    print(f"{backend.display_name} key generation/sign/verify: SUCCESSFUL")
-    print("TAMPERED MESSAGE REJECTION: SUCCESSFUL")
-    print("SHOR RESULT: NO KNOWN DIRECTLY APPLICABLE ATTACK")
-
-    _section("[9] FINAL CONCLUSION")
-    print("Unlike RSA and ECC signatures, ML-DSA was designed around module-")
-    print("lattice assumptions rather than factorization or discrete logarithms.")
-    print("Shor's algorithm does not provide a known efficient signing-key")
-    print("recovery or forgery method for ML-DSA. This module used real ML-DSA")
-    print("operations and did not claim absolute immunity to future attacks.")
+    heading("MODULE 4 SUCCESSFUL")
+    print("ML-DSA key generation, signing, and verification worked.")
+    print("The changed message was rejected.")
+    print("Shor has no known direct efficient attack on ML-DSA's foundations.")
+    print("This does not prove protection from every possible future attack.")

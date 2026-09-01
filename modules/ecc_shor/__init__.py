@@ -1,30 +1,8 @@
-"""ECC and Shor discrete-logarithm workflow demonstration."""
+"""ECC and Shor demonstration module."""
 
 from .demo import run_demo
-from .ecc import (
-    Curve,
-    ECCCiphertext,
-    ECCKeyPair,
-    Point,
-    decrypt_point,
-    encrypt_message,
-    generate_keypair,
-    point_order,
-    scalar_multiply,
-)
-from .shor_math import ECCShorAttackResult, run_ecc_shor_math_attack
+from .ecc import add_points, create_keypair, decrypt, encrypt, multiply
+from .shor_math import attack_ecc, find_private_key
 
-__all__ = [
-    "Curve",
-    "ECCCiphertext",
-    "ECCKeyPair",
-    "ECCShorAttackResult",
-    "Point",
-    "decrypt_point",
-    "encrypt_message",
-    "generate_keypair",
-    "point_order",
-    "run_demo",
-    "run_ecc_shor_math_attack",
-    "scalar_multiply",
-]
+__all__ = ["add_points", "attack_ecc", "create_keypair", "decrypt",
+           "encrypt", "find_private_key", "multiply", "run_demo"]

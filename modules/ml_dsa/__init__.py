@@ -1,14 +1,7 @@
-"""ML-DSA operations and Shor applicability demonstration."""
+"""ML-DSA demonstration module."""
 
-from .backend import MLDSABackend, PQCBackendUnavailable, load_backend
 from .demo import run_demo
-from .shor_analysis import ShorApplicability, analyze_shor_applicability
+from .ml_dsa import get_algorithm, run_ml_dsa, shor_has_direct_attack, verify
 
-__all__ = [
-    "MLDSABackend",
-    "PQCBackendUnavailable",
-    "ShorApplicability",
-    "analyze_shor_applicability",
-    "load_backend",
-    "run_demo",
-]
+__all__ = ["get_algorithm", "run_demo", "run_ml_dsa",
+           "shor_has_direct_attack", "verify"]

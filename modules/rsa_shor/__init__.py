@@ -1,15 +1,15 @@
-"""RSA and Shor mathematical-workflow demonstration."""
+"""RSA and Shor demonstration module."""
 
 from .demo import run_demo
-from .rsa import RSAKeyPair, decrypt, encrypt, generate_keypair
-from .shor_math import ShorAttackResult, run_shor_math_attack
+from .rsa import decrypt, encrypt, generate_keys
+from .shor_math import attack_rsa, find_order, recover_factors
 
 __all__ = [
-    "RSAKeyPair",
-    "ShorAttackResult",
+    "attack_rsa",
     "decrypt",
     "encrypt",
-    "generate_keypair",
+    "find_order",
+    "generate_keys",
+    "recover_factors",
     "run_demo",
-    "run_shor_math_attack",
 ]

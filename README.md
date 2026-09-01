@@ -1,9 +1,4 @@
-# Quantum-Resilient Authenticated Communication for CAV Using Post-Quantum Cryptography
-
-Quantum-resilient authenticated communication for autonomous vehicles using
-post-quantum cryptography.
-
-## Cryptography Demonstration Modules
+# Quantum Cryptography Demonstration
 
 ## Purpose
 
@@ -139,13 +134,11 @@ quantum_crypto_demo/
 |   |   `-- demo.py
 |   |-- ml_kem/
 |   |   |-- __init__.py
-|   |   |-- backend.py
-|   |   |-- shor_analysis.py
+|   |   |-- ml_kem.py
 |   |   `-- demo.py
 |   `-- ml_dsa/
 |       |-- __init__.py
-|       |-- backend.py
-|       |-- shor_analysis.py
+|       |-- ml_dsa.py
 |       `-- demo.py
 |-- tests/
 |   |-- __init__.py
