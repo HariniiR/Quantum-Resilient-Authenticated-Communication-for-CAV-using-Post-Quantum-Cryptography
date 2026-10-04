@@ -1,0 +1,20 @@
+attack,rejected,mechanism
+record tampering (1 bit flipped),True,AES-256-GCM tag check fails
+record replay,True,counter already seen in the 64-record window
+GCM nonce reuse with Finished,True,data counters start at 1; 0 is Finished only
+ClientHello replay,True,nonce already in the server's replay cache
+stale ClientHello (timestamp -300 s),True,outside the 30 s freshness window
+client impersonation with stolen certificate,True,client signature over the transcript fails (deck design had no client signature)
+RSU impersonation with stolen certificate,True,server signature over transcript + pk_kem fails
+certificate from a rogue TA,True,certificate signature does not verify under pk_TA
+revoked credential,True,certificate serial on the signed CRL
+vehicle posing as an RSU,True,role is bound into the certificate
+MITM substitutes the ephemeral ML-KEM key,True,server signature covers pk_kem
+MITM substitutes the KEM ciphertext,True,client signature covers c
+downgrade to classical suite,True,suite must match and is inside both signatures
+tampered Finished,True,key confirmation under transcript-bound keys fails
+forward secrecy: ephemeral key retained,True,"ephemeral ML-KEM key per session, erased after decapsulation"
+consensus vote from a non-member,True,sender has no certificate in the directory
+consensus vote spoofing another member,True,ML-DSA signature does not verify
+tampered block (result changed),True,leader signature and commit certificate
+ledger history rewrite,True,Pr_B_Hash link broken

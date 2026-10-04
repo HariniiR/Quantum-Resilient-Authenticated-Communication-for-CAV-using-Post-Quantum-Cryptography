@@ -1,0 +1,2 @@
+# Linux / WSL2 only: ns-3 3.44 Python bindings (wheels for Python 3.10-3.13)
+ns3==3.44.post0

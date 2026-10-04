@@ -1,0 +1,5 @@
+nodes,ags_consensus_set,ags_msgs_per_req,plain_msgs_per_req,msg_reduction_pct,ags_ms_per_req,plain_ms_per_req,chain_valid
+10,5,42.0,182.0,76.9,138.439,0.009,True
+16,8,114.0,482.0,76.3,168.7,0.009,True
+22,11,222.0,926.0,76.0,190.355,0.009,True
+28,14,366.0,1514.0,75.8,219.282,0.01,True

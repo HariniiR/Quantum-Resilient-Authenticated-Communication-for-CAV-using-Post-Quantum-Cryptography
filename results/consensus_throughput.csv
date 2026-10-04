@@ -1,0 +1,3 @@
+nodes,mode,requests,committed,seconds,tps,cpu_s_total
+16,ags,60,60,1.013,59.2,8.744
+16,pbft,60,60,0.671,89.4,10.945

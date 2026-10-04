@@ -1,0 +1,7 @@
+consensus_set,f,quorum,byzantine,honest_in_set,committed,requests,commit_pct,safety,liveness,within_bound
+7,2,5,0,7,15,15,100.0,True,True,True
+7,2,5,1,6,15,15,100.0,True,True,True
+7,2,5,2,5,15,15,100.0,True,True,True
+7,2,5,3,4,0,15,0.0,True,False,False
+7,2,5,4,3,0,15,0.0,True,False,False
+7,2,5,5,2,0,15,0.0,True,False,False

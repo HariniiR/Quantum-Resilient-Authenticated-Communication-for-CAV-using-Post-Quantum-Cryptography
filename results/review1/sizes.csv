@@ -1,0 +1,5 @@
+level,kem,sig,kem_pk,kem_ct,sig_len,handshake_flight_bytes,frames_1500B,airtime_ms
+L1,ML-KEM-512,ML-DSA-44,800,768,2420,6408,5,10.91
+L3,ML-KEM-768,ML-DSA-65,1184,1088,3309,8890,6,14.7
+L5,ML-KEM-1024,ML-DSA-87,1568,1568,4627,12390,9,20.79
+classical,ECDH P-256,ECDSA P-256,65,65,72,274,1,0.84

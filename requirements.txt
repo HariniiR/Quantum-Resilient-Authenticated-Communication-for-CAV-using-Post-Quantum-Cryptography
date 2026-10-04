@@ -1,0 +1,9 @@
+# core (Windows, Linux, macOS)
+cryptography>=47          # bundles OpenSSL >= 3.5: native ML-KEM / ML-DSA (tested with 49.0.0)
+kyber-py==1.2.0           # pure-Python ML-KEM (comparison backend, and ML-KEM-512)
+dilithium-py==1.4.0       # pure-Python ML-DSA (comparison backend)
+matplotlib>=3.7
+numpy>=1.24
+pytest>=7
+# used only by the Review 1 prototype in cavpqc/
+pycryptodome>=3.20

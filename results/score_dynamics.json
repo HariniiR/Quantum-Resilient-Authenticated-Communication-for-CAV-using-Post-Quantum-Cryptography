@@ -1,0 +1,7718 @@
+{
+ "wrong": "NODE_06",
+ "silent": "NODE_08",
+ "initial": [
+  "NODE_03",
+  "NODE_06",
+  "NODE_08",
+  "NODE_09",
+  "NODE_10",
+  "NODE_15",
+  "NODE_16"
+ ],
+ "trace": [
+  {
+   "block": 1,
+   "node": "NODE_01",
+   "score": 101,
+   "in_consensus": false,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_02",
+   "score": 101,
+   "in_consensus": false,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_03",
+   "score": 101,
+   "in_consensus": true,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_04",
+   "score": 101,
+   "in_consensus": false,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_05",
+   "score": 101,
+   "in_consensus": false,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_06",
+   "score": 95,
+   "in_consensus": true,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_07",
+   "score": 101,
+   "in_consensus": false,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_09",
+   "score": 101,
+   "in_consensus": true,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_10",
+   "score": 101,
+   "in_consensus": true,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_11",
+   "score": 101,
+   "in_consensus": false,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_12",
+   "score": 101,
+   "in_consensus": false,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_13",
+   "score": 101,
+   "in_consensus": false,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_14",
+   "score": 101,
+   "in_consensus": false,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_15",
+   "score": 101,
+   "in_consensus": true,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 1,
+   "node": "NODE_16",
+   "score": 101,
+   "in_consensus": true,
+   "mu": 100.56,
+   "sigma": 1.46
+  },
+  {
+   "block": 2,
+   "node": "NODE_01",
+   "score": 102,
+   "in_consensus": false,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_02",
+   "score": 102,
+   "in_consensus": false,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_03",
+   "score": 102,
+   "in_consensus": true,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_04",
+   "score": 102,
+   "in_consensus": false,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_05",
+   "score": 102,
+   "in_consensus": false,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_06",
+   "score": 90,
+   "in_consensus": true,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_07",
+   "score": 102,
+   "in_consensus": false,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_09",
+   "score": 102,
+   "in_consensus": true,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_10",
+   "score": 102,
+   "in_consensus": true,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_11",
+   "score": 102,
+   "in_consensus": false,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_12",
+   "score": 102,
+   "in_consensus": false,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_13",
+   "score": 102,
+   "in_consensus": false,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_14",
+   "score": 102,
+   "in_consensus": false,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_15",
+   "score": 102,
+   "in_consensus": true,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 2,
+   "node": "NODE_16",
+   "score": 102,
+   "in_consensus": true,
+   "mu": 101.12,
+   "sigma": 2.91
+  },
+  {
+   "block": 3,
+   "node": "NODE_01",
+   "score": 103,
+   "in_consensus": false,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_02",
+   "score": 103,
+   "in_consensus": false,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_03",
+   "score": 103,
+   "in_consensus": true,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_04",
+   "score": 103,
+   "in_consensus": false,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_05",
+   "score": 103,
+   "in_consensus": false,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_06",
+   "score": 85,
+   "in_consensus": true,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_07",
+   "score": 103,
+   "in_consensus": false,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_09",
+   "score": 103,
+   "in_consensus": true,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_10",
+   "score": 103,
+   "in_consensus": true,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_11",
+   "score": 103,
+   "in_consensus": false,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_12",
+   "score": 103,
+   "in_consensus": false,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_13",
+   "score": 103,
+   "in_consensus": false,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_14",
+   "score": 103,
+   "in_consensus": false,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_15",
+   "score": 103,
+   "in_consensus": true,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 3,
+   "node": "NODE_16",
+   "score": 103,
+   "in_consensus": true,
+   "mu": 101.69,
+   "sigma": 4.37
+  },
+  {
+   "block": 4,
+   "node": "NODE_01",
+   "score": 104,
+   "in_consensus": false,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_02",
+   "score": 104,
+   "in_consensus": false,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_03",
+   "score": 104,
+   "in_consensus": true,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_04",
+   "score": 104,
+   "in_consensus": false,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_05",
+   "score": 104,
+   "in_consensus": false,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_06",
+   "score": 80,
+   "in_consensus": true,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_07",
+   "score": 104,
+   "in_consensus": false,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_09",
+   "score": 104,
+   "in_consensus": true,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_10",
+   "score": 104,
+   "in_consensus": true,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_11",
+   "score": 104,
+   "in_consensus": false,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_12",
+   "score": 104,
+   "in_consensus": false,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_13",
+   "score": 104,
+   "in_consensus": false,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_14",
+   "score": 104,
+   "in_consensus": false,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_15",
+   "score": 104,
+   "in_consensus": true,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 4,
+   "node": "NODE_16",
+   "score": 104,
+   "in_consensus": true,
+   "mu": 102.25,
+   "sigma": 5.83
+  },
+  {
+   "block": 5,
+   "node": "NODE_01",
+   "score": 105,
+   "in_consensus": false,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_02",
+   "score": 105,
+   "in_consensus": false,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_03",
+   "score": 105,
+   "in_consensus": true,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_04",
+   "score": 105,
+   "in_consensus": false,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_05",
+   "score": 105,
+   "in_consensus": false,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_06",
+   "score": 75,
+   "in_consensus": true,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_07",
+   "score": 105,
+   "in_consensus": false,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_09",
+   "score": 105,
+   "in_consensus": true,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_10",
+   "score": 105,
+   "in_consensus": true,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_11",
+   "score": 105,
+   "in_consensus": false,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_12",
+   "score": 105,
+   "in_consensus": false,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_13",
+   "score": 105,
+   "in_consensus": false,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_14",
+   "score": 105,
+   "in_consensus": false,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_15",
+   "score": 105,
+   "in_consensus": true,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 5,
+   "node": "NODE_16",
+   "score": 105,
+   "in_consensus": true,
+   "mu": 102.81,
+   "sigma": 7.28
+  },
+  {
+   "block": 6,
+   "node": "NODE_01",
+   "score": 106,
+   "in_consensus": false,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_02",
+   "score": 106,
+   "in_consensus": false,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_03",
+   "score": 106,
+   "in_consensus": true,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_04",
+   "score": 106,
+   "in_consensus": false,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_05",
+   "score": 106,
+   "in_consensus": false,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_06",
+   "score": 70,
+   "in_consensus": true,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_07",
+   "score": 106,
+   "in_consensus": false,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_09",
+   "score": 106,
+   "in_consensus": true,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_10",
+   "score": 106,
+   "in_consensus": true,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_11",
+   "score": 106,
+   "in_consensus": false,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_12",
+   "score": 106,
+   "in_consensus": false,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_13",
+   "score": 106,
+   "in_consensus": false,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_14",
+   "score": 106,
+   "in_consensus": false,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_15",
+   "score": 106,
+   "in_consensus": true,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 6,
+   "node": "NODE_16",
+   "score": 106,
+   "in_consensus": true,
+   "mu": 103.38,
+   "sigma": 8.74
+  },
+  {
+   "block": 7,
+   "node": "NODE_01",
+   "score": 107,
+   "in_consensus": false,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_02",
+   "score": 107,
+   "in_consensus": false,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_03",
+   "score": 107,
+   "in_consensus": true,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_04",
+   "score": 107,
+   "in_consensus": false,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_05",
+   "score": 107,
+   "in_consensus": false,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_06",
+   "score": 65,
+   "in_consensus": true,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_07",
+   "score": 107,
+   "in_consensus": false,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_09",
+   "score": 107,
+   "in_consensus": true,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_10",
+   "score": 107,
+   "in_consensus": true,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_11",
+   "score": 107,
+   "in_consensus": false,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_12",
+   "score": 107,
+   "in_consensus": false,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_13",
+   "score": 107,
+   "in_consensus": false,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_14",
+   "score": 107,
+   "in_consensus": false,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_15",
+   "score": 107,
+   "in_consensus": true,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 7,
+   "node": "NODE_16",
+   "score": 107,
+   "in_consensus": true,
+   "mu": 103.94,
+   "sigma": 10.19
+  },
+  {
+   "block": 8,
+   "node": "NODE_01",
+   "score": 108,
+   "in_consensus": false,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_02",
+   "score": 108,
+   "in_consensus": false,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_03",
+   "score": 108,
+   "in_consensus": true,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_04",
+   "score": 108,
+   "in_consensus": false,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_05",
+   "score": 108,
+   "in_consensus": false,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_06",
+   "score": 60,
+   "in_consensus": true,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_07",
+   "score": 108,
+   "in_consensus": false,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_09",
+   "score": 108,
+   "in_consensus": true,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_10",
+   "score": 108,
+   "in_consensus": true,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_11",
+   "score": 108,
+   "in_consensus": false,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_12",
+   "score": 108,
+   "in_consensus": false,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_13",
+   "score": 108,
+   "in_consensus": false,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_14",
+   "score": 108,
+   "in_consensus": false,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_15",
+   "score": 108,
+   "in_consensus": true,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 8,
+   "node": "NODE_16",
+   "score": 108,
+   "in_consensus": true,
+   "mu": 104.5,
+   "sigma": 11.65
+  },
+  {
+   "block": 9,
+   "node": "NODE_01",
+   "score": 109,
+   "in_consensus": false,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_02",
+   "score": 109,
+   "in_consensus": false,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_03",
+   "score": 109,
+   "in_consensus": true,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_04",
+   "score": 109,
+   "in_consensus": false,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_05",
+   "score": 109,
+   "in_consensus": false,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_06",
+   "score": 55,
+   "in_consensus": true,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_07",
+   "score": 109,
+   "in_consensus": false,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_09",
+   "score": 109,
+   "in_consensus": true,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_10",
+   "score": 109,
+   "in_consensus": true,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_11",
+   "score": 109,
+   "in_consensus": false,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_12",
+   "score": 109,
+   "in_consensus": false,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_13",
+   "score": 109,
+   "in_consensus": false,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_14",
+   "score": 109,
+   "in_consensus": false,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_15",
+   "score": 109,
+   "in_consensus": true,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 9,
+   "node": "NODE_16",
+   "score": 109,
+   "in_consensus": true,
+   "mu": 105.06,
+   "sigma": 13.11
+  },
+  {
+   "block": 10,
+   "node": "NODE_01",
+   "score": 110,
+   "in_consensus": true,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_02",
+   "score": 110,
+   "in_consensus": false,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_03",
+   "score": 110,
+   "in_consensus": true,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_04",
+   "score": 110,
+   "in_consensus": false,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_05",
+   "score": 110,
+   "in_consensus": false,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_06",
+   "score": 50,
+   "in_consensus": false,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_07",
+   "score": 110,
+   "in_consensus": false,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_09",
+   "score": 110,
+   "in_consensus": true,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_10",
+   "score": 110,
+   "in_consensus": true,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_11",
+   "score": 110,
+   "in_consensus": false,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_12",
+   "score": 110,
+   "in_consensus": false,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_13",
+   "score": 110,
+   "in_consensus": false,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_14",
+   "score": 110,
+   "in_consensus": false,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_15",
+   "score": 110,
+   "in_consensus": true,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 10,
+   "node": "NODE_16",
+   "score": 110,
+   "in_consensus": true,
+   "mu": 105.62,
+   "sigma": 14.56
+  },
+  {
+   "block": 11,
+   "node": "NODE_01",
+   "score": 111,
+   "in_consensus": true,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_02",
+   "score": 111,
+   "in_consensus": false,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_03",
+   "score": 111,
+   "in_consensus": true,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_04",
+   "score": 111,
+   "in_consensus": false,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_05",
+   "score": 111,
+   "in_consensus": false,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_06",
+   "score": 45,
+   "in_consensus": false,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_07",
+   "score": 111,
+   "in_consensus": false,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_09",
+   "score": 111,
+   "in_consensus": true,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_10",
+   "score": 111,
+   "in_consensus": true,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_11",
+   "score": 111,
+   "in_consensus": false,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_12",
+   "score": 111,
+   "in_consensus": false,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_13",
+   "score": 111,
+   "in_consensus": false,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_14",
+   "score": 111,
+   "in_consensus": false,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_15",
+   "score": 111,
+   "in_consensus": true,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 11,
+   "node": "NODE_16",
+   "score": 111,
+   "in_consensus": true,
+   "mu": 106.19,
+   "sigma": 16.02
+  },
+  {
+   "block": 12,
+   "node": "NODE_01",
+   "score": 112,
+   "in_consensus": true,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_02",
+   "score": 112,
+   "in_consensus": false,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_03",
+   "score": 112,
+   "in_consensus": true,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_04",
+   "score": 112,
+   "in_consensus": false,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_05",
+   "score": 112,
+   "in_consensus": false,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_06",
+   "score": 40,
+   "in_consensus": false,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_07",
+   "score": 112,
+   "in_consensus": false,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_09",
+   "score": 112,
+   "in_consensus": true,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_10",
+   "score": 112,
+   "in_consensus": true,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_11",
+   "score": 112,
+   "in_consensus": false,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_12",
+   "score": 112,
+   "in_consensus": false,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_13",
+   "score": 112,
+   "in_consensus": false,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_14",
+   "score": 112,
+   "in_consensus": false,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_15",
+   "score": 112,
+   "in_consensus": true,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 12,
+   "node": "NODE_16",
+   "score": 112,
+   "in_consensus": true,
+   "mu": 106.75,
+   "sigma": 17.48
+  },
+  {
+   "block": 13,
+   "node": "NODE_01",
+   "score": 113,
+   "in_consensus": true,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_02",
+   "score": 113,
+   "in_consensus": false,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_03",
+   "score": 113,
+   "in_consensus": true,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_04",
+   "score": 113,
+   "in_consensus": false,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_05",
+   "score": 113,
+   "in_consensus": false,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_06",
+   "score": 35,
+   "in_consensus": false,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_07",
+   "score": 113,
+   "in_consensus": false,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_09",
+   "score": 113,
+   "in_consensus": true,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_10",
+   "score": 113,
+   "in_consensus": true,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_11",
+   "score": 113,
+   "in_consensus": false,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_12",
+   "score": 113,
+   "in_consensus": false,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_13",
+   "score": 113,
+   "in_consensus": false,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_14",
+   "score": 113,
+   "in_consensus": false,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_15",
+   "score": 113,
+   "in_consensus": true,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 13,
+   "node": "NODE_16",
+   "score": 113,
+   "in_consensus": true,
+   "mu": 107.31,
+   "sigma": 18.93
+  },
+  {
+   "block": 14,
+   "node": "NODE_01",
+   "score": 114,
+   "in_consensus": true,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_02",
+   "score": 114,
+   "in_consensus": false,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_03",
+   "score": 114,
+   "in_consensus": true,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_04",
+   "score": 114,
+   "in_consensus": false,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_05",
+   "score": 114,
+   "in_consensus": false,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_06",
+   "score": 30,
+   "in_consensus": false,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_07",
+   "score": 114,
+   "in_consensus": false,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_09",
+   "score": 114,
+   "in_consensus": true,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_10",
+   "score": 114,
+   "in_consensus": true,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_11",
+   "score": 114,
+   "in_consensus": false,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_12",
+   "score": 114,
+   "in_consensus": false,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_13",
+   "score": 114,
+   "in_consensus": false,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_14",
+   "score": 114,
+   "in_consensus": false,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_15",
+   "score": 114,
+   "in_consensus": true,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 14,
+   "node": "NODE_16",
+   "score": 114,
+   "in_consensus": true,
+   "mu": 107.88,
+   "sigma": 20.39
+  },
+  {
+   "block": 15,
+   "node": "NODE_01",
+   "score": 115,
+   "in_consensus": true,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_02",
+   "score": 115,
+   "in_consensus": false,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_03",
+   "score": 115,
+   "in_consensus": true,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_04",
+   "score": 115,
+   "in_consensus": false,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_05",
+   "score": 115,
+   "in_consensus": false,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_06",
+   "score": 25,
+   "in_consensus": false,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_07",
+   "score": 115,
+   "in_consensus": false,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_09",
+   "score": 115,
+   "in_consensus": true,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_10",
+   "score": 115,
+   "in_consensus": true,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_11",
+   "score": 115,
+   "in_consensus": false,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_12",
+   "score": 115,
+   "in_consensus": false,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_13",
+   "score": 115,
+   "in_consensus": false,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_14",
+   "score": 115,
+   "in_consensus": false,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_15",
+   "score": 115,
+   "in_consensus": true,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 15,
+   "node": "NODE_16",
+   "score": 115,
+   "in_consensus": true,
+   "mu": 108.44,
+   "sigma": 21.85
+  },
+  {
+   "block": 16,
+   "node": "NODE_01",
+   "score": 116,
+   "in_consensus": true,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_02",
+   "score": 116,
+   "in_consensus": false,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_03",
+   "score": 116,
+   "in_consensus": true,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_04",
+   "score": 116,
+   "in_consensus": false,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_05",
+   "score": 116,
+   "in_consensus": false,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_06",
+   "score": 20,
+   "in_consensus": false,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_07",
+   "score": 116,
+   "in_consensus": false,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_09",
+   "score": 116,
+   "in_consensus": true,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_10",
+   "score": 116,
+   "in_consensus": true,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_11",
+   "score": 116,
+   "in_consensus": false,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_12",
+   "score": 116,
+   "in_consensus": false,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_13",
+   "score": 116,
+   "in_consensus": false,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_14",
+   "score": 116,
+   "in_consensus": false,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_15",
+   "score": 116,
+   "in_consensus": true,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 16,
+   "node": "NODE_16",
+   "score": 116,
+   "in_consensus": true,
+   "mu": 109.0,
+   "sigma": 23.3
+  },
+  {
+   "block": 17,
+   "node": "NODE_01",
+   "score": 117,
+   "in_consensus": true,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_02",
+   "score": 117,
+   "in_consensus": false,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_03",
+   "score": 117,
+   "in_consensus": true,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_04",
+   "score": 117,
+   "in_consensus": false,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_05",
+   "score": 117,
+   "in_consensus": false,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_06",
+   "score": 15,
+   "in_consensus": false,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_07",
+   "score": 117,
+   "in_consensus": false,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_09",
+   "score": 117,
+   "in_consensus": true,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_10",
+   "score": 117,
+   "in_consensus": true,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_11",
+   "score": 117,
+   "in_consensus": false,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_12",
+   "score": 117,
+   "in_consensus": false,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_13",
+   "score": 117,
+   "in_consensus": false,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_14",
+   "score": 117,
+   "in_consensus": false,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_15",
+   "score": 117,
+   "in_consensus": true,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 17,
+   "node": "NODE_16",
+   "score": 117,
+   "in_consensus": true,
+   "mu": 109.56,
+   "sigma": 24.76
+  },
+  {
+   "block": 18,
+   "node": "NODE_01",
+   "score": 118,
+   "in_consensus": true,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_02",
+   "score": 118,
+   "in_consensus": false,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_03",
+   "score": 118,
+   "in_consensus": true,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_04",
+   "score": 118,
+   "in_consensus": false,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_05",
+   "score": 118,
+   "in_consensus": false,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_06",
+   "score": 10,
+   "in_consensus": false,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_07",
+   "score": 118,
+   "in_consensus": false,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_09",
+   "score": 118,
+   "in_consensus": true,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_10",
+   "score": 118,
+   "in_consensus": true,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_11",
+   "score": 118,
+   "in_consensus": false,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_12",
+   "score": 118,
+   "in_consensus": false,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_13",
+   "score": 118,
+   "in_consensus": false,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_14",
+   "score": 118,
+   "in_consensus": false,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_15",
+   "score": 118,
+   "in_consensus": true,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 18,
+   "node": "NODE_16",
+   "score": 118,
+   "in_consensus": true,
+   "mu": 110.12,
+   "sigma": 26.22
+  },
+  {
+   "block": 19,
+   "node": "NODE_01",
+   "score": 119,
+   "in_consensus": true,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_02",
+   "score": 119,
+   "in_consensus": false,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_03",
+   "score": 119,
+   "in_consensus": true,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_04",
+   "score": 119,
+   "in_consensus": false,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_05",
+   "score": 119,
+   "in_consensus": false,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_06",
+   "score": 5,
+   "in_consensus": false,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_07",
+   "score": 119,
+   "in_consensus": false,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_09",
+   "score": 119,
+   "in_consensus": true,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_10",
+   "score": 119,
+   "in_consensus": true,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_11",
+   "score": 119,
+   "in_consensus": false,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_12",
+   "score": 119,
+   "in_consensus": false,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_13",
+   "score": 119,
+   "in_consensus": false,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_14",
+   "score": 119,
+   "in_consensus": false,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_15",
+   "score": 119,
+   "in_consensus": true,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 19,
+   "node": "NODE_16",
+   "score": 119,
+   "in_consensus": true,
+   "mu": 110.69,
+   "sigma": 27.67
+  },
+  {
+   "block": 20,
+   "node": "NODE_01",
+   "score": 120,
+   "in_consensus": true,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_02",
+   "score": 120,
+   "in_consensus": false,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_03",
+   "score": 120,
+   "in_consensus": true,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_04",
+   "score": 120,
+   "in_consensus": false,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_05",
+   "score": 120,
+   "in_consensus": false,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_06",
+   "score": 0,
+   "in_consensus": false,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_07",
+   "score": 120,
+   "in_consensus": false,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_09",
+   "score": 120,
+   "in_consensus": true,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_10",
+   "score": 120,
+   "in_consensus": true,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_11",
+   "score": 120,
+   "in_consensus": false,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_12",
+   "score": 120,
+   "in_consensus": false,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_13",
+   "score": 120,
+   "in_consensus": false,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_14",
+   "score": 120,
+   "in_consensus": false,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_15",
+   "score": 120,
+   "in_consensus": true,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 20,
+   "node": "NODE_16",
+   "score": 120,
+   "in_consensus": true,
+   "mu": 111.25,
+   "sigma": 29.13
+  },
+  {
+   "block": 21,
+   "node": "NODE_01",
+   "score": 121,
+   "in_consensus": true,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_02",
+   "score": 121,
+   "in_consensus": false,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_03",
+   "score": 121,
+   "in_consensus": true,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_04",
+   "score": 121,
+   "in_consensus": false,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_05",
+   "score": 121,
+   "in_consensus": false,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_06",
+   "score": -5,
+   "in_consensus": false,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_07",
+   "score": 121,
+   "in_consensus": false,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_09",
+   "score": 121,
+   "in_consensus": true,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_10",
+   "score": 121,
+   "in_consensus": true,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_11",
+   "score": 121,
+   "in_consensus": false,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_12",
+   "score": 121,
+   "in_consensus": false,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_13",
+   "score": 121,
+   "in_consensus": false,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_14",
+   "score": 121,
+   "in_consensus": false,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_15",
+   "score": 121,
+   "in_consensus": true,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 21,
+   "node": "NODE_16",
+   "score": 121,
+   "in_consensus": true,
+   "mu": 111.81,
+   "sigma": 30.58
+  },
+  {
+   "block": 22,
+   "node": "NODE_01",
+   "score": 122,
+   "in_consensus": true,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_02",
+   "score": 122,
+   "in_consensus": false,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_03",
+   "score": 122,
+   "in_consensus": true,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_04",
+   "score": 122,
+   "in_consensus": false,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_05",
+   "score": 122,
+   "in_consensus": false,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_06",
+   "score": -10,
+   "in_consensus": false,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_07",
+   "score": 122,
+   "in_consensus": false,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_09",
+   "score": 122,
+   "in_consensus": true,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_10",
+   "score": 122,
+   "in_consensus": true,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_11",
+   "score": 122,
+   "in_consensus": false,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_12",
+   "score": 122,
+   "in_consensus": false,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_13",
+   "score": 122,
+   "in_consensus": false,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_14",
+   "score": 122,
+   "in_consensus": false,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_15",
+   "score": 122,
+   "in_consensus": true,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 22,
+   "node": "NODE_16",
+   "score": 122,
+   "in_consensus": true,
+   "mu": 112.38,
+   "sigma": 32.04
+  },
+  {
+   "block": 23,
+   "node": "NODE_01",
+   "score": 123,
+   "in_consensus": true,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_02",
+   "score": 123,
+   "in_consensus": false,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_03",
+   "score": 123,
+   "in_consensus": true,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_04",
+   "score": 123,
+   "in_consensus": false,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_05",
+   "score": 123,
+   "in_consensus": false,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_06",
+   "score": -15,
+   "in_consensus": false,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_07",
+   "score": 123,
+   "in_consensus": false,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_09",
+   "score": 123,
+   "in_consensus": true,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_10",
+   "score": 123,
+   "in_consensus": true,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_11",
+   "score": 123,
+   "in_consensus": false,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_12",
+   "score": 123,
+   "in_consensus": false,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_13",
+   "score": 123,
+   "in_consensus": false,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_14",
+   "score": 123,
+   "in_consensus": false,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_15",
+   "score": 123,
+   "in_consensus": true,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 23,
+   "node": "NODE_16",
+   "score": 123,
+   "in_consensus": true,
+   "mu": 112.94,
+   "sigma": 33.5
+  },
+  {
+   "block": 24,
+   "node": "NODE_01",
+   "score": 124,
+   "in_consensus": true,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_02",
+   "score": 124,
+   "in_consensus": false,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_03",
+   "score": 124,
+   "in_consensus": true,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_04",
+   "score": 124,
+   "in_consensus": false,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_05",
+   "score": 124,
+   "in_consensus": false,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_06",
+   "score": -20,
+   "in_consensus": false,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_07",
+   "score": 124,
+   "in_consensus": false,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_09",
+   "score": 124,
+   "in_consensus": true,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_10",
+   "score": 124,
+   "in_consensus": true,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_11",
+   "score": 124,
+   "in_consensus": false,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_12",
+   "score": 124,
+   "in_consensus": false,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_13",
+   "score": 124,
+   "in_consensus": false,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_14",
+   "score": 124,
+   "in_consensus": false,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_15",
+   "score": 124,
+   "in_consensus": true,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 24,
+   "node": "NODE_16",
+   "score": 124,
+   "in_consensus": true,
+   "mu": 113.5,
+   "sigma": 34.95
+  },
+  {
+   "block": 25,
+   "node": "NODE_01",
+   "score": 125,
+   "in_consensus": true,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_02",
+   "score": 125,
+   "in_consensus": false,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_03",
+   "score": 125,
+   "in_consensus": true,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_04",
+   "score": 125,
+   "in_consensus": false,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_05",
+   "score": 125,
+   "in_consensus": false,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_06",
+   "score": -25,
+   "in_consensus": false,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_07",
+   "score": 125,
+   "in_consensus": false,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_09",
+   "score": 125,
+   "in_consensus": true,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_10",
+   "score": 125,
+   "in_consensus": true,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_11",
+   "score": 125,
+   "in_consensus": false,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_12",
+   "score": 125,
+   "in_consensus": false,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_13",
+   "score": 125,
+   "in_consensus": false,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_14",
+   "score": 125,
+   "in_consensus": false,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_15",
+   "score": 125,
+   "in_consensus": true,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 25,
+   "node": "NODE_16",
+   "score": 125,
+   "in_consensus": true,
+   "mu": 114.06,
+   "sigma": 36.41
+  },
+  {
+   "block": 26,
+   "node": "NODE_01",
+   "score": 126,
+   "in_consensus": true,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_02",
+   "score": 126,
+   "in_consensus": false,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_03",
+   "score": 126,
+   "in_consensus": true,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_04",
+   "score": 126,
+   "in_consensus": false,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_05",
+   "score": 126,
+   "in_consensus": false,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_06",
+   "score": -30,
+   "in_consensus": false,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_07",
+   "score": 126,
+   "in_consensus": false,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_09",
+   "score": 126,
+   "in_consensus": true,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_10",
+   "score": 126,
+   "in_consensus": true,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_11",
+   "score": 126,
+   "in_consensus": false,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_12",
+   "score": 126,
+   "in_consensus": false,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_13",
+   "score": 126,
+   "in_consensus": false,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_14",
+   "score": 126,
+   "in_consensus": false,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_15",
+   "score": 126,
+   "in_consensus": true,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 26,
+   "node": "NODE_16",
+   "score": 126,
+   "in_consensus": true,
+   "mu": 114.62,
+   "sigma": 37.87
+  },
+  {
+   "block": 27,
+   "node": "NODE_01",
+   "score": 127,
+   "in_consensus": true,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_02",
+   "score": 127,
+   "in_consensus": false,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_03",
+   "score": 127,
+   "in_consensus": true,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_04",
+   "score": 127,
+   "in_consensus": false,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_05",
+   "score": 127,
+   "in_consensus": false,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_06",
+   "score": -35,
+   "in_consensus": false,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_07",
+   "score": 127,
+   "in_consensus": false,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_09",
+   "score": 127,
+   "in_consensus": true,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_10",
+   "score": 127,
+   "in_consensus": true,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_11",
+   "score": 127,
+   "in_consensus": false,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_12",
+   "score": 127,
+   "in_consensus": false,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_13",
+   "score": 127,
+   "in_consensus": false,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_14",
+   "score": 127,
+   "in_consensus": false,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_15",
+   "score": 127,
+   "in_consensus": true,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 27,
+   "node": "NODE_16",
+   "score": 127,
+   "in_consensus": true,
+   "mu": 115.19,
+   "sigma": 39.32
+  },
+  {
+   "block": 28,
+   "node": "NODE_01",
+   "score": 128,
+   "in_consensus": true,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_02",
+   "score": 128,
+   "in_consensus": false,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_03",
+   "score": 128,
+   "in_consensus": true,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_04",
+   "score": 128,
+   "in_consensus": false,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_05",
+   "score": 128,
+   "in_consensus": false,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_06",
+   "score": -40,
+   "in_consensus": false,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_07",
+   "score": 128,
+   "in_consensus": false,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_09",
+   "score": 128,
+   "in_consensus": true,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_10",
+   "score": 128,
+   "in_consensus": true,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_11",
+   "score": 128,
+   "in_consensus": false,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_12",
+   "score": 128,
+   "in_consensus": false,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_13",
+   "score": 128,
+   "in_consensus": false,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_14",
+   "score": 128,
+   "in_consensus": false,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_15",
+   "score": 128,
+   "in_consensus": true,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 28,
+   "node": "NODE_16",
+   "score": 128,
+   "in_consensus": true,
+   "mu": 115.75,
+   "sigma": 40.78
+  },
+  {
+   "block": 29,
+   "node": "NODE_01",
+   "score": 129,
+   "in_consensus": true,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_02",
+   "score": 129,
+   "in_consensus": false,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_03",
+   "score": 129,
+   "in_consensus": true,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_04",
+   "score": 129,
+   "in_consensus": false,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_05",
+   "score": 129,
+   "in_consensus": false,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_06",
+   "score": -45,
+   "in_consensus": false,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_07",
+   "score": 129,
+   "in_consensus": false,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_09",
+   "score": 129,
+   "in_consensus": true,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_10",
+   "score": 129,
+   "in_consensus": true,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_11",
+   "score": 129,
+   "in_consensus": false,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_12",
+   "score": 129,
+   "in_consensus": false,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_13",
+   "score": 129,
+   "in_consensus": false,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_14",
+   "score": 129,
+   "in_consensus": false,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_15",
+   "score": 129,
+   "in_consensus": true,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 29,
+   "node": "NODE_16",
+   "score": 129,
+   "in_consensus": true,
+   "mu": 116.31,
+   "sigma": 42.24
+  },
+  {
+   "block": 30,
+   "node": "NODE_01",
+   "score": 130,
+   "in_consensus": true,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_02",
+   "score": 130,
+   "in_consensus": false,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_03",
+   "score": 130,
+   "in_consensus": true,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_04",
+   "score": 130,
+   "in_consensus": false,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_05",
+   "score": 130,
+   "in_consensus": false,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_06",
+   "score": -50,
+   "in_consensus": false,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_07",
+   "score": 130,
+   "in_consensus": false,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_09",
+   "score": 130,
+   "in_consensus": true,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_10",
+   "score": 130,
+   "in_consensus": true,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_11",
+   "score": 130,
+   "in_consensus": false,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_12",
+   "score": 130,
+   "in_consensus": false,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_13",
+   "score": 130,
+   "in_consensus": false,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_14",
+   "score": 130,
+   "in_consensus": false,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_15",
+   "score": 130,
+   "in_consensus": true,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 30,
+   "node": "NODE_16",
+   "score": 130,
+   "in_consensus": true,
+   "mu": 116.88,
+   "sigma": 43.69
+  },
+  {
+   "block": 31,
+   "node": "NODE_01",
+   "score": 131,
+   "in_consensus": true,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_02",
+   "score": 131,
+   "in_consensus": false,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_03",
+   "score": 131,
+   "in_consensus": true,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_04",
+   "score": 131,
+   "in_consensus": false,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_05",
+   "score": 131,
+   "in_consensus": false,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_06",
+   "score": -55,
+   "in_consensus": false,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_07",
+   "score": 131,
+   "in_consensus": false,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_09",
+   "score": 131,
+   "in_consensus": true,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_10",
+   "score": 131,
+   "in_consensus": true,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_11",
+   "score": 131,
+   "in_consensus": false,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_12",
+   "score": 131,
+   "in_consensus": false,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_13",
+   "score": 131,
+   "in_consensus": false,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_14",
+   "score": 131,
+   "in_consensus": false,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_15",
+   "score": 131,
+   "in_consensus": true,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 31,
+   "node": "NODE_16",
+   "score": 131,
+   "in_consensus": true,
+   "mu": 117.44,
+   "sigma": 45.15
+  },
+  {
+   "block": 32,
+   "node": "NODE_01",
+   "score": 132,
+   "in_consensus": true,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_02",
+   "score": 132,
+   "in_consensus": false,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_03",
+   "score": 132,
+   "in_consensus": true,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_04",
+   "score": 132,
+   "in_consensus": false,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_05",
+   "score": 132,
+   "in_consensus": false,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_06",
+   "score": -60,
+   "in_consensus": false,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_07",
+   "score": 132,
+   "in_consensus": false,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_09",
+   "score": 132,
+   "in_consensus": true,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_10",
+   "score": 132,
+   "in_consensus": true,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_11",
+   "score": 132,
+   "in_consensus": false,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_12",
+   "score": 132,
+   "in_consensus": false,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_13",
+   "score": 132,
+   "in_consensus": false,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_14",
+   "score": 132,
+   "in_consensus": false,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_15",
+   "score": 132,
+   "in_consensus": true,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 32,
+   "node": "NODE_16",
+   "score": 132,
+   "in_consensus": true,
+   "mu": 118.0,
+   "sigma": 46.6
+  },
+  {
+   "block": 33,
+   "node": "NODE_01",
+   "score": 133,
+   "in_consensus": true,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_02",
+   "score": 133,
+   "in_consensus": false,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_03",
+   "score": 133,
+   "in_consensus": true,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_04",
+   "score": 133,
+   "in_consensus": false,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_05",
+   "score": 133,
+   "in_consensus": false,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_06",
+   "score": -65,
+   "in_consensus": false,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_07",
+   "score": 133,
+   "in_consensus": false,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_09",
+   "score": 133,
+   "in_consensus": true,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_10",
+   "score": 133,
+   "in_consensus": true,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_11",
+   "score": 133,
+   "in_consensus": false,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_12",
+   "score": 133,
+   "in_consensus": false,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_13",
+   "score": 133,
+   "in_consensus": false,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_14",
+   "score": 133,
+   "in_consensus": false,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_15",
+   "score": 133,
+   "in_consensus": true,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 33,
+   "node": "NODE_16",
+   "score": 133,
+   "in_consensus": true,
+   "mu": 118.56,
+   "sigma": 48.06
+  },
+  {
+   "block": 34,
+   "node": "NODE_01",
+   "score": 134,
+   "in_consensus": true,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_02",
+   "score": 134,
+   "in_consensus": false,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_03",
+   "score": 134,
+   "in_consensus": true,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_04",
+   "score": 134,
+   "in_consensus": false,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_05",
+   "score": 134,
+   "in_consensus": false,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_06",
+   "score": -70,
+   "in_consensus": false,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_07",
+   "score": 134,
+   "in_consensus": false,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_09",
+   "score": 134,
+   "in_consensus": true,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_10",
+   "score": 134,
+   "in_consensus": true,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_11",
+   "score": 134,
+   "in_consensus": false,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_12",
+   "score": 134,
+   "in_consensus": false,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_13",
+   "score": 134,
+   "in_consensus": false,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_14",
+   "score": 134,
+   "in_consensus": false,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_15",
+   "score": 134,
+   "in_consensus": true,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 34,
+   "node": "NODE_16",
+   "score": 134,
+   "in_consensus": true,
+   "mu": 119.12,
+   "sigma": 49.52
+  },
+  {
+   "block": 35,
+   "node": "NODE_01",
+   "score": 135,
+   "in_consensus": true,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_02",
+   "score": 135,
+   "in_consensus": false,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_03",
+   "score": 135,
+   "in_consensus": true,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_04",
+   "score": 135,
+   "in_consensus": false,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_05",
+   "score": 135,
+   "in_consensus": false,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_06",
+   "score": -75,
+   "in_consensus": false,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_07",
+   "score": 135,
+   "in_consensus": false,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_09",
+   "score": 135,
+   "in_consensus": true,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_10",
+   "score": 135,
+   "in_consensus": true,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_11",
+   "score": 135,
+   "in_consensus": false,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_12",
+   "score": 135,
+   "in_consensus": false,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_13",
+   "score": 135,
+   "in_consensus": false,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_14",
+   "score": 135,
+   "in_consensus": false,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_15",
+   "score": 135,
+   "in_consensus": true,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 35,
+   "node": "NODE_16",
+   "score": 135,
+   "in_consensus": true,
+   "mu": 119.69,
+   "sigma": 50.97
+  },
+  {
+   "block": 36,
+   "node": "NODE_01",
+   "score": 136,
+   "in_consensus": true,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_02",
+   "score": 136,
+   "in_consensus": false,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_03",
+   "score": 136,
+   "in_consensus": true,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_04",
+   "score": 136,
+   "in_consensus": false,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_05",
+   "score": 136,
+   "in_consensus": false,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_06",
+   "score": -80,
+   "in_consensus": false,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_07",
+   "score": 136,
+   "in_consensus": false,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_09",
+   "score": 136,
+   "in_consensus": true,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_10",
+   "score": 136,
+   "in_consensus": true,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_11",
+   "score": 136,
+   "in_consensus": false,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_12",
+   "score": 136,
+   "in_consensus": false,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_13",
+   "score": 136,
+   "in_consensus": false,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_14",
+   "score": 136,
+   "in_consensus": false,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_15",
+   "score": 136,
+   "in_consensus": true,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 36,
+   "node": "NODE_16",
+   "score": 136,
+   "in_consensus": true,
+   "mu": 120.25,
+   "sigma": 52.43
+  },
+  {
+   "block": 37,
+   "node": "NODE_01",
+   "score": 137,
+   "in_consensus": true,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_02",
+   "score": 137,
+   "in_consensus": false,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_03",
+   "score": 137,
+   "in_consensus": true,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_04",
+   "score": 137,
+   "in_consensus": false,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_05",
+   "score": 137,
+   "in_consensus": false,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_06",
+   "score": -85,
+   "in_consensus": false,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_07",
+   "score": 137,
+   "in_consensus": false,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_09",
+   "score": 137,
+   "in_consensus": true,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_10",
+   "score": 137,
+   "in_consensus": true,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_11",
+   "score": 137,
+   "in_consensus": false,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_12",
+   "score": 137,
+   "in_consensus": false,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_13",
+   "score": 137,
+   "in_consensus": false,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_14",
+   "score": 137,
+   "in_consensus": false,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_15",
+   "score": 137,
+   "in_consensus": true,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 37,
+   "node": "NODE_16",
+   "score": 137,
+   "in_consensus": true,
+   "mu": 120.81,
+   "sigma": 53.89
+  },
+  {
+   "block": 38,
+   "node": "NODE_01",
+   "score": 138,
+   "in_consensus": true,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_02",
+   "score": 138,
+   "in_consensus": false,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_03",
+   "score": 138,
+   "in_consensus": true,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_04",
+   "score": 138,
+   "in_consensus": false,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_05",
+   "score": 138,
+   "in_consensus": false,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_06",
+   "score": -90,
+   "in_consensus": false,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_07",
+   "score": 138,
+   "in_consensus": false,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_09",
+   "score": 138,
+   "in_consensus": true,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_10",
+   "score": 138,
+   "in_consensus": true,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_11",
+   "score": 138,
+   "in_consensus": false,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_12",
+   "score": 138,
+   "in_consensus": false,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_13",
+   "score": 138,
+   "in_consensus": false,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_14",
+   "score": 138,
+   "in_consensus": false,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_15",
+   "score": 138,
+   "in_consensus": true,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 38,
+   "node": "NODE_16",
+   "score": 138,
+   "in_consensus": true,
+   "mu": 121.38,
+   "sigma": 55.34
+  },
+  {
+   "block": 39,
+   "node": "NODE_01",
+   "score": 139,
+   "in_consensus": true,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_02",
+   "score": 139,
+   "in_consensus": false,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_03",
+   "score": 139,
+   "in_consensus": true,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_04",
+   "score": 139,
+   "in_consensus": false,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_05",
+   "score": 139,
+   "in_consensus": false,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_06",
+   "score": -95,
+   "in_consensus": false,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_07",
+   "score": 139,
+   "in_consensus": false,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_09",
+   "score": 139,
+   "in_consensus": true,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_10",
+   "score": 139,
+   "in_consensus": true,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_11",
+   "score": 139,
+   "in_consensus": false,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_12",
+   "score": 139,
+   "in_consensus": false,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_13",
+   "score": 139,
+   "in_consensus": false,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_14",
+   "score": 139,
+   "in_consensus": false,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_15",
+   "score": 139,
+   "in_consensus": true,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 39,
+   "node": "NODE_16",
+   "score": 139,
+   "in_consensus": true,
+   "mu": 121.94,
+   "sigma": 56.8
+  },
+  {
+   "block": 40,
+   "node": "NODE_01",
+   "score": 140,
+   "in_consensus": true,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_02",
+   "score": 140,
+   "in_consensus": false,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_03",
+   "score": 140,
+   "in_consensus": true,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_04",
+   "score": 140,
+   "in_consensus": false,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_05",
+   "score": 140,
+   "in_consensus": false,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_06",
+   "score": -100,
+   "in_consensus": false,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_07",
+   "score": 140,
+   "in_consensus": false,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_09",
+   "score": 140,
+   "in_consensus": true,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_10",
+   "score": 140,
+   "in_consensus": true,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_11",
+   "score": 140,
+   "in_consensus": false,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_12",
+   "score": 140,
+   "in_consensus": false,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_13",
+   "score": 140,
+   "in_consensus": false,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_14",
+   "score": 140,
+   "in_consensus": false,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_15",
+   "score": 140,
+   "in_consensus": true,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 40,
+   "node": "NODE_16",
+   "score": 140,
+   "in_consensus": true,
+   "mu": 122.5,
+   "sigma": 58.26
+  },
+  {
+   "block": 41,
+   "node": "NODE_01",
+   "score": 141,
+   "in_consensus": true,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_02",
+   "score": 141,
+   "in_consensus": false,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_03",
+   "score": 141,
+   "in_consensus": true,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_04",
+   "score": 141,
+   "in_consensus": false,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_05",
+   "score": 141,
+   "in_consensus": false,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_06",
+   "score": -105,
+   "in_consensus": false,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_07",
+   "score": 141,
+   "in_consensus": false,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_09",
+   "score": 141,
+   "in_consensus": true,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_10",
+   "score": 141,
+   "in_consensus": true,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_11",
+   "score": 141,
+   "in_consensus": false,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_12",
+   "score": 141,
+   "in_consensus": false,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_13",
+   "score": 141,
+   "in_consensus": false,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_14",
+   "score": 141,
+   "in_consensus": false,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_15",
+   "score": 141,
+   "in_consensus": true,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 41,
+   "node": "NODE_16",
+   "score": 141,
+   "in_consensus": true,
+   "mu": 123.06,
+   "sigma": 59.71
+  },
+  {
+   "block": 42,
+   "node": "NODE_01",
+   "score": 142,
+   "in_consensus": true,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_02",
+   "score": 142,
+   "in_consensus": false,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_03",
+   "score": 142,
+   "in_consensus": true,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_04",
+   "score": 142,
+   "in_consensus": false,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_05",
+   "score": 142,
+   "in_consensus": false,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_06",
+   "score": -110,
+   "in_consensus": false,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_07",
+   "score": 142,
+   "in_consensus": false,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_09",
+   "score": 142,
+   "in_consensus": true,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_10",
+   "score": 142,
+   "in_consensus": true,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_11",
+   "score": 142,
+   "in_consensus": false,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_12",
+   "score": 142,
+   "in_consensus": false,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_13",
+   "score": 142,
+   "in_consensus": false,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_14",
+   "score": 142,
+   "in_consensus": false,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_15",
+   "score": 142,
+   "in_consensus": true,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 42,
+   "node": "NODE_16",
+   "score": 142,
+   "in_consensus": true,
+   "mu": 123.62,
+   "sigma": 61.17
+  },
+  {
+   "block": 43,
+   "node": "NODE_01",
+   "score": 143,
+   "in_consensus": true,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_02",
+   "score": 143,
+   "in_consensus": false,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_03",
+   "score": 143,
+   "in_consensus": true,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_04",
+   "score": 143,
+   "in_consensus": false,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_05",
+   "score": 143,
+   "in_consensus": false,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_06",
+   "score": -115,
+   "in_consensus": false,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_07",
+   "score": 143,
+   "in_consensus": false,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_09",
+   "score": 143,
+   "in_consensus": true,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_10",
+   "score": 143,
+   "in_consensus": true,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_11",
+   "score": 143,
+   "in_consensus": false,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_12",
+   "score": 143,
+   "in_consensus": false,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_13",
+   "score": 143,
+   "in_consensus": false,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_14",
+   "score": 143,
+   "in_consensus": false,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_15",
+   "score": 143,
+   "in_consensus": true,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 43,
+   "node": "NODE_16",
+   "score": 143,
+   "in_consensus": true,
+   "mu": 124.19,
+   "sigma": 62.63
+  },
+  {
+   "block": 44,
+   "node": "NODE_01",
+   "score": 144,
+   "in_consensus": true,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_02",
+   "score": 144,
+   "in_consensus": false,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_03",
+   "score": 144,
+   "in_consensus": true,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_04",
+   "score": 144,
+   "in_consensus": false,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_05",
+   "score": 144,
+   "in_consensus": false,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_06",
+   "score": -120,
+   "in_consensus": false,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_07",
+   "score": 144,
+   "in_consensus": false,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_09",
+   "score": 144,
+   "in_consensus": true,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_10",
+   "score": 144,
+   "in_consensus": true,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_11",
+   "score": 144,
+   "in_consensus": false,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_12",
+   "score": 144,
+   "in_consensus": false,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_13",
+   "score": 144,
+   "in_consensus": false,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_14",
+   "score": 144,
+   "in_consensus": false,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_15",
+   "score": 144,
+   "in_consensus": true,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 44,
+   "node": "NODE_16",
+   "score": 144,
+   "in_consensus": true,
+   "mu": 124.75,
+   "sigma": 64.08
+  },
+  {
+   "block": 45,
+   "node": "NODE_01",
+   "score": 145,
+   "in_consensus": true,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_02",
+   "score": 145,
+   "in_consensus": false,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_03",
+   "score": 145,
+   "in_consensus": true,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_04",
+   "score": 145,
+   "in_consensus": false,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_05",
+   "score": 145,
+   "in_consensus": false,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_06",
+   "score": -125,
+   "in_consensus": false,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_07",
+   "score": 145,
+   "in_consensus": false,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_09",
+   "score": 145,
+   "in_consensus": true,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_10",
+   "score": 145,
+   "in_consensus": true,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_11",
+   "score": 145,
+   "in_consensus": false,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_12",
+   "score": 145,
+   "in_consensus": false,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_13",
+   "score": 145,
+   "in_consensus": false,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_14",
+   "score": 145,
+   "in_consensus": false,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_15",
+   "score": 145,
+   "in_consensus": true,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 45,
+   "node": "NODE_16",
+   "score": 145,
+   "in_consensus": true,
+   "mu": 125.31,
+   "sigma": 65.54
+  },
+  {
+   "block": 46,
+   "node": "NODE_01",
+   "score": 146,
+   "in_consensus": true,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_02",
+   "score": 146,
+   "in_consensus": false,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_03",
+   "score": 146,
+   "in_consensus": true,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_04",
+   "score": 146,
+   "in_consensus": false,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_05",
+   "score": 146,
+   "in_consensus": false,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_06",
+   "score": -130,
+   "in_consensus": false,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_07",
+   "score": 146,
+   "in_consensus": false,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_09",
+   "score": 146,
+   "in_consensus": true,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_10",
+   "score": 146,
+   "in_consensus": true,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_11",
+   "score": 146,
+   "in_consensus": false,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_12",
+   "score": 146,
+   "in_consensus": false,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_13",
+   "score": 146,
+   "in_consensus": false,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_14",
+   "score": 146,
+   "in_consensus": false,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_15",
+   "score": 146,
+   "in_consensus": true,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 46,
+   "node": "NODE_16",
+   "score": 146,
+   "in_consensus": true,
+   "mu": 125.88,
+   "sigma": 66.99
+  },
+  {
+   "block": 47,
+   "node": "NODE_01",
+   "score": 147,
+   "in_consensus": true,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_02",
+   "score": 147,
+   "in_consensus": false,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_03",
+   "score": 147,
+   "in_consensus": true,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_04",
+   "score": 147,
+   "in_consensus": false,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_05",
+   "score": 147,
+   "in_consensus": false,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_06",
+   "score": -135,
+   "in_consensus": false,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_07",
+   "score": 147,
+   "in_consensus": false,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_09",
+   "score": 147,
+   "in_consensus": true,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_10",
+   "score": 147,
+   "in_consensus": true,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_11",
+   "score": 147,
+   "in_consensus": false,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_12",
+   "score": 147,
+   "in_consensus": false,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_13",
+   "score": 147,
+   "in_consensus": false,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_14",
+   "score": 147,
+   "in_consensus": false,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_15",
+   "score": 147,
+   "in_consensus": true,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 47,
+   "node": "NODE_16",
+   "score": 147,
+   "in_consensus": true,
+   "mu": 126.44,
+   "sigma": 68.45
+  },
+  {
+   "block": 48,
+   "node": "NODE_01",
+   "score": 148,
+   "in_consensus": true,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_02",
+   "score": 148,
+   "in_consensus": false,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_03",
+   "score": 148,
+   "in_consensus": true,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_04",
+   "score": 148,
+   "in_consensus": false,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_05",
+   "score": 148,
+   "in_consensus": false,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_06",
+   "score": -140,
+   "in_consensus": false,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_07",
+   "score": 148,
+   "in_consensus": false,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_09",
+   "score": 148,
+   "in_consensus": true,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_10",
+   "score": 148,
+   "in_consensus": true,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_11",
+   "score": 148,
+   "in_consensus": false,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_12",
+   "score": 148,
+   "in_consensus": false,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_13",
+   "score": 148,
+   "in_consensus": false,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_14",
+   "score": 148,
+   "in_consensus": false,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_15",
+   "score": 148,
+   "in_consensus": true,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 48,
+   "node": "NODE_16",
+   "score": 148,
+   "in_consensus": true,
+   "mu": 127.0,
+   "sigma": 69.91
+  },
+  {
+   "block": 49,
+   "node": "NODE_01",
+   "score": 149,
+   "in_consensus": true,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_02",
+   "score": 149,
+   "in_consensus": false,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_03",
+   "score": 149,
+   "in_consensus": true,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_04",
+   "score": 149,
+   "in_consensus": false,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_05",
+   "score": 149,
+   "in_consensus": false,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_06",
+   "score": -145,
+   "in_consensus": false,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_07",
+   "score": 149,
+   "in_consensus": false,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_09",
+   "score": 149,
+   "in_consensus": true,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_10",
+   "score": 149,
+   "in_consensus": true,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_11",
+   "score": 149,
+   "in_consensus": false,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_12",
+   "score": 149,
+   "in_consensus": false,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_13",
+   "score": 149,
+   "in_consensus": false,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_14",
+   "score": 149,
+   "in_consensus": false,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_15",
+   "score": 149,
+   "in_consensus": true,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 49,
+   "node": "NODE_16",
+   "score": 149,
+   "in_consensus": true,
+   "mu": 127.56,
+   "sigma": 71.36
+  },
+  {
+   "block": 50,
+   "node": "NODE_01",
+   "score": 150,
+   "in_consensus": true,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_02",
+   "score": 150,
+   "in_consensus": false,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_03",
+   "score": 150,
+   "in_consensus": true,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_04",
+   "score": 150,
+   "in_consensus": false,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_05",
+   "score": 150,
+   "in_consensus": false,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_06",
+   "score": -150,
+   "in_consensus": false,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_07",
+   "score": 150,
+   "in_consensus": false,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_09",
+   "score": 150,
+   "in_consensus": true,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_10",
+   "score": 150,
+   "in_consensus": true,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_11",
+   "score": 150,
+   "in_consensus": false,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_12",
+   "score": 150,
+   "in_consensus": false,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_13",
+   "score": 150,
+   "in_consensus": false,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_14",
+   "score": 150,
+   "in_consensus": false,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_15",
+   "score": 150,
+   "in_consensus": true,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 50,
+   "node": "NODE_16",
+   "score": 150,
+   "in_consensus": true,
+   "mu": 128.12,
+   "sigma": 72.82
+  },
+  {
+   "block": 51,
+   "node": "NODE_01",
+   "score": 151,
+   "in_consensus": true,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_02",
+   "score": 151,
+   "in_consensus": false,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_03",
+   "score": 151,
+   "in_consensus": true,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_04",
+   "score": 151,
+   "in_consensus": false,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_05",
+   "score": 151,
+   "in_consensus": false,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_06",
+   "score": -155,
+   "in_consensus": false,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_07",
+   "score": 151,
+   "in_consensus": false,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_09",
+   "score": 151,
+   "in_consensus": true,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_10",
+   "score": 151,
+   "in_consensus": true,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_11",
+   "score": 151,
+   "in_consensus": false,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_12",
+   "score": 151,
+   "in_consensus": false,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_13",
+   "score": 151,
+   "in_consensus": false,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_14",
+   "score": 151,
+   "in_consensus": false,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_15",
+   "score": 151,
+   "in_consensus": true,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 51,
+   "node": "NODE_16",
+   "score": 151,
+   "in_consensus": true,
+   "mu": 128.69,
+   "sigma": 74.28
+  },
+  {
+   "block": 52,
+   "node": "NODE_01",
+   "score": 152,
+   "in_consensus": true,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_02",
+   "score": 152,
+   "in_consensus": false,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_03",
+   "score": 152,
+   "in_consensus": true,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_04",
+   "score": 152,
+   "in_consensus": false,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_05",
+   "score": 152,
+   "in_consensus": false,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_06",
+   "score": -160,
+   "in_consensus": false,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_07",
+   "score": 152,
+   "in_consensus": false,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_09",
+   "score": 152,
+   "in_consensus": true,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_10",
+   "score": 152,
+   "in_consensus": true,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_11",
+   "score": 152,
+   "in_consensus": false,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_12",
+   "score": 152,
+   "in_consensus": false,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_13",
+   "score": 152,
+   "in_consensus": false,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_14",
+   "score": 152,
+   "in_consensus": false,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_15",
+   "score": 152,
+   "in_consensus": true,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 52,
+   "node": "NODE_16",
+   "score": 152,
+   "in_consensus": true,
+   "mu": 129.25,
+   "sigma": 75.73
+  },
+  {
+   "block": 53,
+   "node": "NODE_01",
+   "score": 153,
+   "in_consensus": true,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_02",
+   "score": 153,
+   "in_consensus": false,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_03",
+   "score": 153,
+   "in_consensus": true,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_04",
+   "score": 153,
+   "in_consensus": false,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_05",
+   "score": 153,
+   "in_consensus": false,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_06",
+   "score": -165,
+   "in_consensus": false,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_07",
+   "score": 153,
+   "in_consensus": false,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_09",
+   "score": 153,
+   "in_consensus": true,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_10",
+   "score": 153,
+   "in_consensus": true,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_11",
+   "score": 153,
+   "in_consensus": false,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_12",
+   "score": 153,
+   "in_consensus": false,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_13",
+   "score": 153,
+   "in_consensus": false,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_14",
+   "score": 153,
+   "in_consensus": false,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_15",
+   "score": 153,
+   "in_consensus": true,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 53,
+   "node": "NODE_16",
+   "score": 153,
+   "in_consensus": true,
+   "mu": 129.81,
+   "sigma": 77.19
+  },
+  {
+   "block": 54,
+   "node": "NODE_01",
+   "score": 154,
+   "in_consensus": true,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_02",
+   "score": 154,
+   "in_consensus": false,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_03",
+   "score": 154,
+   "in_consensus": true,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_04",
+   "score": 154,
+   "in_consensus": false,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_05",
+   "score": 154,
+   "in_consensus": false,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_06",
+   "score": -170,
+   "in_consensus": false,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_07",
+   "score": 154,
+   "in_consensus": false,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_09",
+   "score": 154,
+   "in_consensus": true,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_10",
+   "score": 154,
+   "in_consensus": true,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_11",
+   "score": 154,
+   "in_consensus": false,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_12",
+   "score": 154,
+   "in_consensus": false,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_13",
+   "score": 154,
+   "in_consensus": false,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_14",
+   "score": 154,
+   "in_consensus": false,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_15",
+   "score": 154,
+   "in_consensus": true,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 54,
+   "node": "NODE_16",
+   "score": 154,
+   "in_consensus": true,
+   "mu": 130.38,
+   "sigma": 78.65
+  },
+  {
+   "block": 55,
+   "node": "NODE_01",
+   "score": 155,
+   "in_consensus": true,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_02",
+   "score": 155,
+   "in_consensus": false,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_03",
+   "score": 155,
+   "in_consensus": true,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_04",
+   "score": 155,
+   "in_consensus": false,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_05",
+   "score": 155,
+   "in_consensus": false,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_06",
+   "score": -175,
+   "in_consensus": false,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_07",
+   "score": 155,
+   "in_consensus": false,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_09",
+   "score": 155,
+   "in_consensus": true,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_10",
+   "score": 155,
+   "in_consensus": true,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_11",
+   "score": 155,
+   "in_consensus": false,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_12",
+   "score": 155,
+   "in_consensus": false,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_13",
+   "score": 155,
+   "in_consensus": false,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_14",
+   "score": 155,
+   "in_consensus": false,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_15",
+   "score": 155,
+   "in_consensus": true,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 55,
+   "node": "NODE_16",
+   "score": 155,
+   "in_consensus": true,
+   "mu": 130.94,
+   "sigma": 80.1
+  },
+  {
+   "block": 56,
+   "node": "NODE_01",
+   "score": 156,
+   "in_consensus": true,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_02",
+   "score": 156,
+   "in_consensus": false,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_03",
+   "score": 156,
+   "in_consensus": true,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_04",
+   "score": 156,
+   "in_consensus": false,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_05",
+   "score": 156,
+   "in_consensus": false,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_06",
+   "score": -180,
+   "in_consensus": false,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_07",
+   "score": 156,
+   "in_consensus": false,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_09",
+   "score": 156,
+   "in_consensus": true,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_10",
+   "score": 156,
+   "in_consensus": true,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_11",
+   "score": 156,
+   "in_consensus": false,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_12",
+   "score": 156,
+   "in_consensus": false,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_13",
+   "score": 156,
+   "in_consensus": false,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_14",
+   "score": 156,
+   "in_consensus": false,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_15",
+   "score": 156,
+   "in_consensus": true,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 56,
+   "node": "NODE_16",
+   "score": 156,
+   "in_consensus": true,
+   "mu": 131.5,
+   "sigma": 81.56
+  },
+  {
+   "block": 57,
+   "node": "NODE_01",
+   "score": 157,
+   "in_consensus": true,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_02",
+   "score": 157,
+   "in_consensus": false,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_03",
+   "score": 157,
+   "in_consensus": true,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_04",
+   "score": 157,
+   "in_consensus": false,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_05",
+   "score": 157,
+   "in_consensus": false,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_06",
+   "score": -185,
+   "in_consensus": false,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_07",
+   "score": 157,
+   "in_consensus": false,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_09",
+   "score": 157,
+   "in_consensus": true,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_10",
+   "score": 157,
+   "in_consensus": true,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_11",
+   "score": 157,
+   "in_consensus": false,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_12",
+   "score": 157,
+   "in_consensus": false,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_13",
+   "score": 157,
+   "in_consensus": false,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_14",
+   "score": 157,
+   "in_consensus": false,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_15",
+   "score": 157,
+   "in_consensus": true,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 57,
+   "node": "NODE_16",
+   "score": 157,
+   "in_consensus": true,
+   "mu": 132.06,
+   "sigma": 83.01
+  },
+  {
+   "block": 58,
+   "node": "NODE_01",
+   "score": 158,
+   "in_consensus": true,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_02",
+   "score": 158,
+   "in_consensus": false,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_03",
+   "score": 158,
+   "in_consensus": true,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_04",
+   "score": 158,
+   "in_consensus": false,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_05",
+   "score": 158,
+   "in_consensus": false,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_06",
+   "score": -190,
+   "in_consensus": false,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_07",
+   "score": 158,
+   "in_consensus": false,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_09",
+   "score": 158,
+   "in_consensus": true,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_10",
+   "score": 158,
+   "in_consensus": true,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_11",
+   "score": 158,
+   "in_consensus": false,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_12",
+   "score": 158,
+   "in_consensus": false,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_13",
+   "score": 158,
+   "in_consensus": false,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_14",
+   "score": 158,
+   "in_consensus": false,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_15",
+   "score": 158,
+   "in_consensus": true,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 58,
+   "node": "NODE_16",
+   "score": 158,
+   "in_consensus": true,
+   "mu": 132.62,
+   "sigma": 84.47
+  },
+  {
+   "block": 59,
+   "node": "NODE_01",
+   "score": 159,
+   "in_consensus": true,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_02",
+   "score": 159,
+   "in_consensus": false,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_03",
+   "score": 159,
+   "in_consensus": true,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_04",
+   "score": 159,
+   "in_consensus": false,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_05",
+   "score": 159,
+   "in_consensus": false,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_06",
+   "score": -195,
+   "in_consensus": false,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_07",
+   "score": 159,
+   "in_consensus": false,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_09",
+   "score": 159,
+   "in_consensus": true,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_10",
+   "score": 159,
+   "in_consensus": true,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_11",
+   "score": 159,
+   "in_consensus": false,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_12",
+   "score": 159,
+   "in_consensus": false,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_13",
+   "score": 159,
+   "in_consensus": false,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_14",
+   "score": 159,
+   "in_consensus": false,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_15",
+   "score": 159,
+   "in_consensus": true,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 59,
+   "node": "NODE_16",
+   "score": 159,
+   "in_consensus": true,
+   "mu": 133.19,
+   "sigma": 85.93
+  },
+  {
+   "block": 60,
+   "node": "NODE_01",
+   "score": 160,
+   "in_consensus": true,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_02",
+   "score": 160,
+   "in_consensus": false,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_03",
+   "score": 160,
+   "in_consensus": true,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_04",
+   "score": 160,
+   "in_consensus": false,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_05",
+   "score": 160,
+   "in_consensus": false,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_06",
+   "score": -200,
+   "in_consensus": false,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_07",
+   "score": 160,
+   "in_consensus": false,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_08",
+   "score": 100,
+   "in_consensus": true,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_09",
+   "score": 160,
+   "in_consensus": true,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_10",
+   "score": 160,
+   "in_consensus": true,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_11",
+   "score": 160,
+   "in_consensus": false,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_12",
+   "score": 160,
+   "in_consensus": false,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_13",
+   "score": 160,
+   "in_consensus": false,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_14",
+   "score": 160,
+   "in_consensus": false,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_15",
+   "score": 160,
+   "in_consensus": true,
+   "mu": 133.75,
+   "sigma": 87.38
+  },
+  {
+   "block": 60,
+   "node": "NODE_16",
+   "score": 160,
+   "in_consensus": true,
+   "mu": 133.75,
+   "sigma": 87.38
+  }
+ ],
+ "regroups": [
+  {
+   "b_id": 10,
+   "promoted": [
+    "NODE_01"
+   ],
+   "demoted": [
+    "NODE_06"
+   ],
+   "consensus": [
+    "NODE_01",
+    "NODE_03",
+    "NODE_08",
+    "NODE_09",
+    "NODE_10",
+    "NODE_15",
+    "NODE_16"
+   ]
+  }
+ ],
+ "committed": 60,
+ "consistent": true,
+ "valid": true
+}

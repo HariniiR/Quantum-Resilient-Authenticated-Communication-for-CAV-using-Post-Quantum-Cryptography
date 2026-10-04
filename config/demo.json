@@ -1,0 +1,55 @@
+{
+  "_comment": "Review 2 demonstration: 1 TA, 1 cloud, 1 MEC, 8 consensus nodes, 3 RSUs, 5 vehicles on localhost.",
+  "suite": "DECK",
+  "backend": "auto",
+  "host": "127.0.0.1",
+  "run_dir": "run",
+  "beacon_hz": 10,
+  "crl_interval": 1.0,
+  "ta": {"port": 7000, "use_roster": true, "revoke": [{"at": 40, "id": "CAV_05"}]},
+  "cloud": {"id": "CLOUD_01", "port": 7100},
+  "mec": [{"id": "MEC_01", "port": 7200}],
+  "consensus": {
+    "mode": "ags",
+    "regroup_interval": 8,
+    "view_change_timeout": 2.0,
+    "client_timeout": 3.0,
+    "initial_consensus": ["NODE_01", "NODE_02", "NODE_03", "NODE_04"],
+    "nodes": [
+      {"id": "NODE_01", "port": 7301, "crash_at": 34},
+      {"id": "NODE_02", "port": 7302},
+      {"id": "NODE_03", "port": 7303, "behaviour": "wrong_result"},
+      {"id": "NODE_04", "port": 7304},
+      {"id": "NODE_05", "port": 7305},
+      {"id": "NODE_06", "port": 7306},
+      {"id": "NODE_07", "port": 7307},
+      {"id": "NODE_08", "port": 7308}
+    ]
+  },
+  "rsus": [
+    {"id": "RSU_01", "port": 7401, "pos": [0, 0], "mec": "MEC_01", "neighbours": ["RSU_02"]},
+    {"id": "RSU_02", "port": 7402, "pos": [450, 0], "mec": "MEC_01", "neighbours": ["RSU_01", "RSU_03"]},
+    {"id": "RSU_03", "port": 7403, "pos": [900, 0], "mec": "MEC_01", "neighbours": ["RSU_02"]}
+  ],
+  "cavs": [
+    {"id": "CAV_01", "rsu": "RSU_01", "start": [10, 0], "speed": 13.9, "script": [
+      {"at": 7, "action": "event", "kind": "collision_ahead", "criticality": 1},
+      {"at": 10, "action": "v2v", "dst": "CAV_04", "text": "braking hard, keep distance"}
+    ]},
+    {"id": "CAV_02", "rsu": "RSU_01", "start": [60, 3.5], "speed": 12.0, "script": [
+      {"at": 8, "action": "event", "kind": "pothole", "criticality": 0},
+      {"at": 30, "action": "event", "kind": "road_condition", "criticality": 0}
+    ]},
+    {"id": "CAV_03", "rsu": "RSU_02", "start": [420, 0], "speed": 15.0, "script": [
+      {"at": 12, "action": "handover", "rsu": "RSU_03"},
+      {"at": 14, "action": "event", "kind": "pedestrian_on_road", "criticality": 1}
+    ]},
+    {"id": "CAV_04", "rsu": "RSU_02", "start": [500, 3.5], "speed": 11.0, "script": [
+      {"at": 16, "action": "event", "kind": "traffic_jam", "criticality": 1, "repeat": 10, "every": 1.0}
+    ]},
+    {"id": "CAV_05", "rsu": "RSU_03", "start": [880, 0], "speed": 14.0, "script": [
+      {"at": 36, "action": "event", "kind": "ice_on_road", "criticality": 1},
+      {"at": 43, "action": "reconnect"}
+    ]}
+  ]
+}

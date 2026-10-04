@@ -1,0 +1,8 @@
+attack,rejected,note
+ciphertext tampering,True,AEAD tag mismatch
+replay (stale timestamp),True,freshness window exceeded
+impersonation,True,public key does not match TA directory
+revoked credential,True,identity on CRL
+MITM key substitution,True,signature does not cover the substituted key
+session key reuse,True,ephemeral KEM keypair per session
+ledger tampering,True,hash chain broken

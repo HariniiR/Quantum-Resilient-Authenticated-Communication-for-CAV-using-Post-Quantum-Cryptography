@@ -1,0 +1,7 @@
+mode,vc_timeout_s,crashed_leader,post_crash_committed,recovery_first_commit_ms,post_crash_p50_ms,new_view,consistent
+ags,0.5,NODE_01,5,1201.7,1401.7,1,True
+ags,1.0,NODE_01,5,2192.7,2392.7,1,True
+ags,2.0,NODE_01,5,4706.4,4900.4,1,True
+pbft,0.5,NODE_01,5,1158.1,1352.3,1,True
+pbft,1.0,NODE_01,5,2168.2,2362.2,1,True
+pbft,2.0,NODE_01,5,4670.2,4866.4,1,True

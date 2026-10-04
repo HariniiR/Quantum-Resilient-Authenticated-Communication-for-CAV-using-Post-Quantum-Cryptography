@@ -1,0 +1,7 @@
+scheme,operation,mean_ms,sd_ms
+classical,ECDH P-256 keygen,0.021,0.0001
+classical,ECDH P-256 exchange,0.0535,0.0016
+classical,ECDSA P-256 sign,0.0313,0.0007
+classical,ECDSA P-256 verify,0.0852,0.002
+classical,ECDH P-256 public key size,65,0
+classical,ECDSA P-256 signature size,70,0

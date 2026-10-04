@@ -1,0 +1,5 @@
+mode,crypto_ms,sd_ms,airtime_ms,total_ms,fits_100ms
+AEAD only,0.0305,0.0075,1.838,1.869,True
+signed (ML-DSA-44),28.532,21.6509,6.75,35.282,True
+signed (ML-DSA-65),47.1339,30.0192,9.657,56.791,True
+signed (ML-DSA-87),50.458,27.9187,13.136,63.594,True
