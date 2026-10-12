@@ -20,15 +20,18 @@ INK = "#0b0b0b"
 INK2 = "#52514e"
 GRID = "#e4e3df"
 # fixed categorical order (validated reference palette, light mode)
-SUITE_COLOR = {"CLASSIC": "#2a78d6", "L1": "#eb6834", "L3": "#1baf7a", "DECK": "#eda100", "L5": "#e87ba4"}
+SUITE_COLOR = {"CLASSIC": "#2a78d6", "L1": "#eb6834", "L3": "#1baf7a", "DECK": "#eda100", "L5": "#e87ba4",
+               "DECK+cache": "#4a3aa7"}
 SUITE_LABEL = {
     "CLASSIC": "Classical ECDH+ECDSA P-256",
     "L1": "L1 ML-KEM-512+ML-DSA-44",
     "L3": "L3 ML-KEM-768+ML-DSA-65",
     "DECK": "Deck ML-KEM-1024+ML-DSA-65",
     "L5": "L5 ML-KEM-1024+ML-DSA-87",
+    "DECK+cache": "Deck + certificate caching",
 }
 ORDER = ["CLASSIC", "L1", "L3", "DECK", "L5"]
+NS3_ORDER = ORDER + ["DECK+cache"]
 MODE_COLOR = {"ags": "#2a78d6", "ags-noshadow": "#1baf7a", "pbft": "#eb6834"}
 MODE_LABEL = {"ags": "AGS-PBFT", "ags-noshadow": "AGS-PBFT, no shadow validation", "pbft": "PBFT"}
 
@@ -103,13 +106,13 @@ def fig_handshake_size(res: Path, out: Path):
     suites = [s for s in ORDER if any(r["suite"] == s for r in rows)]
     bottoms = [0.0] * len(suites)
     for key, label, col in parts:
-        vals = [next(r for r in rows if r["suite"] == s)[key] / 1024 for s in suites]
+        vals = [next(r for r in rows if r["suite"] == s)[key] / 1000 for s in suites]
         ax.bar(range(len(suites)), vals, 0.6, bottom=bottoms, color=col, label=label,
                edgecolor=SURFACE, linewidth=1.5)
         bottoms = [b + v for b, v in zip(bottoms, vals)]
     for i, s in enumerate(suites):
         r = next(r for r in rows if r["suite"] == s)
-        ax.text(i, bottoms[i] + 0.4, f"{r['handshake_total'] / 1024:.1f} KB\n{int(r['frames'])} frames",
+        ax.text(i, bottoms[i] + 0.4, f"{r['handshake_total'] / 1000:.1f} KB\n{int(r['frames'])} frames",
                 ha="center", fontsize=8.5, color=INK)
     ax.set_xticks(range(len(suites)), suites)
     ax.set_ylabel("bytes on the air, KB")
@@ -224,13 +227,14 @@ def _agg(rows, key):
     for r in rows:
         if str(r.get("backend")) == "pure":
             continue
-        groups.setdefault((str(r["suite"]), int(r["vehicles"])), []).append(float(r[key]))
+        suite = str(r["suite"]) + ("+cache" if float(r.get("cert_cache") or 0) > 0 else "")
+        groups.setdefault((suite, int(r["vehicles"])), []).append(float(r[key]))
     return {k: (sum(v) / len(v), min(v), max(v), len(v)) for k, v in groups.items()}
 
 
 def _ns3_lines(ax, rows, key, ylabel, title, log=False, budget=None):
     agg = _agg(rows, key)
-    for s in ORDER:
+    for s in NS3_ORDER:
         pts = sorted((v, m) for (su, v), m in agg.items() if su == s)
         if not pts:
             continue
@@ -239,7 +243,7 @@ def _ns3_lines(ax, rows, key, ylabel, title, log=False, budget=None):
         lo = [p[1][0] - p[1][1] for p in pts]
         hi = [p[1][2] - p[1][0] for p in pts]
         ax.errorbar(x, mean, yerr=[lo, hi], marker="o", ms=5, color=SUITE_COLOR[s], label=SUITE_LABEL[s],
-                    capsize=3, elinewidth=1, lw=2)
+                    capsize=3, elinewidth=1, lw=2, ls="--" if s.endswith("+cache") else "-")
     if budget:
         ax.axhline(budget, color=INK2, lw=1, ls="--")
     if log:
@@ -275,7 +279,7 @@ def fig_ns3(res: Path, out: Path):
 def fig_ns3_ablation(res: Path, out: Path):
     rows = read_csv(res / "ns3_variants.csv")
     deck = [r for r in rows if str(r.get("suite")) == "DECK" and str(r.get("backend")) == "openssl"
-            and not r.get("signed_beacons")]
+            and not r.get("signed_beacons") and not float(r.get("cert_cache") or 0)]
     if not deck:
         return
     def pick(e, b):
@@ -302,11 +306,51 @@ def fig_ns3_ablation(res: Path, out: Path):
     _save(fig, out, "fig10_ns3_ablation.png")
 
 
+def fig_cert_cache(res: Path, out: Path):
+    """Certificate caching: bytes per handshake, and its effect in ns-3."""
+    sz = read_csv(res / "sizes.csv")
+    if not sz or "handshake_total_cached" not in sz[0]:
+        return
+    dens = read_csv(res / "ns3_density.csv") + read_csv(res / "ns3_density_seeds.csv")
+    has_ns3 = any(float(r.get("cert_cache") or 0) > 0 for r in dens)
+    fig, axs = plt.subplots(1, 3 if has_ns3 else 1, figsize=(13 if has_ns3 else 6, 3.8))
+    axs = axs if has_ns3 else [axs]
+    ax = axs[0]
+    suites = [s for s in ORDER if any(r["suite"] == s for r in sz)]
+    w = 0.38
+    for j, (key, lab, col) in enumerate([("handshake_total", "certificates sent", "#9a9994"),
+                                         ("handshake_total_cached", "certificates cached", "#4a3aa7")]):
+        vals = [next(r for r in sz if r["suite"] == s)[key] / 1000 for s in suites]
+        xs = [i + (j - 0.5) * w for i in range(len(suites))]
+        ax.bar(xs, vals, w * 0.92, color=col, label=lab)
+        for x, v in zip(xs, vals):
+            ax.text(x, v + 0.3, f"{v:.1f}", ha="center", fontsize=7.5, color=INK2)
+    for i, s in enumerate(suites):
+        r = next(r for r in sz if r["suite"] == s)
+        ax.text(i, r["handshake_total"] / 1000 + 2.6, f"-{r['cache_saving_pct']:.0f}%", ha="center",
+                fontsize=8.5, color=INK, fontweight="bold")
+    ax.set_xticks(range(len(suites)), suites)
+    ax.set_ylim(0, max(r["handshake_total"] for r in sz) / 1000 * 1.3)
+    ax.set_ylabel("handshake bytes, KB")
+    ax.set_title("Bytes per handshake")
+    ax.legend(loc="upper left", fontsize=8)
+    if has_ns3:
+        sub = [r for r in dens if str(r["suite"]) in ("DECK", "CLASSIC") and str(r.get("backend")) != "pure"]
+        _ns3_lines(axs[1], sub, "handshake_success_pct", "%", "ns-3: handshakes completed")
+        axs[1].set_ylim(0, 105)
+        _ns3_lines(axs[2], sub, "airtime_pct", "% of one channel (sum over cells)", "ns-3: channel airtime")
+        axs[1].legend(fontsize=7.5, loc="lower left")
+        for ax in axs[1:]:
+            ax.set_xlabel("vehicles (1.5 km x 1.5 km, 9 RSUs)")
+    fig.suptitle("Certificate caching", x=0.01, ha="left", fontsize=12, fontweight="bold", color=INK)
+    _save(fig, out, "fig11_cert_cache.png")
+
+
 def make_all(res: Path, out: Path | None = None) -> list[str]:
     _style()
     out = out or res
     out.mkdir(parents=True, exist_ok=True)
     for f in (fig_handshake_time, fig_handshake_size, fig_beacon_budget, fig_consensus_scaling,
-              fig_score_dynamics, fig_fault_tolerance, fig_ns3, fig_ns3_ablation):
+              fig_score_dynamics, fig_fault_tolerance, fig_ns3, fig_ns3_ablation, fig_cert_cache):
         f(res, out)
     return sorted(p.name for p in out.glob("fig*.png"))

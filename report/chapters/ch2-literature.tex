@@ -1,0 +1,100 @@
+\chapter{Literature Survey}
+\label{ch:lit}
+
+\section{The quantum threat and the migration timeline}
+
+Shor~\cite{shor} showed that a quantum computer factors integers and computes
+discrete logarithms in polynomial time, which breaks RSA, finite-field
+Diffie--Hellman and every elliptic-curve scheme. Grover's search
+algorithm~\cite{grover} gives only a quadratic speed-up against symmetric
+primitives, so AES-256 and SHA-3 keep an ample margin. Mosca~\cite{mosca}
+framed the planning problem: if data must stay secret for $x$ years and
+migration takes $y$ years, systems are already exposed when $x + y$ exceeds
+the time until a cryptographically relevant quantum computer exists. Vehicles
+are a clear case, with long service lives and slow fleet-wide updates. NIST's
+transition guidance~\cite{nistir8547} proposes deprecating quantum-vulnerable
+public-key algorithms by 2030 and disallowing them by 2035.
+
+\section{Post-quantum standards}
+
+NIST's standardisation process selected CRYSTALS-Kyber~\cite{kyber} for key
+establishment and CRYSTALS-Dilithium~\cite{dilithium} for signatures, published
+in 2024 as ML-KEM~\cite{fips203} and ML-DSA~\cite{fips204}. Both rest on
+Module-LWE~\cite{regev,langlois}. ML-KEM is IND-CCA2 secure through a variant
+of the Fujisaki--Okamoto transform~\cite{fo}, with implicit rejection: a
+malformed ciphertext yields a pseudorandom key instead of an error. ML-DSA
+follows the Fiat--Shamir-with-aborts paradigm, so signing repeats until a
+candidate passes a bound check; signing time is therefore variable, while
+verification is deterministic. Each standard defines three parameter sets
+(ML-KEM-512/768/1024, ML-DSA-44/65/87) mapped to NIST security categories.
+
+\section{V2X security today}
+
+IEEE~1609.2~\cite{ieee16092} defines the security services of the WAVE stack
+used over IEEE~802.11p~\cite{ieee80211p}: periodic safety messages are
+broadcast with an ECDSA P-256 signature and a certificate or certificate
+digest, and certificates are issued by a PKI. The design assumes small
+signatures. A post-quantum signature per beacon multiplies the frame size by
+more than ten, which is why this project separates the one-off handshake
+from the per-beacon cost and evaluates both a session-based (AEAD) beacon
+design and a signed-broadcast design.
+
+For the radio itself we rely on the vehicular channel model of
+Torrent-Moreno et al.~\cite{torrent}, whose Nakagami fading parameters are
+the usual choice for 802.11p highway and urban studies, and on the ns-3
+network simulator~\cite{ns3}.
+
+\section{The base paper}
+
+Aslam, Bhardwaj and Chaudhary~\cite{base} propose a four-layer framework:
+vehicles at the user layer, RSUs and multi-access edge computing (MEC) servers
+at the edge, a consensus layer of validator nodes, and a cloud archive. A
+Trusted Authority registers every entity; vehicles and RSUs establish session
+keys with Kyber; edge servers send critical events to consensus and routine
+data to the cloud. Its main contribution is AGS-PBFT: nodes carry a score
+(starting at 100, $+1$ for agreeing with the committed result, $-5$ for
+disagreeing), only a \emph{consensus set} of size $3f+1$ votes, and every 50
+requests nodes below $\mu - \sigma$ are demoted to a \emph{candidate set}
+while candidates above $\mu + \sigma$ are promoted. The paper reports lower
+message counts than PBFT and an end-to-end latency evaluation in a vehicular
+simulator.
+
+On implementation we found that the paper cannot be executed as written
+(Section~\ref{sec:defects}): its consensus messages are to be ``signed with
+Kyber'', which has no signing operation; its key-exchange listing is circular;
+the Trusted Authority generates entities' private keys although the paper
+claims no key escrow; and Hyperledger Fabric~2.2, the platform it lists,
+orders transactions with Raft~\cite{fabric} and cannot run a PBFT-family
+protocol.
+
+\section{Handshake composition}
+
+Olushola and Meenakshi~\cite{olushola} combine ML-KEM-1024 with ML-DSA-65 in
+an authenticated key exchange for vehicular networks; our Review~1 slides
+adopted the same pairing, which we call the \emph{DECK} suite. The pattern of
+an ephemeral KEM key signed by a long-term signature key, with keys derived
+from a hash of the whole transcript, follows TLS~1.3~\cite{tls13}. Our key
+schedule uses HKDF~\cite{hkdf}; the record layer uses AES-GCM~\cite{gcm} with
+an anti-replay window in the style of IPsec~\cite{esp}; the classical baseline
+uses the DHKEM construction of HPKE~\cite{hpke} so that ECDH fits the same
+KEM interface. Certificate caching follows the idea of TLS cached
+information~\cite{rfc7924}.
+
+\section{Byzantine fault-tolerant consensus}
+
+PBFT~\cite{pbft} tolerates $f$ Byzantine replicas out of $3f+1$ with three
+phases (pre-prepare, prepare, commit) and a view-change protocol that replaces
+a faulty leader. Its message complexity is quadratic in the number of
+replicas, which motivates variants such as AGS-PBFT that restrict voting to a
+subset chosen by reputation.
+
+\section{Gap addressed by this project}
+
+The base paper evaluates its framework by simulation and reports latency and
+message counts, but it cannot be executed as written, and it folds the
+one-off handshake into the per-message latency. What is missing is a complete
+system in which the standardised algorithms run through a real protocol, with sizes and
+processing times measured from that code and then carried over a simulated
+802.11p channel with mobility, alongside a classical baseline that uses the
+same protocol code. This project provides that, together with a working
+AGS-PBFT and a measured comparison against PBFT.

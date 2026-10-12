@@ -8,6 +8,8 @@ client impersonation with stolen certificate,True,client signature over the tran
 RSU impersonation with stolen certificate,True,server signature over transcript + pk_kem fails
 certificate from a rogue TA,True,certificate signature does not verify under pk_TA
 revoked credential,True,certificate serial on the signed CRL
+cache: claim another vehicle's cached certificate,True,client signature checked with the referenced certificate's key
+cache: revoked certificate still in the cache,True,cached certificates are re-verified against the current CRL
 vehicle posing as an RSU,True,role is bound into the certificate
 MITM substitutes the ephemeral ML-KEM key,True,server signature covers pk_kem
 MITM substitutes the KEM ciphertext,True,client signature covers c

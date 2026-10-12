@@ -2,7 +2,8 @@
 Run the ns-3 experiments and write results/ns3_*.csv plus the raw samples
 used by the figures.
 
-    python scripts/run_ns3_sweeps.py              # full: 5 suites x 50-200 vehicles (~20 min on 2 cores)
+    python scripts/run_ns3_sweeps.py              # full: 5 suites + DECK with certificate caching
+                                                  # x 50-200 vehicles (~30 min on 2 cores)
     python scripts/run_ns3_sweeps.py --quick      # 2 suites x 50,100 vehicles
     python scripts/run_ns3_sweeps.py --vehicles 50 100 200 300
 
@@ -33,6 +34,8 @@ def main() -> None:
     ap.add_argument("--sim-time", type=float, default=30.0)
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--out", default=str(ROOT / "results"))
+    ap.add_argument("--no-cache-runs", action="store_true",
+                    help="skip the certificate-caching scenarios")
     ap.add_argument("--seeds", type=int, nargs="*",
                     help="extra seeds for the density sweep only; rows go to ns3_density_seeds.csv")
     args = ap.parse_args()
@@ -54,8 +57,16 @@ def main() -> None:
     if "DECK" in suites:
         load_or_build("DECK", "pure", prof_dir, samples=40, consensus_requests=10)
 
+    def cached(seed=1):
+        # DECK with certificate caching (pre-distributed RSU certificates + edge directory)
+        if args.no_cache_runs or "DECK" not in paths:
+            return []
+        return [(paths["DECK"], {"n_vehicles": n, "sim_time": args.sim_time, "seed": seed, "cert_cache": 1})
+                for n in vehicles]
+
     if args.seeds:
-        jobs = [j for sd in args.seeds for j in density_jobs(paths, vehicles, args.sim_time, seed=sd)]
+        jobs = [j for sd in args.seeds
+                for j in density_jobs(paths, vehicles, args.sim_time, seed=sd) + cached(sd)]
         print(f"[ns3] {len(jobs)} extra-seed scenarios on {args.workers} workers ...", flush=True)
         rows = run_many(jobs, args.workers)
         for r, (_, kw) in zip(rows, jobs):
@@ -64,9 +75,14 @@ def main() -> None:
         print(f"[ns3] done in {time.time() - t0:.0f} s -> {out}", flush=True)
         return
 
-    jobs = density_jobs(paths, vehicles, args.sim_time)
+    jobs = density_jobs(paths, vehicles, args.sim_time) + cached()
     mid = vehicles[min(1, len(vehicles) - 1)]
     extra = []
+    if not args.no_cache_runs:
+        if "DECK" in paths:     # upper bound: every certificate already cached
+            extra.append((paths["DECK"], {"n_vehicles": mid, "sim_time": args.sim_time, "cert_cache": 2}))
+        if "L3" in paths:
+            extra.append((paths["L3"], {"n_vehicles": mid, "sim_time": args.sim_time, "cert_cache": 1}))
     for s in [x for x in ("CLASSIC", "DECK") if x in paths]:     # broadcast-signed beacons
         extra.append((paths[s], {"n_vehicles": mid, "sim_time": args.sim_time, "signed_beacons": True}))
     if "DECK" in paths:
@@ -81,7 +97,7 @@ def main() -> None:
     write_rows(out / "ns3_density.csv", dens)
     write_rows(out / "ns3_variants.csv", rows[len(jobs):] + [r for r in dens if r["vehicles"] == mid])
     raw = {f"{r['profile']}|{r['vehicles']}|{'signed' if r['signed_beacons'] else 'aead'}"
-           f"|edca={int(r['edca'])}|backoff={int(r['backoff'])}":
+           f"|edca={int(r['edca'])}|backoff={int(r['backoff'])}|cache={int(r['cert_cache'])}":
            {"handshake_ms": r["raw_handshake_ms"], "beacon_ms": r["raw_beacon_ms"][:5000],
             "alert_ms": r["raw_alert_ms"]} for r in rows}
     (out / "ns3_raw.json").write_text(json.dumps(raw))

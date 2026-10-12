@@ -36,6 +36,8 @@ class CAVNode(NodeBase):
         self.heading = float(self.me_cfg.get("heading", 0.0))
         self.log("ready", f"vehicle up; associating with {self.rsu}")
         asyncio.ensure_future(self.crl_loop())
+        # RSU certificates are distributed to vehicles ahead of time (like the CRL)
+        await self.preload_certs("RSU", expected=len(self.cfg["rsus"]))
         await self._associate(self.rsu)
         asyncio.ensure_future(self.script())
         period = 1.0 / self.hz

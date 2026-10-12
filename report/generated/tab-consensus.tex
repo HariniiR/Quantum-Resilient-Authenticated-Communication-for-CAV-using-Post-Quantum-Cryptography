@@ -1,0 +1,14 @@
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{rrrrrrrr}
+\toprule
+Nodes & $|CN|$ & msgs/req AGS / PBFT & fewer msgs \% & fewer bytes \% & no shadow \% & latency \% & less CPU \% \\
+\midrule
+8 & 4 & 35 / 128 & 73 & 8 & 41 & +49 & 18 \\
+12 & 4 & 47 / 288 & 84 & 23 & 64 & +46 & 25 \\
+16 & 7 & 89 / 512 & 83 & 25 & 57 & +41 & 18 \\
+20 & 10 & 149 / 800 & 81 & 25 & 53 & +43 & 23 \\
+24 & 10 & 161 / 1{,}152 & 86 & 30 & 63 & +58 & 24 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip{\footnotesize Real ML-DSA-65 signatures, 1\,ms links, 20 requests at light load. Percentages are AGS-PBFT relative to PBFT; latency is the median commit latency.}

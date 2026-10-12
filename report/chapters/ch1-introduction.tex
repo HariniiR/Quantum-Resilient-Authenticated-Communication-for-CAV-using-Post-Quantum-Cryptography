@@ -1,0 +1,119 @@
+\chapter{Introduction}
+\label{ch:intro}
+
+\section{Background}
+
+A connected autonomous vehicle (CAV) is in continuous radio contact with the
+infrastructure around it. It broadcasts its position, speed and heading about
+ten times a second, reports hazards such as a collision ahead or ice on the
+road, and receives warnings issued by roadside units (RSUs) and edge servers.
+Every one of these messages is safety-relevant: a forged ``brake now'' or a
+suppressed hazard warning can cause a crash. Vehicle-to-everything (V2X)
+security therefore rests on two guarantees, that a message really comes from
+the registered entity that claims to have sent it, and that it has not been
+altered or replayed.
+
+Deployed V2X security, specified in IEEE~1609.2~\cite{ieee16092}, provides
+these guarantees with elliptic-curve cryptography: ECDSA signatures on
+messages and certificates, and ECDH where confidentiality is needed. Both
+rest on the elliptic-curve discrete-logarithm problem. Shor's
+algorithm~\cite{shor} solves that problem, and integer factorisation, in
+polynomial time on a sufficiently large quantum computer. Such machines do not
+exist yet, but two facts make the problem urgent now. First, an adversary can
+record encrypted traffic today and decrypt it once the hardware arrives
+(``harvest now, decrypt later''~\cite{mosca}); a vehicle's movement history
+stays sensitive for years. Second, vehicles stay in service for fifteen years
+or more, so the cryptography fitted to a car sold today must still be secure
+in 2040.
+
+In August 2024 NIST published the first post-quantum standards: ML-KEM
+(FIPS~203~\cite{fips203}), a key-encapsulation mechanism derived from
+CRYSTALS-Kyber, and ML-DSA (FIPS~204~\cite{fips204}), a signature scheme
+derived from CRYSTALS-Dilithium. Both are built on the Module Learning With
+Errors problem over lattices, for which no efficient quantum algorithm is
+known, and both run on ordinary processors. Their cost is size: an ML-DSA-65
+public key is 1,952 bytes and a signature 3,309 bytes, against 65 and about
+72 bytes for ECDSA P-256. On a 6\,Mb/s IEEE 802.11p channel shared by every
+vehicle in range, that difference matters more than computation time.
+
+\section{Problem statement}
+
+Our base paper, Aslam, Bhardwaj and Chaudhary~\cite{base}, proposes a
+quantum-resilient V2X framework: a Trusted Authority registers entities,
+vehicles establish keys with RSUs using Kyber, edge servers route events by
+criticality, and an Adaptive Grouping Score PBFT (AGS-PBFT) consensus layer
+records critical events on a ledger. The paper reports latency and message
+counts but leaves open the questions a deployment depends on:
+
+\begin{enumerate}
+\item Can the framework be implemented as specified with the standardised
+algorithms, and is the resulting protocol secure?
+\item Do post-quantum handshakes and safety messages fit vehicular latency
+budgets (100\,ms for periodic beacons) when computation \emph{and} radio
+transmission are both measured?
+\item How does a shared 802.11p channel behave as vehicle density grows, when
+every handshake carries post-quantum keys, signatures and certificates?
+\item Does AGS-PBFT deliver the savings the paper claims over PBFT, and at
+what cost?
+\end{enumerate}
+
+\section{Objectives}
+
+\begin{enumerate}
+\item Implement the complete framework (Trusted Authority, registration,
+mutually authenticated ML-KEM/ML-DSA handshake, record layer, edge routing,
+AGS-PBFT with view change, and a ledger) as a working distributed system.
+\item Correct every defect in the published design that prevents it from
+working or makes it insecure, and document each correction.
+\item Measure computation, message size and radio airtime for all NIST
+security levels and for a classical ECDH/ECDSA baseline run through the same
+protocol code.
+\item Evaluate the protocol in ns-3 with IEEE 802.11p, fading and vehicle
+mobility from 50 to 200 vehicles.
+\item Compare AGS-PBFT with PBFT using real signatures, and test both under
+Byzantine faults and leader crashes.
+\item Test the implementation against concrete attacks.
+\item Reduce the handshake's size, the dominant cost, with certificate caching.
+\end{enumerate}
+
+\section{Contributions}
+
+\begin{itemize}
+\item \textbf{A complete, running implementation} (the \code{qrcav} package,
+about 7,600 lines of Python, including tests, and 870 lines of C++ for ns-3) that runs as 19
+processes over TCP, inside ns-3, and as an evaluation suite, with 57 automated
+tests.
+\item \textbf{Corrections to the base paper} (D1--D5): a consensus layer that
+signs with a KEM, a circular key-derivation listing, a session key that
+hashes a value with itself, key escrow at the Trusted Authority, and a ledger
+platform that cannot host PBFT. \textbf{Corrections to our own Review~1
+design} (F1--F7), the most serious being the absence of client
+authentication.
+\item \textbf{Design decisions where the paper is undefined} (D6--D9) that
+make AGS-PBFT implementable: regrouping when all scores are equal, how
+candidates earn promotion, how group size follows load, and how the leader's
+own vote counts.
+\item \textbf{Certificate caching} for the post-quantum handshake, with its
+security argument, which halves the handshake to \V{deck-cached-bytes} bytes.
+\item \textbf{A measured answer} to the questions above: per-message
+post-quantum protection fits the budget; channel capacity during handshakes
+does not scale; the cause is size, which certificate caching and
+exponential backoff after failed handshakes reduce.
+\end{itemize}
+
+\section{Scope}
+
+The project uses ordinary (classical) hardware; post-quantum cryptography is
+software and needs no quantum devices. Out of scope are deployment on real
+on-board units, side-channel hardening beyond what the OpenSSL implementation
+provides, formal verification of the protocol, and pseudonymous certificates
+for location privacy.
+
+\section{Organisation of the report}
+
+Chapter~\ref{ch:lit} surveys related work. Chapter~\ref{ch:bg} explains the
+cryptographic and consensus building blocks. Chapter~\ref{ch:design}
+presents the system design, the defects found and the corrections.
+Chapter~\ref{ch:impl} describes the implementation and the simulation
+methodology. Chapter~\ref{ch:results} reports and discusses the results, and
+Chapter~\ref{ch:conc} concludes with limitations and future work.

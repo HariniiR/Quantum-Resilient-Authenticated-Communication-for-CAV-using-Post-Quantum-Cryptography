@@ -129,6 +129,8 @@ def run_scenario(
     seed: int = 1,
     edca: bool = True,
     backoff: bool = True,
+    cert_cache: int = 0,
+    trace: bool = False,
 ) -> dict:
     lib = _lib()
     std = lib._std
@@ -142,6 +144,8 @@ def run_scenario(
         "nakagami": 1.0 if nakagami else 0.0, "hs_timeout_ms": hs_timeout_ms, "seed": float(seed),
         "hs_retries": 3, "link_timeout": 1.0, "backhaul_ms": 2.0,
         "edca": 1.0 if edca else 0.0, "backoff": 1.0 if backoff else 0.0,
+        "cert_cache": float(cert_cache),
+        "trace": 1.0 if trace else 0.0,
     }
     for k, v in profile["sizes"].items():
         params[f"size_{k}"] = float(v)
@@ -154,7 +158,8 @@ def run_scenario(
     rsus = rsu_grid(width, height, rsu_spacing, block)
     for x, y in rsus:
         lib.add_rsu(float(x), float(y))
-    for i, wps in enumerate(manhattan_waypoints(n_vehicles, width, height, block, sim_time, rng)):
+    all_wps = manhattan_waypoints(n_vehicles, width, height, block, sim_time, rng)
+    for i, wps in enumerate(all_wps):
         for t, x, y in wps:
             lib.add_waypoint(i, float(t), float(x), float(y))
 
@@ -174,6 +179,7 @@ def run_scenario(
         "suite": profile["suite"], "backend": profile["backend"], "vehicles": n_vehicles,
         "rsus": len(rsus), "area_km2": width * height / 1e6, "signed_beacons": signed_beacons,
         "consensus": "pbft" if pbft else "ags", "edca": edca, "backoff": backoff,
+        "cert_cache": cert_cache,
         "handshake_attempts": C.get("handshake_attempts", 0), "handshakes_ok": C.get("handshakes_ok", 0),
         "handshakes_failed": C.get("handshakes_failed", 0),
         "handshake_retx": C.get("handshake_retx", 0),
@@ -191,9 +197,22 @@ def run_scenario(
         "alert_others_p50_ms": _pct(ao, 0.5),
         "commit_p50_ms": _pct(cl, 0.5), "commit_p95_ms": _pct(cl, 0.95),
         "links_lost": C.get("links_lost", 0),
+        "directory_lookups": C.get("cert_directory_lookups", 0),
         "mean_session_s": statistics.fmean(sess) if sess else float("nan"),
         "airtime_pct": 100 * C.get("airtime_tx_s", 0) / max(1e-9, measured),
         "tx_mbytes": C.get("tx_bytes", 0) / 1e6,
         "raw_handshake_ms": hs, "raw_beacon_ms": bl[:20000], "raw_alert_ms": al,
     }
+    if trace:
+        tr = get("trace")
+        res["raw_trace"] = {
+            "width": width, "height": height, "block": block, "sim_time": sim_time, "warmup": warmup,
+            "rsus": rsus,
+            "waypoints": [[[round(t, 3), round(x, 1), round(y, 1)] for t, x, y in w] for w in all_wps],
+            "events": [[round(tr[i], 4), int(tr[i + 1]), int(tr[i + 2]), int(tr[i + 3])]
+                       for i in range(0, len(tr), 4)],
+            "air_bucket_s": 0.5,
+            "airtime": [round(x, 5) for x in get("air_bucket")],
+        }
+    return res
     return res

@@ -1,0 +1,370 @@
+<title>V2X Handshake Replay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: map canvas (the city grid, drawn to scale) beside a control column;
+   stacks to one column on phones. Road-signage type, asphalt neutrals,
+   state colours borrowed from traffic signals. */
+:root {
+  --bg: #eef0ec;
+  --panel: #f8f9f6;
+  --ink: #1b211f;
+  --ink2: #56605b;
+  --line: #d3d8d1;
+  --road: #dde1da;
+  --block: #e7eae4;
+  --rsu: #1b211f;
+  --up: #0f7a63;
+  --hs: #c27100;
+  --fail: #c0392b;
+  --idle: #8b948f;
+  --alert: #6d4bd1;
+  --accent: #0f7a63;
+  --display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111513; --panel: #171c1a; --ink: #e6ebe7; --ink2: #9aa59f; --line: #2c3430;
+    --road: #262d2a; --block: #1a201d; --rsu: #e6ebe7; --up: #2fbf98; --hs: #f0a330;
+    --fail: #ef6a5b; --idle: #6d7672; --alert: #a48bf2; --accent: #2fbf98; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111513; --panel: #171c1a; --ink: #e6ebe7; --ink2: #9aa59f; --line: #2c3430;
+  --road: #262d2a; --block: #1a201d; --rsu: #e6ebe7; --up: #2fbf98; --hs: #f0a330;
+  --fail: #ef6a5b; --idle: #6d7672; --alert: #a48bf2; --accent: #2fbf98; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.45; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 20px 32px; display: grid; gap: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: 30px; letter-spacing: 0.01em; margin: 0; text-wrap: balance; }
+.sub { color: var(--ink2); margin: 2px 0 0; max-width: 68ch; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.mapbox { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px; min-width: 0; }
+canvas#map { width: 100%; aspect-ratio: 1 / 1; display: block; max-width: 100%; }
+.side { display: grid; gap: 12px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: grid; gap: 10px; }
+.label { font-family: var(--display); font-weight: 600; font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink2); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.seg button { font: 600 14px/1.2 var(--display); letter-spacing: 0.02em; padding: 8px 4px; background: transparent; color: var(--ink2); border: 0; border-left: 1px solid var(--line); cursor: pointer; }
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.seg button:focus-visible, .ctl button:focus-visible, input[type=range]:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.suite { font-size: 13.5px; color: var(--ink2); }
+.ctl { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ctl button { font: 600 14px var(--display); padding: 7px 14px; border-radius: 5px; border: 1px solid var(--ink); background: var(--ink); color: var(--panel); cursor: pointer; min-width: 76px; }
+.ctl select { font: 14px var(--body); padding: 6px 8px; border-radius: 5px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.clock { font-family: var(--mono); font-size: 14px; font-variant-numeric: tabular-nums; margin-left: auto; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; }
+.stat { display: grid; gap: 0; }
+.stat b { font-family: var(--mono); font-weight: 500; font-size: 20px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12.5px; color: var(--ink2); }
+.key { display: grid; gap: 6px; font-size: 13.5px; }
+.key div { display: flex; align-items: center; gap: 8px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.dash { width: 18px; height: 0; border-top: 2px dashed var(--hs); flex: none; }
+.solid { width: 18px; height: 0; border-top: 2px solid var(--up); flex: none; }
+canvas#air { width: 100%; height: 70px; display: block; }
+.runrow { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 13.5px; }
+.runrow span:nth-child(even) { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+.feed { font-family: var(--mono); font-size: 12px; color: var(--ink2); display: grid; gap: 2px; max-height: 150px; overflow: auto; }
+.feed .f { color: var(--fail); } .feed .a { color: var(--alert); } .feed .u { color: var(--up); }
+.note { font-size: 13px; color: var(--ink2); max-width: 75ch; }
+.empty { padding: 40px; text-align: center; color: var(--ink2); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>V2X Handshake Replay</h1>
+      <p class="sub" id="sub">ns-3 replay: vehicles on a Manhattan grid associating with roadside units over IEEE 802.11p.</p>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div class="mapbox"><canvas id="map" aria-label="City grid with vehicles and roadside units"></canvas></div>
+
+    <div class="side">
+      <div class="card">
+        <div class="label">Scenario</div>
+        <div class="seg" id="seg" role="group" aria-label="Scenario"></div>
+        <div class="suite" id="suite"></div>
+        <div class="ctl">
+          <button id="play" type="button">Play</button>
+          <select id="speed" aria-label="Playback speed">
+            <option value="0.25">0.25×</option><option value="0.5">0.5×</option>
+            <option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option>
+          </select>
+          <span class="clock" id="clock">t = 0.0 s</span>
+        </div>
+        <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Simulation time">
+      </div>
+
+      <div class="card">
+        <div class="label">At this moment</div>
+        <div class="stats">
+          <div class="stat"><b id="sUp">0</b><span>vehicles with a session</span></div>
+          <div class="stat"><b id="sHs">0</b><span>handshakes in progress</span></div>
+          <div class="stat"><b id="sFail">0</b><span>failed handshakes so far</span></div>
+          <div class="stat"><b id="sAlert">0</b><span>alerts delivered so far</span></div>
+        </div>
+        <div class="label">Channel airtime, every 0.5 s</div>
+        <canvas id="air" aria-label="Airtime over time"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="label">Whole run (after 5 s warm-up)</div>
+        <div class="runrow" id="run"></div>
+      </div>
+
+      <div class="card">
+        <div class="label">Key</div>
+        <div class="key">
+          <div><span class="dot" style="background:var(--up)"></span>session up (AES-GCM beacons flowing)</div>
+          <div><span class="dot" style="background:var(--hs)"></span>handshake in progress</div>
+          <div><span class="dot" style="background:var(--idle)"></span>no session</div>
+          <div><span class="dot" style="background:var(--fail)"></span>handshake just failed</div>
+          <div><span class="dot" style="background:var(--alert)"></span>critical event reported (ring)</div>
+          <div><span class="dash"></span>handshake flights in the air</div>
+          <div><span class="solid"></span>secure session to an RSU</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Event log</div>
+        <div class="feed" id="feed"></div>
+      </div>
+    </div>
+  </div>
+  <p class="note" id="note"></p>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+
+(function () {
+  const map = document.getElementById("map");
+  if (!DATA || !DATA.scenarios || !DATA.scenarios.length) {
+    map.replaceWith(Object.assign(document.createElement("div"), { className: "empty", textContent: "No trace data. Run scripts/make_viewer.py." }));
+    return;
+  }
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  let C = {};
+  const readColors = () => { for (const k of ["panel","ink","ink2","line","road","block","rsu","up","hs","fail","idle","alert"]) C[k] = css("--" + k); };
+  readColors();
+  if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => { readColors(); draw(); });
+  new MutationObserver(() => { readColors(); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  const seg = document.getElementById("seg");
+  const scrub = document.getElementById("scrub");
+  const playBtn = document.getElementById("play");
+  const speedSel = document.getElementById("speed");
+  let idx = 0, t = 0, playing = false, last = null;
+
+  // ---- per-scenario preprocessing -------------------------------------------------
+  const scen = DATA.scenarios.map(s => {
+    const tr = s.trace;
+    const nV = tr.waypoints.length;
+    const per = Array.from({ length: nV }, () => []);
+    const alerts = [], fails = [];
+    for (const e of tr.events) {
+      const [tt, kind, v, x] = e;
+      if (kind === 6 || kind === 7) alerts.push(e);
+      if (kind === 3) fails.push(tt);
+      if (v >= 0 && v < nV) per[v].push(e);
+    }
+    const alertRx = tr.events.filter(e => e[1] === 7).map(e => e[0]);
+    return { ...s, nV, per, alerts, fails, alertRx };
+  });
+
+  function pos(wps, tt) {
+    if (tt <= wps[0][0]) return [wps[0][1], wps[0][2]];
+    let lo = 0, hi = wps.length - 1;
+    if (tt >= wps[hi][0]) return [wps[hi][1], wps[hi][2]];
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (wps[m][0] <= tt) lo = m; else hi = m; }
+    const a = wps[lo], b = wps[hi], f = (tt - a[0]) / Math.max(1e-9, b[0] - a[0]);
+    return [a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f];
+  }
+  function stateAt(evs, tt) {
+    // last handshake-relevant event at or before tt
+    let st = { s: "idle", rsu: -1, since: 0 };
+    for (const [et, kind, , x] of evs) {
+      if (et > tt) break;
+      if (kind === 1 || kind === 5) st = { s: "hs", rsu: x, since: et };
+      else if (kind === 2) st = { s: "up", rsu: x, since: et };
+      else if (kind === 3) st = { s: "fail", rsu: -1, since: et };
+      else if (kind === 4) st = { s: "idle", rsu: -1, since: et };
+    }
+    if (st.s === "fail" && tt - st.since > 0.6) st.s = "idle";
+    return st;
+  }
+  const count = (arr, tt) => { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] <= tt) lo = m + 1; else hi = m; } return lo; };
+
+  // ---- UI ----------------------------------------------------------------------------
+  scen.forEach((s, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.id = "scn" + i; b.textContent = s.short;
+    b.setAttribute("aria-pressed", i === 0 ? "true" : "false");
+    b.addEventListener("click", () => select(i));
+    seg.appendChild(b);
+  });
+  const T = () => scen[idx].trace.sim_time;
+  function select(i) {
+    idx = i;
+    [...seg.children].forEach((b, j) => b.setAttribute("aria-pressed", j === i ? "true" : "false"));
+    const s = scen[i];
+    document.getElementById("suite").textContent = s.label;
+    const r = s.summary, fmt = (v, d = 0) => (v === null || v === undefined || Number.isNaN(v)) ? "–" : Number(v).toFixed(d);
+    document.getElementById("run").innerHTML = [
+      ["Handshake bytes", fmt(s.handshake_bytes) + " B"],
+      ["Handshakes completed", fmt(r.handshake_success_pct, 1) + " %"],
+      ["Handshake time, median", fmt(r.hs_p50_ms, 0) + " ms"],
+      ["Handshake time, p95", fmt(r.hs_p95_ms, 0) + " ms"],
+      ["Beacon slots with a session", fmt(r.beacon_coverage_pct, 1) + " %"],
+      ["Event → alert, median", fmt(r.alert_p50_ms, 1) + " ms"],
+      ["Channel airtime (sum of cells)", fmt(r.airtime_pct, 0) + " %"],
+    ].map(([a, b]) => `<span>${a}</span><span>${b}</span>`).join("");
+    feedMark = -1;
+    draw();
+  }
+  playBtn.addEventListener("click", () => { playing = !playing; playBtn.textContent = playing ? "Pause" : "Play"; if (playing && t >= T() - 0.01) t = 0; last = null; if (playing) requestAnimationFrame(tick); });
+  scrub.addEventListener("input", () => { t = scrub.value / 1000 * T(); feedMark = -1; draw(); });
+  function tick(ts) {
+    if (!playing) return;
+    if (last !== null) t += (ts - last) / 1000 * parseFloat(speedSel.value);
+    last = ts;
+    if (t >= T()) { t = T(); playing = false; playBtn.textContent = "Play"; }
+    draw();
+    if (playing) requestAnimationFrame(tick);
+  }
+
+  // ---- drawing -----------------------------------------------------------------------
+  let feedMark = -1;
+  const feed = document.getElementById("feed");
+  function fitCanvas(cv) {
+    const r = cv.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    const w = Math.max(10, Math.round(r.width * dpr)), h = Math.max(10, Math.round(r.height * dpr));
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+    return [w, h, dpr];
+  }
+  function draw() {
+    const s = scen[idx], tr = s.trace;
+    scrub.value = Math.round(t / T() * 1000);
+    document.getElementById("clock").textContent = `t = ${t.toFixed(1)} s`;
+    const [W, H, dpr] = fitCanvas(map);
+    const ctx = map.getContext("2d");
+    const pad = 18 * dpr, sc = Math.min((W - 2 * pad) / tr.width, (H - 2 * pad) / tr.height);
+    const X = x => pad + x * sc, Y = y => H - pad - y * sc;
+    ctx.fillStyle = C.block; ctx.fillRect(0, 0, W, H);
+    // streets
+    ctx.strokeStyle = C.road; ctx.lineWidth = Math.max(3, 14 * sc);
+    for (let x = 0; x <= tr.width + 1; x += tr.block) { ctx.beginPath(); ctx.moveTo(X(x), Y(0)); ctx.lineTo(X(x), Y(tr.height)); ctx.stroke(); }
+    for (let y = 0; y <= tr.height + 1; y += tr.block) { ctx.beginPath(); ctx.moveTo(X(0), Y(y)); ctx.lineTo(X(tr.width), Y(y)); ctx.stroke(); }
+    // scale bar: 250 m = one block
+    ctx.fillStyle = C.ink2; ctx.font = `${11 * dpr}px "IBM Plex Mono", monospace`;
+    ctx.fillText(`one block = ${tr.block} m`, pad, H - 4 * dpr);
+    // RSUs with nominal coverage hint
+    tr.rsus.forEach(([rx, ry], i) => {
+      ctx.strokeStyle = C.line; ctx.lineWidth = 1 * dpr; ctx.beginPath(); ctx.arc(X(rx), Y(ry), 250 * sc, 0, 7); ctx.stroke();
+    });
+    // vehicles
+    let nUp = 0, nHs = 0;
+    const live = [];
+    for (let v = 0; v < s.nV; v++) {
+      const [x, y] = pos(tr.waypoints[v], t);
+      const st = stateAt(s.per[v], t);
+      if (st.s === "up") nUp++; else if (st.s === "hs") nHs++;
+      live.push([x, y, st, v]);
+      if ((st.s === "up" || st.s === "hs") && st.rsu >= 0 && tr.rsus[st.rsu]) {
+        const [rx, ry] = tr.rsus[st.rsu];
+        ctx.strokeStyle = st.s === "up" ? C.up : C.hs;
+        ctx.globalAlpha = st.s === "up" ? 0.35 : 0.9;
+        ctx.lineWidth = (st.s === "up" ? 1 : 1.6) * dpr;
+        ctx.setLineDash(st.s === "hs" ? [4 * dpr, 3 * dpr] : []);
+        ctx.beginPath(); ctx.moveTo(X(x), Y(y)); ctx.lineTo(X(rx), Y(ry)); ctx.stroke();
+        ctx.setLineDash([]); ctx.globalAlpha = 1;
+      }
+    }
+    // alert pulses: event sent (ring at reporter) and alert received (flash)
+    // a critical event: an expanding ring at the reporting vehicle
+    const recent = s.alerts.filter(e => e[1] === 6 && e[0] <= t && t - e[0] < 1.0);
+    for (const [et, kind, v] of recent) {
+      const [x, y] = pos(tr.waypoints[v], t), k = (t - et) / 1.0;
+      ctx.strokeStyle = C.alert; ctx.globalAlpha = 1 - k; ctx.lineWidth = 2.2 * dpr;
+      ctx.beginPath(); ctx.arc(X(x), Y(y), (6 + 46 * k) * dpr, 0, 7); ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    for (const [x, y, st] of live) {
+      ctx.fillStyle = st.s === "up" ? C.up : st.s === "hs" ? C.hs : st.s === "fail" ? C.fail : C.idle;
+      ctx.beginPath(); ctx.arc(X(x), Y(y), 3.6 * dpr, 0, 7); ctx.fill();
+    }
+    tr.rsus.forEach(([rx, ry], i) => {
+      const r = 6 * dpr;
+      ctx.fillStyle = C.rsu; ctx.fillRect(X(rx) - r, Y(ry) - r, 2 * r, 2 * r);
+      ctx.fillStyle = C.panel; ctx.font = `600 ${8.5 * dpr}px "Barlow Semi Condensed", sans-serif`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(String(i + 1), X(rx), Y(ry) + 0.5 * dpr);
+      ctx.textAlign = "start"; ctx.textBaseline = "alphabetic";
+    });
+
+    document.getElementById("sUp").textContent = nUp;
+    document.getElementById("sHs").textContent = nHs;
+    document.getElementById("sFail").textContent = count(s.fails, t);
+    document.getElementById("sAlert").textContent = count(s.alertRx, t);
+    drawAir(s, tr);
+    updateFeed(s);
+  }
+  function drawAir(s, tr) {
+    const cv = document.getElementById("air");
+    const [W, H, dpr] = fitCanvas(cv);
+    const ctx = cv.getContext("2d");
+    ctx.clearRect(0, 0, W, H);
+    // y scale shared by all scenarios so they can be compared
+    const max = Math.max(...scen.map(z => Math.max(0.01, ...z.trace.airtime))) / tr.air_bucket_s;
+    const n = Math.ceil(tr.sim_time / tr.air_bucket_s), bw = W / n;
+    const bottom = H - 12 * dpr;
+    tr.airtime.forEach((a, i) => {
+      const h = (a / tr.air_bucket_s) / max * (bottom - 4 * dpr);
+      ctx.fillStyle = (i + 1) * tr.air_bucket_s <= t ? C.ink2 : C.line;
+      ctx.fillRect(i * bw + 0.5, bottom - h, Math.max(1, bw - 1.5), h);
+    });
+    ctx.strokeStyle = C.hs; ctx.lineWidth = 1.5 * dpr;
+    const xt = t / tr.sim_time * W; ctx.beginPath(); ctx.moveTo(xt, 0); ctx.lineTo(xt, bottom); ctx.stroke();
+    ctx.fillStyle = C.ink2; ctx.font = `${10 * dpr}px "IBM Plex Mono", monospace`;
+    ctx.fillText("0 s", 0, H - 1 * dpr);
+    const lab = `${tr.sim_time} s`; ctx.fillText(lab, W - ctx.measureText(lab).width, H - 1 * dpr);
+    const peak = `peak ${Math.round(max * 100)}% of one channel`;
+    ctx.fillText(peak, W / 2 - ctx.measureText(peak).width / 2, H - 1 * dpr);
+  }
+  const KIND = { 1: "handshake start", 2: "session up", 3: "handshake FAILED", 4: "link lost", 5: "handover", 6: "CRITICAL EVENT", 7: "alert rx" };
+  function updateFeed(s) {
+    const evs = s.trace.events;
+    let k = count(evs.map(e => e[0]), t);
+    if (k === feedMark) return;
+    feedMark = k;
+    const rows = [];
+    for (let i = k - 1; i >= 0 && rows.length < 40; i--) {
+      const [et, kind, v, x] = evs[i];
+      if (kind === 7 && rows.length > 0) continue;  // alerts arrive in bursts; show the first
+      const cls = kind === 3 ? "f" : (kind === 6 || kind === 7) ? "a" : kind === 2 ? "u" : "";
+      const tail = (kind === 6 || kind === 7) ? "" : ` RSU ${x + 1}`;
+      rows.push(`<div class="${cls}">${et.toFixed(2).padStart(6)}  CAV ${String(v + 1).padStart(3, "0")}  ${KIND[kind]}${tail}</div>`);
+    }
+    feed.innerHTML = rows.join("") || "<div>no events yet</div>";
+  }
+  window.addEventListener("resize", draw);
+
+  document.getElementById("sub").textContent =
+    `ns-3 replay: ${scen[0].nV} vehicles on a ${scen[0].trace.width / 1000} × ${scen[0].trace.height / 1000} km Manhattan grid, ` +
+    `${scen[0].trace.rsus.length} roadside units, IEEE 802.11p at 6 Mb/s. Same mobility and seed in every scenario; only the cryptography changes.`;
+  document.getElementById("note").textContent = DATA.note || "";
+  t = Math.min(8, T());
+  select(0);
+})();
+</script>

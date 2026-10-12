@@ -1,0 +1,18 @@
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrrrrr}
+\toprule
+Suite & KEM keygen & encaps & decaps & sign & sign p99 & verify \\
+\midrule
+Classical & 0.024 & 0.12 & 0.091 & 0.031 & 0.072 & 0.12 \\
+L1 & 1.80 & 2.70 & 3.63 & 1.27 & 3.32 & 0.16 \\
+L1 (pure) & 2.29 & 2.75 & 3.92 & 30.2 & 73.6 & 8.00 \\
+L3 & 0.14 & 0.052 & 0.041 & 1.30 & 4.60 & 0.23 \\
+L3 (pure) & 3.32 & 3.80 & 7.23 & 50.9 & 108 & 11.8 \\
+DECK & 0.23 & 0.067 & 0.052 & 1.28 & 4.38 & 0.23 \\
+DECK (pure) & 6.87 & 6.82 & 7.60 & 74.0 & 258 & 14.7 \\
+L5 & 0.20 & 0.067 & 0.052 & 1.48 & 5.19 & 0.42 \\
+L5 (pure) & 4.52 & 5.60 & 7.67 & 58.9 & 165 & 19.1 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip{\footnotesize Mean of 200 runs (native) or 40 runs (pure Python) after warm-up, in ms. L1's KEM is always pure Python because the \texttt{cryptography} library exposes no ML-KEM-512.}

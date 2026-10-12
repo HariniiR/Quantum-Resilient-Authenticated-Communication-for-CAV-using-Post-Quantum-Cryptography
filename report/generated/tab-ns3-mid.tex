@@ -1,0 +1,15 @@
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrr}
+\toprule
+Measure & Classical & DECK & DECK + cache \\
+\midrule
+Beacon slots with a session (\%) & 99.9 & 83.3 & 97.4 \\
+Aggregate airtime (\% of one channel) & 41 & 160 & 68 \\
+Handshake time, p95 (ms) & 33 & 1{,}094 & 359 \\
+Event $\rightarrow$ alert at the reporter, median (ms) & 5.4 & 7.6 & 5.6 \\
+Ledger commit after the event, median (ms) & 11.6 & 24.6 & 24.0 \\
+Sessions lost (link timeout) & 0.0 & 3.0 & 1.7 \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip{\footnotesize 100 vehicles, mean of 3 seeds.}

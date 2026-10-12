@@ -72,7 +72,7 @@ code** as the post-quantum suites, so the comparison is like-for-like.
 
 The two are byte-compatible: `tests/test_crypto.py::test_backends_interoperate`
 encapsulates with one and decapsulates with the other, and signs with one and
-verifies with the other. OpenSSL does not ship ML-KEM-512, so `L1` always uses
+verifies with the other. The `cryptography` library exposes only ML-KEM-768 and ML-KEM-1024 (OpenSSL itself implements 512), so `L1` always uses
 the pure KEM.
 
 Moving to the native backend removes the Review 1 limitation that the
@@ -138,7 +138,7 @@ so the TA does not create one.
 poll the TA, accept only a newer, validly signed CRL, and close any open session
 whose peer is now revoked.
 
-An ML-DSA-65 certificate is **5,353 bytes** (a 1,952-byte public key plus a
+An ML-DSA-65 certificate is **5,355 bytes** (a 1,952-byte public key plus a
 3,309-byte TA signature). This dominates handshake size; see section 8.
 
 ---
@@ -176,6 +176,50 @@ An ML-DSA-65 certificate is **5,353 bytes** (a 1,952-byte public key plus a
 The state machines are **sans-IO**: they take bytes and return bytes. The same
 code runs over TCP (`qrcav/net/secure.py`), in memory (tests and benchmarks),
 and supplies exact message sizes to ns-3.
+
+### Certificate caching (`qrcav/certcache.py`)
+
+An ML-DSA-65 certificate is 5,355 bytes: a 1,952-byte public key and the TA's
+3,309-byte signature. The full handshake carries two (one per side), which is
+about half of its 20.8 KB. Caching replaces them with 32-byte references
+`cert_ref = H("qrcav-cert", Cert)`, in the spirit of TLS cached-info (RFC 7924).
+
+```
+1. C → S  ClientHello  {v, suite, cref = H(Cert_C), nonce_C, ts, known = H(Cert_S)}
+2. S → C  ServerHello  {cref = H(Cert_S), pk_kem, nonce_S, sig_S}      if known matches
+   or     HelloRetry   {nonce_C}                                       if S cannot resolve cref
+          → C resends ClientHello with Cert_C in full (new nonce); the handshake continues as normal
+```
+
+Where the certificates come from in a deployment:
+
+| Certificate | Held by the peer because | Here |
+|---|---|---|
+| RSU's (server) | RSU certificates are few and long-lived, so they are distributed to vehicles ahead of time with the CRL | `NodeBase.preload_certs("RSU")`; each certificate is verified against pk_TA before caching |
+| Vehicle's (client) | after a vehicle's first handshake its certificate sits in an edge directory at the MEC, which every RSU reaches over the wired backhaul | `resolve_cert()` asks the TA registry (`op: cert`); ns-3 charges one backhaul round trip |
+
+Security, point by point:
+
+1. **Checks are not cached.** A cached certificate is verified in full on
+   every handshake: TA signature, validity, role, expected identity and the
+   *current* CRL. Revocation still applies at the next CRL refresh
+   (`test_cached_certificate_is_still_checked_against_the_crl`).
+2. **The reference is bound by both signatures.** `cref` is a collision-
+   resistant hash of the exact certificate bytes and sits inside CH and SH,
+   which `sig_C` and `sig_S` cover. Claiming another vehicle's cached
+   certificate fails `sig_C`; swapping the server's reference fails `sig_S`
+   (two tests, two attacks in `attacks.csv`).
+3. **The directory is not trusted.** A certificate fetched from the directory
+   must hash to the reference asked for, and is still verified against pk_TA.
+4. **The cache cannot be filled by strangers.** A server caches a client
+   certificate only after a handshake with its owner has fully succeeded, and
+   the cache is a bounded LRU (4,096 entries).
+5. **HelloRetry is unauthenticated, and that is safe.** It must echo the
+   client's nonce and is accepted once per handshake. Forging it only forces
+   the full-certificate path, as with TLS 1.3's HelloRetryRequest.
+
+Result: DECK handshake 20,779 → 10,173 bytes (−51 %), 17 → 10 frames. The
+first handshake of a vehicle that is not yet in the directory is unchanged.
 
 ### Servers accept only expected roles
 
@@ -349,6 +393,7 @@ Each node has a single-server CPU queue.
 | MAC priority (EDCA) | announces, beacons, events and alerts as AC_VO; handshake flights as AC_BE | 802.11p EDCA access categories |
 | Handshake backoff | after a failed handshake wait U(0.5, 1) x 2^k s (k = failures, capped at 4) | standard exponential backoff |
 | Warm-up | first 5 s excluded (the initial association storm) | |
+| Certificate caching | `cert_cache` 0 = off; 1 = RSU certificates pre-distributed, vehicle sends a reference after its first session, a new RSU resolves it from the MEC directory (+2 × backhaul delay); 2 = all references from the start | section 4 |
 
 **Simulator traps found and fixed.** Each would have distorted the results by
 an order of magnitude, so they belong in the report's methodology:
@@ -384,11 +429,12 @@ are evaluated by ablation (`results/ns3_variants.csv`, Figure 10):
 
 | Script | Produces |
 |---|---|
-| `scripts/run_evaluation.py` | primitives, sizes, handshake timing, beacon budget, 19 attacks, consensus scaling, throughput, fault tolerance, view change, score dynamics; all figures |
-| `scripts/run_ns3_sweeps.py` | density sweep for 5 suites × 50–200 vehicles, signed vs AEAD beacons, pure vs native backend |
+| `scripts/run_evaluation.py` | primitives, sizes (full and cached), handshake timing, beacon budget, 21 attacks, consensus scaling, throughput, fault tolerance, view change, score dynamics; all figures |
+| `scripts/run_ns3_sweeps.py` | density sweep for 5 suites + DECK with certificate caching × 50–200 vehicles, signed vs AEAD beacons, pure vs native backend, EDCA/backoff ablation |
+| `scripts/make_viewer.py` | `results/viewer.html`: browser replay of one traced ns-3 run per scenario (classical, PQ, PQ + cache) |
 | `scripts/run_network.py` | the distributed system run, with the end-to-end report |
 | `scripts/demo_protocol.py` | step-by-step protocol walkthrough for the viva |
-| `pytest` | 48 tests (unit tests plus a real multi-process run) |
+| `pytest` | 57 tests (unit tests plus a real multi-process run) |
 
 ---
 
@@ -403,9 +449,14 @@ are evaluated by ablation (`results/ns3_variants.csv`, Figure 10):
   either, so the behaviour is close; documented as an approximation.
 - **V2V through RSUs is not end-to-end.** RSUs see the plaintext, as in the
   deck's design.
-- **Certificates are sent in full in every handshake.** Certificate caching
-  (as in TLS's cached-info extension) would cut the post-quantum handshake by
-  about half. Listed as future work.
+- **Certificate caching assumes infrastructure we model, not deploy.** The
+  edge directory is the TA registry here, and ns-3 models it as one backhaul
+  round trip. A vehicle's very first handshake still sends its certificate in
+  full.
+- **References are linkable.** `cref` is a stable identifier, so a passive
+  listener can link a vehicle's handshakes, exactly as it can with the full
+  certificate. Pseudonym certificates (as in IEEE 1609.2 / SCMS) would be
+  needed for unlinkability; out of scope.
 - **No formal verification** (ProVerif / Tamarin).
 
 

@@ -1,0 +1,426 @@
+% Review 2 presentation.
+% Build: python scripts/make_tables.py ; cd slides && latexmk -pdf review2.tex
+\documentclass[aspectratio=169,10pt]{beamer}
+\usetheme[progressbar=frametitle,numbering=fraction,block=fill]{metropolis}
+\usepackage[T1]{fontenc}
+\usepackage[scaled=0.95]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{booktabs}
+\usepackage{adjustbox}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\graphicspath{{../results/}}
+\input{../report/generated/numbers}
+
+\definecolor{ink}{HTML}{1B211F}
+\definecolor{teal}{HTML}{0F7A63}
+\definecolor{amber}{HTML}{C27100}
+\definecolor{brick}{HTML}{C0392B}
+\definecolor{paper}{HTML}{F7F8F5}
+\setbeamercolor{normal text}{fg=ink,bg=paper}
+\setbeamercolor{frametitle}{bg=ink,fg=paper}
+\setbeamercolor{progress bar}{fg=teal,bg=ink!20}
+\setbeamercolor{alerted text}{fg=brick}
+\setbeamercolor{example text}{fg=teal}
+\setbeamercolor{title separator}{fg=teal}
+\newcommand{\bignum}[1]{{\Large\bfseries #1}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+\title{Quantum-Resilient Authenticated Communication\\for Connected Autonomous Vehicles}
+\subtitle{Review 2: the complete system and its evaluation}
+\author{Harini R \quad Ananyalakshmi V K \quad Adhithya K \quad Ratish S A\\[2pt]
+\small Guide: Dr.\ Vijayalakshmi M}
+\institute{Department of Information Technology, College of Engineering Guindy, Anna University}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+% -----------------------------------------------------------------------------
+\begin{frame}{The problem}
+\begin{columns}[T]
+\begin{column}{0.55\textwidth}
+\begin{itemize}
+\item V2X safety messages are signed with \textbf{ECDSA} and keyed with \textbf{ECDH} (IEEE 1609.2).
+\item \textbf{Shor's algorithm breaks both.} Traffic recorded today can be decrypted later.
+\item Cars stay on the road 15+ years: a car sold now must be secure in 2040.
+\item NIST standardised the replacements in 2024: \textbf{ML-KEM} (FIPS 203) and \textbf{ML-DSA} (FIPS 204).
+\end{itemize}
+\end{column}
+\begin{column}{0.42\textwidth}
+\begin{block}{The catch: size}
+\small
+\begin{tabular}{@{}lrr@{}}
+& ECDSA P-256 & ML-DSA-65 \\
+\midrule
+public key & 65 B & 1,952 B \\
+signature & $\approx$70 B & 3,309 B \\
+certificate & \V{classic-cert} B & \V{deck-cert} B \\
+\end{tabular}
+\end{block}
+\vspace{4pt}
+\small 802.11p: 6\,Mb/s, shared by every vehicle in range, beacons every 100\,ms.
+\end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{What we set out to do, and where we are}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\textbf{Objectives}
+\begin{enumerate}
+\item Implement the base paper's framework end to end with ML-KEM and ML-DSA
+\item Fix what prevents it from working
+\item Measure compute, size and airtime vs a classical baseline
+\item Evaluate on an 802.11p channel with mobility (ns-3)
+\item Compare AGS-PBFT with PBFT
+\item Attack it
+\end{enumerate}
+\end{column}
+\begin{column}{0.46\textwidth}
+\textbf{Status}
+\begin{itemize}
+\item[\textcolor{teal}{\checkmark}] Distributed system: 19 processes over TCP
+\item[\textcolor{teal}{\checkmark}] ns-3: 5 suites + caching $\times$ 50--200 vehicles $\times$ \V{ns3-seeds} seeds
+\item[\textcolor{teal}{\checkmark}] \V{attacks-total} attacks, \V{attacks-rejected} rejected
+\item[\textcolor{teal}{\checkmark}] 57 automated tests
+\item[\textcolor{teal}{\checkmark}] New: certificate caching (handshake $-$\V{deck-cache-saving}\,\%)
+\item[\textcolor{teal}{\checkmark}] Replay viewer for the simulation
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Architecture}
+\centering
+\begin{tikzpicture}[
+  node distance=6mm and 9mm,
+  box/.style={draw=ink, fill=white, rounded corners=2pt, minimum height=8mm, minimum width=17mm, align=center, font=\small},
+  lab/.style={font=\scriptsize, align=center, text=ink!70},
+  >={Stealth[length=2mm]}]
+\node[box] (cav1) {CAV};
+\node[box, below=of cav1] (cav2) {CAV};
+\node[box, right=13mm of cav1] (rsu1) {RSU};
+\node[box, right=13mm of cav2] (rsu2) {RSU};
+\node[box, right=13mm of $(rsu1)!0.5!(rsu2)$] (mec) {MEC};
+\node[box, right=16mm of mec, yshift=10mm] (cons) {8 consensus\\nodes};
+\node[box, right=16mm of mec, yshift=-10mm] (cloud) {Cloud};
+\node[box, above=6mm of rsu1, xshift=8mm] (ta) {Trusted\\Authority};
+\draw[<->, teal, thick] (cav1) -- node[lab, above]{802.11p} (rsu1);
+\draw[<->, teal, thick] (cav2) -- (rsu2);
+\draw[<->, teal, thick] (rsu1) -- node[lab, right]{V2V} (rsu2);
+\draw[<->, teal, thick] (rsu1) -- (mec);
+\draw[<->, teal, thick] (rsu2) -- (mec);
+\draw[->, teal, thick] (mec) -- node[lab, above, sloped]{critical} (cons);
+\draw[->, teal, thick] (mec) -- node[lab, below, sloped]{routine} (cloud);
+\draw[->, dashed, ink!50] (ta) -- node[lab, left]{certificates, CRL} (rsu1);
+\end{tikzpicture}
+
+\vspace{6pt}
+\small Every \textcolor{teal}{green} link is a mutually authenticated ML-KEM + ML-DSA session carrying AES-256-GCM records.\\
+The MEC sends the \textbf{alert first}, then submits the event to consensus: safety never waits for the ledger.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{The base paper cannot run as written}
+\small
+\begin{tabular}{@{}p{0.5cm}p{6.6cm}p{6.6cm}@{}}
+\toprule
+& In the paper & What we do \\
+\midrule
+D1 & Consensus messages ``signed with Kyber''. \textbf{A KEM cannot sign.} & ML-DSA signatures \\
+D2 & Encapsulation defines $k_i$ using $k_i$ & standard Encaps / Decaps \\
+D3 & Session key $= H(k_i \parallel k'_j)$ with $k_i = k'_j$ & HKDF over secret + transcript hash \\
+D4 & TA generates private keys, yet claims ``no key escrow'' & entities make their own keys; proof of possession \\
+D5 & Hyperledger Fabric 2.2 uses Raft: cannot host PBFT & our own certified ledger \\
+\bottomrule
+\end{tabular}
+
+\vspace{8pt}
+And four gaps in AGS-PBFT itself (D6--D9): $\sigma = 0$ at the first regroup, candidates that can never be promoted, undefined group sizing, an unreachable prepare quorum.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Handshake: four flights, both sides authenticated}
+\begin{columns}[T]
+\begin{column}{0.56\textwidth}
+\begin{tikzpicture}[font=\scriptsize, >={Stealth[length=1.8mm]}]
+\def\L{0} \def\R{6.2}
+\node[font=\small\bfseries] at (\L,0.3) {CAV}; \node[font=\small\bfseries] at (\R,0.3) {RSU};
+\draw[ink!40] (\L,0) -- (\L,-4.3); \draw[ink!40] (\R,0) -- (\R,-4.3);
+\draw[->] (\L,-0.4) -- node[above]{ClientHello: Cert$_C$, nonce, ts, suite} (\R,-0.7);
+\draw[<-] (\L,-1.6) -- node[above]{ServerHello: Cert$_S$, $pk_{kem}$ (ephemeral), $\sigma_S$} (\R,-1.3);
+\draw[->] (\L,-2.2) -- node[above]{ClientKey: $c$, $\sigma_C$, Finished$_C$} (\R,-2.5);
+\draw[<-] (\L,-3.4) -- node[above]{ServerFinished} (\R,-3.1);
+\draw[<->, teal, thick] (\L,-4.0) -- node[above]{AES-GCM records, counter from 1} (\R,-4.0);
+\end{tikzpicture}
+\end{column}
+\begin{column}{0.42\textwidth}
+\small
+Fixes to our Review 1 design:
+\begin{itemize}
+\item \textbf{F2: the client now signs.} Before, a copied (public) certificate was enough to impersonate a vehicle.
+\item F1: ClientHello nonce opens the transcript.
+\item F3: data counter starts at 1: no GCM nonce reuse.
+\item F5--F7: role in certificate, downgrade protection, uniform abort.
+\end{itemize}
+Forward secrecy: the RSU's KEM key is erased after each session.
+\end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{New: certificate caching}
+\begin{columns}[T]
+\begin{column}{0.5\textwidth}
+\small
+Half the handshake is two 5.3\,KB certificates. Peers usually hold them already:
+\begin{itemize}
+\item RSU certificates: \textbf{pre-distributed} with the CRL
+\item vehicle certificates: \textbf{edge directory} at the MEC after first contact
+\end{itemize}
+Send $H(\text{cert})$, 32 bytes, instead. Unknown reference $\rightarrow$ HelloRetry, then the full certificate.
+
+\vspace{4pt}
+\textbf{Security:} cached certificates are still verified every time (TA signature, CRL); the reference is inside both signatures; caching only after a completed handshake.
+\end{column}
+\begin{column}{0.47\textwidth}
+\centering
+\begin{tabular}{@{}lrr@{}}
+\toprule
+DECK & full & cached \\
+\midrule
+ClientHello & \V{deck-ch} & \V{deck-ch-cached} \\
+ServerHello & \V{deck-sh} & \V{deck-sh-cached} \\
+ClientKey & \V{deck-ck} & \V{deck-ck} \\
+ServerFinished & \V{deck-fs} & \V{deck-fs} \\
+\midrule
+\textbf{total (B)} & \textbf{\V{deck-hs-bytes}} & \textbf{\V{deck-cached-bytes}} \\
+radio frames & \V{deck-hs-frames} & \V{deck-cached-frames} \\
+\bottomrule
+\end{tabular}
+
+\vspace{6pt}
+\bignum{$-$\V{deck-cache-saving}\,\%}
+\end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{AGS-PBFT}
+\small
+\begin{columns}[T]
+\begin{column}{0.52\textwidth}
+\begin{enumerate}
+\item MEC $\rightarrow$ leader: signed REQUEST
+\item PRE-PREPARE $\rightarrow$ consensus set (+ candidates)
+\item PREPARE all-to-all; each node validates the event
+\item RESPONSE $\rightarrow$ leader; $2f+1$ match $\rightarrow$ signed block with commit certificate
+\item Every node re-verifies the block, scores and membership
+\end{enumerate}
+\end{column}
+\begin{column}{0.45\textwidth}
+\begin{itemize}
+\item Score $+1$ agree, $-5$ disagree
+\item Every $k$ blocks: demote below $\mu-\sigma$, promote above $\mu+\sigma$
+\item View change when the leader is silent
+\item PBFT baseline with the same signatures
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Implementation}
+\small
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Runs three ways}
+\begin{enumerate}
+\item \textbf{Distributed}: TA, cloud, MEC, 8 nodes, 3 RSUs, 5 vehicles as 19 processes; faults injected (Byzantine node, leader crash, revocation)
+\item \textbf{ns-3}: IEEE 802.11p, Nakagami fading, Manhattan mobility, 9 RSUs; real message sizes and measured processing times
+\item \textbf{Evaluation suite}: benchmarks, attacks, consensus experiments, figures
+\end{enumerate}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Stack}
+\begin{itemize}
+\item Python, \code{cryptography} (OpenSSL 3.5: native ML-KEM / ML-DSA)
+\item \code{kyber-py}, \code{dilithium-py}: pure-Python comparison backend
+\item ns-3 3.44 (C++ scenario via Python bindings)
+\item 5 suites: Classical, L1, L3, DECK (1024/65), L5
+\item Classical runs through the \textbf{same protocol code}
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Result 1: compute is small, bytes are not}
+\begin{columns}[c]
+\begin{column}{0.58\textwidth}
+\includegraphics[width=\textwidth]{fig2_handshake_size.png}
+\end{column}
+\begin{column}{0.4\textwidth}
+\small
+\begin{tabular}{@{}lrr@{}}
+& Classical & DECK \\
+\midrule
+bytes & \V{classic-hs-bytes} & \V{deck-hs-bytes} \\
+frames & \V{classic-hs-frames} & \V{deck-hs-frames} \\
+airtime (ms) & \V{classic-hs-air} & \V{deck-hs-air} \\
+compute, native (ms) & \V{classic-hs-ms} & \V{deck-hs-ms} \\
+compute, pure (ms) & -- & \V{deck-hs-ms-pure} \\
+\end{tabular}
+
+\vspace{6pt}
+ML-DSA-65 signs in \V{deck-sign-native}\,ms natively vs \V{deck-sign-pure}\,ms in pure Python: \textbf{implementation matters more than the algorithm}.
+\end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Result 2: per message, post-quantum fits}
+\begin{columns}[c]
+\begin{column}{0.58\textwidth}
+\includegraphics[width=\textwidth]{fig3_beacon_budget.png}
+\end{column}
+\begin{column}{0.4\textwidth}
+\small
+\begin{itemize}
+\item In a session a beacon is a \V{deck-beacon-aead-bytes}-byte AES-GCM record for \textbf{every} suite: \V{deck-beacon-aead}\,ms of a 100\,ms budget.
+\item Signing every beacon fits natively (\V{deck-beacon-signed}\,ms) but costs \V{deck-beacon-signed-frames} frames per beacon.
+\item The base paper folds the one-off handshake into per-message latency.
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Result 3: dense traffic breaks post-quantum handshakes}
+\centering
+\includegraphics[width=0.92\textwidth]{fig8_ns3_success_airtime.png}
+
+\small Classical: \V{ns3-success-classic-200}\,\% at 200 vehicles. DECK: \V{ns3-success-deck-100}\,\% at 100, \V{ns3-success-deck-200}\,\% at 200. Roughly in order of size (L3 $\approx$ DECK, within seed noise). \textbf{The limit is the channel, not the CPU.}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Result 4: caching and backoff recover much of it}
+\centering
+\includegraphics[width=0.95\textwidth]{fig11_cert_cache.png}
+
+\small At 100 vehicles DECK completes \V{ns3-success-deck-100}\,\% $\rightarrow$ \textbf{\V{ns3-success-deck-cache-100}\,\%} with caching; airtime \V{ns3-airtime-deck-100}\,\% $\rightarrow$ \V{ns3-airtime-deck-cache-100}\,\%.\\
+Without exponential backoff after failures: \V{var-deck-neither-success}--\V{var-deck-edca-only-success}\,\% complete, alerts wait 380--430\,ms behind handshakes.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Result 5: AGS-PBFT saves messages, not time}
+\begin{columns}[c]
+\begin{column}{0.56\textwidth}
+\includegraphics[width=\textwidth]{fig4_consensus_scaling.png}
+\end{column}
+\begin{column}{0.42\textwidth}
+\small
+\begin{itemize}
+\item \textbf{\V{cons-msg-lo}--\V{cons-msg-hi}\,\% fewer messages}; \V{cons-cpu-lo}--\V{cons-cpu-hi}\,\% less CPU at light load, \V{burst-cpu-more}\,\% \emph{more} under a burst
+\item Bytes only \V{cons-byte-lo}--\V{cons-byte-hi}\,\% fewer: blocks carry $2f+1$ ML-DSA signatures
+\item Latency \textbf{+\V{cons-lat-lo}--\V{cons-lat-hi}\,\%}: one more hop through the leader
+\item Beyond $f$ Byzantine nodes progress stops (leader kept honest in these runs)
+\item Weakness: one outlier inflates $\sigma$ and shields a silent node
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Result 6: security}
+\small
+\textbf{\V{attacks-rejected} of \V{attacks-total} attacks rejected}, each run against the real code:
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+\item record tampering, replay, GCM nonce reuse
+\item ClientHello replay, stale timestamp
+\item client / RSU impersonation with a copied certificate
+\item rogue TA, revoked credential, vehicle posing as RSU
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+\item MITM on the KEM key or ciphertext, downgrade, tampered Finished
+\item forward secrecy
+\item claiming another vehicle's cached certificate; revoked but cached
+\item forged / spoofed votes, tampered block, rewritten ledger
+\end{itemize}
+\end{column}
+\end{columns}
+\vspace{6pt}
+Client impersonation \alert{succeeds against the Review 1 design} (no client signature).
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Distributed run (live demo)}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Secure sessions & \V{net-handshakes}; \V{net-rejected} rejected (revoked vehicle) \\
+Critical event $\rightarrow$ alert at vehicles & median \V{net-alert-ms}\,ms \\
+Event $\rightarrow$ on the ledger & median \V{net-ledger-ms}\,ms \\
+Byzantine NODE\_03 & demoted at the first regroup; candidate promoted \\
+Leader crash & view change, later events commit \\
+Revocation & session closed, reconnection rejected \\
+8 ledgers & consistent, verified from genesis (crashed leader's is a prefix) \\
+\bottomrule
+\end{tabular}
+
+\vspace{8pt}
+\code{python scripts/run\_network.py} \quad then the replay viewer: \code{results/viewer.html}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Findings}
+\begin{enumerate}
+\item \textbf{Per message, post-quantum V2X fits} the 100\,ms budget at every security level, natively.
+\item \textbf{Bandwidth is the binding constraint}: a PQ handshake is $\sim$20$\times$ classical, and dense cells saturate.
+\item \textbf{Certificate caching halves the handshake}; exponential backoff prevents congestion collapse.
+\item \textbf{DECK = category 3}: L3 gives the same security with a smaller KEM.
+\item \textbf{AGS-PBFT}: far fewer messages; slower; never on the safety path.
+\end{enumerate}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Limitations and next steps}
+\begin{columns}[T]
+\begin{column}{0.48\textwidth}
+\textbf{Limitations}
+\small
+\begin{itemize}
+\item Distributed system on one machine; radio only in ns-3
+\item ns-3 replays measured costs
+\item No WAVE module (ad-hoc MAC)
+\item Certificates linkable; no pseudonyms
+\item No formal verification
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\textbf{Next}
+\small
+\begin{itemize}
+\item KEM-based authentication (KEMTLS-style) to shrink the handshake further
+\item Median/MAD regrouping for AGS-PBFT
+\item ProVerif / Tamarin model of the handshake
+\item Final report
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[standout]
+Thank you\\[6pt]
+\normalsize Questions
+\end{frame}
+
+\end{document}

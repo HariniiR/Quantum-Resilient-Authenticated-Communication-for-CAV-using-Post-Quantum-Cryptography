@@ -30,6 +30,16 @@ Flights (C = client/initiator, S = server/responder):
   4. S -> C  ServerFinished {record_S}
              record_S = AES-GCM(k_s2c, v_s2c ^ 0, H("server_finished" || T_hash))
 
+Certificate caching (qrcav/certcache.py). When a cache is supplied:
+  * ClientHello carries "cref" = H(Cert_C) instead of Cert_C once the
+    client's certificate is known to the edge directory, and "known" =
+    H(Cert_S) when the client already holds the server's certificate.
+  * ServerHello then carries "cref" = H(Cert_S) instead of Cert_S.
+  * If the server cannot resolve the client's reference it replies
+    HelloRetry {nonce_C}; the client sends a fresh ClientHello with its full
+    certificate (new nonce) and the handshake continues as normal.
+Cached certificates are verified in full exactly as sent ones are.
+
 Every check failure raises the same HandshakeError with no detail, so a
 probing attacker cannot tell which check failed.
 
@@ -47,6 +57,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from . import codec
+from .certcache import CertCache, cert_ref
 from .crypto.kdf import H, derive_session_keys
 from .crypto.records import RecordReceiver, RecordSender
 from .pki import Certificate, Identity
@@ -105,6 +116,9 @@ class Session:
     crypto_ms: dict[str, float] = field(default_factory=dict)
     elapsed_ms: float = 0.0
     flight_sizes: dict[str, int] = field(default_factory=dict)
+    # which certificates travelled as 32-byte references, and whether a
+    # HelloRetry was needed
+    cert_cache: dict[str, bool] = field(default_factory=dict)
 
     @property
     def peer_id(self) -> str:
@@ -137,6 +151,7 @@ class ClientHandshake:
         expected_role: str | tuple[str, ...] | None = None,
         expected_id: str | None = None,
         now: float | None = None,
+        cache: CertCache | None = None,
     ) -> None:
         if not me.registered:
             raise HandshakeError()
@@ -144,7 +159,10 @@ class ClientHandshake:
         self.suite = me.suite
         self.expected_role = expected_role
         self.expected_id = expected_id
+        self.cache = cache
         self._now = now
+        self._retried = False
+        self.cache_use = {"client_ref": False, "server_ref": False, "retry": False}
         self.timer = _Timer()
         self.sizes: dict[str, int] = {}
         self._t0 = time.perf_counter()
@@ -153,38 +171,86 @@ class ClientHandshake:
     def _clock(self) -> float:
         return time.time() if self._now is None else self._now
 
-    def client_hello(self) -> bytes:
-        if self._state != "start":
-            raise HandshakeError()
-        self._ch = codec.encode({
+    @property
+    def state(self) -> str:
+        return self._state
+
+    def _build_client_hello(self, use_ref: bool) -> bytes:
+        mine = self.me.cert.encode()
+        self._nonce = os.urandom(NONCE_LEN)
+        msg = {
             "t": "CH",
             "v": PROTOCOL_VERSION,
             "suite": self.suite.name,
-            "cert": self.me.cert.encode(),
-            "nonce": os.urandom(NONCE_LEN),
+            "nonce": self._nonce,
             "ts": int(self._clock()),
-        })
+        }
+        if use_ref:
+            msg["cref"] = cert_ref(mine)
+        else:
+            msg["cert"] = mine
+        known = self.cache.ref_for(self.expected_id) if self.cache is not None else b""
+        if known:
+            msg["known"] = known
+        self.cache_use["client_ref"] = use_ref
+        return codec.encode(msg)
+
+    def client_hello(self) -> bytes:
+        if self._state != "start":
+            raise HandshakeError()
+        use_ref = self.cache is not None and self.cache.mine_known
+        self._ch = self._build_client_hello(use_ref)
+        self.sizes["client_hello"] = len(self._ch)
+        self._state = "sent_ch"
+        return self._ch
+
+    def _on_hello_retry(self, hrr_bytes: bytes) -> bytes:
+        """The server could not resolve our certificate reference: resend in full."""
+        hrr = codec.decode_dict(hrr_bytes, "t", "nonce")
+        if self._retried or not self.cache_use["client_ref"] or hrr["nonce"] != self._nonce:
+            raise HandshakeError()
+        self._retried = True
+        self.cache_use["retry"] = True
+        self.sizes["client_hello_ref"] = self.sizes.pop("client_hello")
+        self.sizes["hello_retry"] = len(hrr_bytes)
+        self._ch = self._build_client_hello(use_ref=False)
         self.sizes["client_hello"] = len(self._ch)
         self._state = "sent_ch"
         return self._ch
 
     def on_server_hello(self, sh_bytes: bytes) -> bytes:
-        """Verify the server, encapsulate, sign, derive keys. Returns flight 3."""
+        """
+        Verify the server, encapsulate, sign, derive keys. Returns flight 3,
+        or a new ClientHello if the server sent HelloRetry (state stays
+        "sent_ch", so the caller reads another ServerHello).
+        """
         if self._state != "sent_ch":
             raise HandshakeError()
         self._state = "failed"
         try:
-            sh = codec.decode_dict(sh_bytes, "t", "cert", "pk_kem", "nonce", "sig")
+            if codec.decode_dict(sh_bytes, "t")["t"] == "HRR":
+                return self._on_hello_retry(sh_bytes)
+            sh = codec.decode_dict(sh_bytes, "t", "pk_kem", "nonce", "sig")
             if sh["t"] != "SH" or len(sh["nonce"]) != NONCE_LEN:
                 raise HandshakeError()
-            cert_s = Certificate.decode(sh["cert"])
+            if "cref" in sh:
+                # the server sent only a reference to the certificate we hold
+                cert_key = "cref"
+                cert_bytes = self.cache.get(sh["cref"]) if self.cache is not None else None
+                if cert_bytes is None:
+                    raise HandshakeError()
+                self.cache_use["server_ref"] = True
+            else:
+                cert_key = "cert"
+                cert_bytes = sh["cert"]
+            cert_s = Certificate.decode(cert_bytes)
             anchor = self.me.anchor
             # 6. verify server certificate against pk_TA (+ CRL, role, expiry)
             if not self.timer.run("verify_cert", anchor.verify_cert, cert_s, int(self._clock()),
                                   self.expected_role, self.expected_id):
                 raise HandshakeError()
             # 7. verify server signature over the transcript including pk_kem
-            sh_body = codec.encode({"t": "SH", "cert": sh["cert"], "pk_kem": sh["pk_kem"],
+            sh_body = codec.encode({"t": "SH", cert_key: sh[cert_key], "pk_kem": sh["pk_kem"],
                                     "nonce": sh["nonce"]})
             signed = b"qrcav-sh" + H(self._ch, sh_body)
             if not self.timer.run("verify_sig", self.suite.sig.verify, cert_s.pk, signed, sh["sig"]):
@@ -207,6 +273,7 @@ class ClientHandshake:
             ck = codec.encode({"t": "CK", "ct": ct, "sig": sig_c, "fin": fin})
             self._t_hash = keys.t_hash
             self._peer = cert_s
+            self._peer_bytes = cert_bytes
             self.sizes["server_hello"] = len(sh_bytes)
             self.sizes["client_key"] = len(ck)
             self._state = "sent_ck"
@@ -230,8 +297,14 @@ class ClientHandshake:
                 raise HandshakeError()
             self.sizes["server_finished"] = len(fs_bytes)
             self._state = "done"
+            if self.cache is not None:
+                # only after full success: the server is authenticated, and it
+                # (or the edge directory behind it) now holds our certificate
+                self.cache.put(self._peer_bytes, self._peer.id)
+                self.cache.mine_known = True
             s = Session(self._peer, True, self._sender, self._receiver, self._t_hash,
-                        crypto_ms=dict(self.timer.ops), flight_sizes=dict(self.sizes))
+                        crypto_ms=dict(self.timer.ops), flight_sizes=dict(self.sizes),
+                        cert_cache=dict(self.cache_use))
             s.elapsed_ms = (time.perf_counter() - self._t0) * 1000
             return s
         except HandshakeError:
@@ -252,12 +325,16 @@ class ServerHandshake:
         replay_cache: ReplayCache | None = None,
         now: float | None = None,
         freshness_s: int = FRESHNESS_WINDOW_S,
+        cache: CertCache | None = None,
     ) -> None:
         if not me.registered:
             raise HandshakeError()
         self.me = me
         self.suite = me.suite
         self.allowed_roles = allowed_roles
+        self.cache = cache
+        self._hrr_sent = False
+        self.cache_use = {"client_ref": False, "server_ref": False, "retry": False}
         self.replay_cache = replay_cache if replay_cache is not None else ReplayCache(freshness_s)
         self.freshness_s = freshness_s
         self._now = now
@@ -269,12 +346,16 @@ class ServerHandshake:
     def _clock(self) -> float:
         return time.time() if self._now is None else self._now
 
+    @property
+    def state(self) -> str:
+        return self._state
+
     def on_client_hello(self, ch_bytes: bytes) -> bytes:
         if self._state != "start":
             raise HandshakeError()
         self._state = "failed"
         try:
-            ch = codec.decode_dict(ch_bytes, "t", "v", "suite", "cert", "nonce", "ts")
+            ch = codec.decode_dict(ch_bytes, "t", "v", "suite", "nonce", "ts")
             now = self._clock()
             if ch["t"] != "CH" or ch["v"] != PROTOCOL_VERSION:
                 raise HandshakeError()
@@ -284,7 +365,23 @@ class ServerHandshake:
                 raise HandshakeError()
             if abs(now - ch["ts"]) > self.freshness_s:
                 raise HandshakeError()
-            cert_c = Certificate.decode(ch["cert"])
+            if "cref" in ch:
+                cert_c_bytes = self.cache.get(ch["cref"]) if self.cache is not None else None
+                if cert_c_bytes is None:
+                    # unknown reference: ask once for the full certificate
+                    if self._hrr_sent or len(ch["cref"]) != 32:
+                        raise HandshakeError()
+                    self._hrr_sent = True
+                    self.cache_use["retry"] = True
+                    hrr = codec.encode({"t": "HRR", "nonce": ch["nonce"]})
+                    self.sizes["client_hello_ref"] = len(ch_bytes)
+                    self.sizes["hello_retry"] = len(hrr)
+                    self._state = "start"
+                    return hrr
+                self.cache_use["client_ref"] = True
+            else:
+                cert_c_bytes = ch["cert"]
+            cert_c = Certificate.decode(cert_c_bytes)
             if not self.timer.run("verify_cert", self.me.anchor.verify_cert, cert_c, int(now),
                                   self.allowed_roles):
                 raise HandshakeError()
@@ -294,11 +391,18 @@ class ServerHandshake:
             pk_kem, self._sk_kem = self.timer.run("kem_keygen", self.suite.kem.keygen)
             nonce_s = os.urandom(NONCE_LEN)
             cert_s = self.me.cert.encode()
-            sh_body = codec.encode({"t": "SH", "cert": cert_s, "pk_kem": pk_kem, "nonce": nonce_s})
+            if ch.get("known") == cert_ref(cert_s):
+                # the client already holds our certificate: send the reference
+                cert_key, cert_val = "cref", ch["known"]
+                self.cache_use["server_ref"] = True
+            else:
+                cert_key, cert_val = "cert", cert_s
+            sh_body = codec.encode({"t": "SH", cert_key: cert_val, "pk_kem": pk_kem, "nonce": nonce_s})
             # 2. sign the transcript so far plus the ephemeral key
             sig = self.timer.run("sign", self.me.sign, b"qrcav-sh" + H(ch_bytes, sh_body))
-            sh = codec.encode({"t": "SH", "cert": cert_s, "pk_kem": pk_kem, "nonce": nonce_s, "sig": sig})
+            sh = codec.encode({"t": "SH", cert_key: cert_val, "pk_kem": pk_kem, "nonce": nonce_s, "sig": sig})
             self._ch, self._sh, self._peer = ch_bytes, sh, cert_c
+            self._peer_bytes = cert_c_bytes
             self.sizes["client_hello"] = len(ch_bytes)
             self.sizes["server_hello"] = len(sh)
             self._state = "sent_sh"
@@ -340,8 +444,12 @@ class ServerHandshake:
             self.sizes["client_key"] = len(ck_bytes)
             self.sizes["server_finished"] = len(fs)
             self._state = "done"
+            if self.cache is not None:
+                # cache only certificates whose owner has just proved possession
+                self.cache.put(self._peer_bytes, self._peer.id)
             s = Session(self._peer, False, sender, receiver, keys.t_hash,
-                        crypto_ms=dict(self.timer.ops), flight_sizes=dict(self.sizes))
+                        crypto_ms=dict(self.timer.ops), flight_sizes=dict(self.sizes),
+                        cert_cache=dict(self.cache_use))
             s.elapsed_ms = (time.perf_counter() - self._t0) * 1000
             return fs, s
         except HandshakeError:
@@ -356,12 +464,16 @@ def handshake_in_memory(
     allowed_roles: tuple[str, ...] | None = None,
     expected_role: str | tuple[str, ...] | None = None,
     replay_cache: ReplayCache | None = None,
+    client_cache: CertCache | None = None,
+    server_cache: CertCache | None = None,
 ) -> tuple[Session, Session]:
     """Run all four flights in one process. Used by tests and benchmarks."""
-    c = ClientHandshake(client, expected_role=expected_role)
-    s = ServerHandshake(server, allowed_roles=allowed_roles, replay_cache=replay_cache)
+    c = ClientHandshake(client, expected_role=expected_role, expected_id=server.id, cache=client_cache)
+    s = ServerHandshake(server, allowed_roles=allowed_roles, replay_cache=replay_cache, cache=server_cache)
     sh = s.on_client_hello(c.client_hello())
-    ck = c.on_server_hello(sh)
-    fs, s_sess = s.on_client_key(ck)
+    out = c.on_server_hello(sh)
+    if c.state == "sent_ch":                 # HelloRetry: one more round trip
+        out = c.on_server_hello(s.on_client_hello(out))
+    fs, s_sess = s.on_client_key(out)
     c_sess = c.on_server_finished(fs)
     return c_sess, s_sess

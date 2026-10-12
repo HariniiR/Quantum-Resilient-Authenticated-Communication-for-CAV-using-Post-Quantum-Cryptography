@@ -1,0 +1,14 @@
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lrrr}
+\toprule
+Suite & AEAD in a session & signed broadcast, native & signed, pure Python \\
+\midrule
+Classical & 0.40 (135 B) & 0.88 (234 B, 1 fr.) & -- \\
+L1 & 0.44 (135 B) & 5.55 (2{,}583 B, 2 fr.) & 105 \textbf{(misses)} \\
+L3 & 0.41 (135 B) & 9.87 (3{,}472 B, 3 fr.) & 194 \textbf{(misses)} \\
+DECK & 0.41 (135 B) & 9.51 (3{,}472 B, 3 fr.) & 236 \textbf{(misses)} \\
+L5 & 0.47 (135 B) & 12.6 (4{,}790 B, 4 fr.) & 184 \textbf{(misses)} \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\par\smallskip{\footnotesize p99 of cryptographic processing plus 802.11p airtime per beacon, in ms, against the 100 ms beacon interval.}

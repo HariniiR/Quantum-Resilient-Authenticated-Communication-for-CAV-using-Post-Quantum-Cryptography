@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from .. import codec
+from ..certcache import CertCache
 from ..crypto.suites import get_suite
 from ..handshake import HandshakeError
 from ..net.secure import ChannelClosed, SecureChannel, plain_request, secure_connect, start_secure_server
@@ -33,6 +34,7 @@ def load_config(path: str | Path) -> dict:
     cfg.setdefault("suite", "DECK")
     cfg.setdefault("backend", "auto")
     cfg.setdefault("host", "127.0.0.1")
+    cfg.setdefault("cert_cache", True)
     return cfg
 
 
@@ -92,6 +94,8 @@ class NodeBase:
         self._connecting: dict[str, asyncio.Lock] = {}
         self.t0 = time.time()
         self.stopping = False
+        # certificate cache (qrcav/certcache.py); off with "cert_cache": false
+        self.cert_cache: CertCache | None = CertCache() if cfg.get("cert_cache", True) else None
 
     # -- bootstrap: preparation + registration phases -------------------------
 
@@ -135,6 +139,38 @@ class NodeBase:
             except (ConnectionError, OSError, ChannelClosed, asyncio.TimeoutError):
                 await asyncio.sleep(0.2)
         raise SystemExit(f"{self.id}: TA unreachable")
+
+    async def resolve_cert(self, ref: bytes) -> bytes | None:
+        """Edge-directory lookup of a certificate by reference (served by the TA here)."""
+        resp = await self._ta_call({"op": "cert", "ref": ref})
+        return resp.get("cert") if resp.get("ok") else None
+
+    async def preload_certs(self, role: str, expected: int, wait_s: float = 5.0) -> int:
+        """
+        Pre-distribution: fetch the certificates of all entities with `role`
+        (RSUs, for vehicles), as a deployment would ship them with the CRL.
+        Each one is verified against pk_TA before it is cached.
+        """
+        if self.cert_cache is None:
+            return 0
+        deadline = time.time() + wait_s
+        got = 0
+        while True:
+            resp = await self._ta_call({"op": "certs"})
+            got = 0
+            for raw in resp.get("certs", []):
+                try:
+                    cert = Certificate.decode(raw)
+                except ValueError:
+                    continue
+                if cert.role == role and self.identity.anchor.verify_cert(cert):
+                    self.cert_cache.put(raw, cert.id)
+                    got += 1
+            if got >= expected or time.time() > deadline:
+                break
+            await asyncio.sleep(0.2)
+        self.log("certs-preloaded", f"pre-loaded {got} {role} certificates", role=role, count=got)
+        return got
 
     async def refresh_crl(self) -> None:
         try:
@@ -183,7 +219,7 @@ class NodeBase:
                 try:
                     host, port = self.addr(peer_id)
                     ch = await secure_connect(host, port, self.identity, expected_role=role,
-                                              expected_id=peer_id)
+                                              expected_id=peer_id, cache=self.cert_cache)
                     self._log_handshake(ch, "initiator")
                     self.channels[peer_id] = ch
                     asyncio.ensure_future(self._reader(ch))
@@ -197,11 +233,18 @@ class NodeBase:
 
     def _log_handshake(self, ch: SecureChannel, side: str) -> None:
         s = ch.session
+        cc = s.cert_cache
+        refs = [w for w, k in (("client", "client_ref"), ("server", "server_ref")) if cc.get(k)]
+        note = ""
+        if cc.get("retry"):
+            note = ", cert ref unknown -> HelloRetry"
+        elif refs:
+            note = f", cached cert: {' + '.join(refs)}"
         self.log(
             "handshake", f"secure session with {ch.peer_id} ({ch.peer_role}) as {side}: "
-            f"{s.handshake_bytes} B in 4 flights, {s.elapsed_ms:.1f} ms",
+            f"{s.handshake_bytes} B in {len(s.flight_sizes)} flights{note}, {s.elapsed_ms:.1f} ms",
             peer=ch.peer_id, side=side, bytes=s.handshake_bytes, ms=s.elapsed_ms,
-            crypto_ms=s.crypto_ms, flights=s.flight_sizes,
+            crypto_ms=s.crypto_ms, flights=s.flight_sizes, cert_cache=cc,
         )
 
     async def _reader(self, ch: SecureChannel) -> None:
@@ -235,8 +278,9 @@ class NodeBase:
         def rejected(peer: str) -> None:
             self.log("handshake-rejected", f"rejected handshake from {peer}", peer=peer)
 
-        self._server = await start_secure_server(self.host, port, self.identity, self.ALLOWED_PEERS,
-                                                 self._on_inbound, rejected)
+        self._server = await start_secure_server(
+            self.host, port, self.identity, self.ALLOWED_PEERS, self._on_inbound, rejected,
+            cert_cache=self.cert_cache, resolver=self.resolve_cert if self.cert_cache is not None else None)
 
     async def send(self, peer_id: str, obj: Any) -> bool:
         ch = await self.connect(peer_id)

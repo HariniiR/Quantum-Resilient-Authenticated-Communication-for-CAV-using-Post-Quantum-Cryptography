@@ -3,3 +3,16 @@ __pycache__/
 .pytest_cache/
 .venv/
 node_modules/
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.nav
+*.snm
+*.vrb
+*.synctex.gz

@@ -1,0 +1,13 @@
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{lllrrrrrrrrr}
+\toprule
+Suite & KEM & Signature & pk$_\text{KEM}$ & sig & cert & bytes & frames & air (ms) & cached & frames & saving \\
+\midrule
+Classical & ECDH-P256 & ECDSA-P256 & 65 & 70 & 229 & 1{,}043 & 4 & 2.05 & 691 & 4 & 33.7\,\% \\
+L1 & ML-KEM-512 & ML-DSA-44 & 800 & 2{,}420 & 3{,}826 & 14{,}373 & 13 & 21.3 & 6{,}825 & 8 & 52.5\,\% \\
+L3 & ML-KEM-768 & ML-DSA-65 & 1{,}184 & 3{,}309 & 5{,}355 & 19{,}913 & 17 & 29.4 & 9{,}307 & 10 & 53.3\,\% \\
+DECK & ML-KEM-1024 & ML-DSA-65 & 1{,}568 & 3{,}309 & 5{,}355 & 20{,}779 & 17 & 30.5 & 10{,}173 & 10 & 51.0\,\% \\
+L5 & ML-KEM-1024 & ML-DSA-87 & 1{,}568 & 4{,}627 & 7{,}313 & 27{,}329 & 22 & 40.1 & 12{,}807 & 12 & 53.1\,\% \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}

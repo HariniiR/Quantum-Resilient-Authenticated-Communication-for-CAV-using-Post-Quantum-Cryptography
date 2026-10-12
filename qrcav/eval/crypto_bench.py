@@ -93,7 +93,17 @@ def primitives(n: int = 200, pure_n: int = 40) -> list[dict]:
     return rows
 
 
+def _air(flights: dict) -> tuple[int, float]:
+    frames, air = 0, 0.0
+    for v in flights.values():
+        f, a = message_airtime_ms(v)
+        frames += f
+        air += a
+    return frames, air
+
+
 def sizes() -> list[dict]:
+    from ..certcache import CertCache
     rows = []
     for name in SUITES:
         s = get_suite(name, "auto")
@@ -101,20 +111,25 @@ def sizes() -> list[dict]:
         ids = enrol_all(ta, [("CAV_00001", "CAV"), ("RSU_001", "RSU")])
         c, _ = handshake_in_memory(ids["CAV_00001"], ids["RSU_001"])
         fs = c.flight_sizes
-        total = sum(fs.values())
-        frames, air = 0, 0.0
-        for v in fs.values():
-            f, a = message_airtime_ms(v)
-            frames += f
-            air += a
+        frames, air = _air(fs)
+        # certificate caching: second handshake, both certificates as references
+        cc, sc = CertCache(), CertCache()
+        handshake_in_memory(ids["CAV_00001"], ids["RSU_001"], client_cache=cc, server_cache=sc)
+        cw, _ = handshake_in_memory(ids["CAV_00001"], ids["RSU_001"], client_cache=cc, server_cache=sc)
+        fc = cw.flight_sizes
+        frames_c, air_c = _air(fc)
         rows.append({
-            "suite": name, "kem": s.kem.name, "sig": s.sig.name,
+            "suite": name, "kem": s.kem.name, "sig_alg": s.sig.name,
             "kem_pk": s.kem.pk_len, "kem_ct": s.kem.ct_len, "sig_pk": s.sig.pk_len,
             "sig": len(s.sig.sign(ids["CAV_00001"].sk, b"x")),
             "cert": len(ids["CAV_00001"].cert.encode()),
             "client_hello": fs["client_hello"], "server_hello": fs["server_hello"],
             "client_key": fs["client_key"], "server_finished": fs["server_finished"],
-            "handshake_total": total, "frames": frames, "airtime_ms": round(air, 3),
+            "handshake_total": sum(fs.values()), "frames": frames, "airtime_ms": round(air, 3),
+            "client_hello_cached": fc["client_hello"], "server_hello_cached": fc["server_hello"],
+            "handshake_total_cached": sum(fc.values()), "frames_cached": frames_c,
+            "airtime_ms_cached": round(air_c, 3),
+            "cache_saving_pct": round(100 * (1 - sum(fc.values()) / sum(fs.values())), 1),
         })
     return rows
 

@@ -27,7 +27,8 @@ from .. import codec
 from ..consensus.sim import ConsensusSim
 from ..crypto.records import RECORD_OVERHEAD
 from ..crypto.suites import get_suite
-from ..handshake import ClientHandshake, ServerHandshake
+from ..certcache import CertCache
+from ..handshake import ClientHandshake, ServerHandshake, handshake_in_memory
 from ..pki import TrustedAuthority, enrol_all
 
 
@@ -83,6 +84,12 @@ def build_profile(suite_name: str, backend: str = "auto", samples: int = 150,
     sizes["alert"] = len(codec.encode(alert)) + RECORD_OVERHEAD
     sizes["announce"] = 64
     sizes["cert"] = len(cav.cert.encode())
+    # certificate caching: flight sizes once both certificates travel as references
+    cc, sc = CertCache(), CertCache()
+    handshake_in_memory(cav, rsu, client_cache=cc, server_cache=sc)
+    c_sess, _ = handshake_in_memory(cav, rsu, client_cache=cc, server_cache=sc)
+    sizes["client_hello_cached"] = c_sess.flight_sizes["client_hello"]
+    sizes["server_hello_cached"] = c_sess.flight_sizes["server_hello"]
 
     # consensus commit latency at the MEC, measured with real signatures
     commit = {}

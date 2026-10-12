@@ -1,0 +1,205 @@
+\chapter{Implementation}
+\label{ch:impl}
+
+\section{Software structure}
+
+The system is a Python package, \code{qrcav}, with a strict layering: lower
+layers never import upper ones, and the protocol code performs no I/O.
+
+\begin{table}[h]
+\centering
+\caption{Package structure}
+\label{tab:modules}
+\begin{tabular}{@{}p{4.9cm}p{9.1cm}@{}}
+\toprule
+Module & Responsibility \\
+\midrule
+\code{crypto/suites.py} & ML-KEM and ML-DSA behind one interface; native (OpenSSL) and pure-Python backends; ECDH/ECDSA baseline \\
+\code{crypto/kdf.py} & SHAKE-256 hash, HKDF-SHA3-256, session key derivation \\
+\code{crypto/records.py} & AES-256-GCM records, counters, replay window \\
+\code{codec.py} & canonical compact binary encoding (signatures need identical bytes on both sides) \\
+\code{pki.py} & Trusted Authority, certificates, CRL, registry database, identities \\
+\code{handshake.py} & the four-flight handshake as sans-IO state machines \\
+\code{certcache.py} & certificate references and the bounded LRU cache \\
+\code{consensus/agspbft.py} & AGS-PBFT and PBFT replica: normal case, scoring, regrouping, view change \\
+\code{consensus/sim.py} & discrete-event harness running real replicas with real signatures \\
+\code{ledger.py} & hash-linked, certified blocks; full-chain verification \\
+\code{net/secure.py} & secure channels over TCP with length framing \\
+\code{nodes/} & one process per entity: TA, CAV, RSU, MEC, consensus node, cloud \\
+\code{sim/} & ns-3 scenario (C++), its Python driver, measurement profiles \\
+\code{eval/} & benchmarks, attack harness, consensus experiments, ns-3 sweeps, figures, replay viewer \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Cryptographic suites and backends}
+
+A \emph{suite} pairs a KEM with a signature scheme. Five are implemented:
+\textbf{DECK} (ML-KEM-1024 + ML-DSA-65, the pairing in our Review~1 design and
+in~\cite{olushola}), \textbf{L1} (512/44), \textbf{L3} (768/65), \textbf{L5}
+(1024/87), and \textbf{CLASSIC} (ECDH P-256 + ECDSA P-256, as in IEEE~1609.2).
+DECK pairs a category-5 KEM with a category-3 signature, so its overall
+strength is category~3, the same as L3.
+
+ECDH is wrapped as a KEM with the DHKEM construction of RFC~9180~\cite{hpke}:
+\textsf{Encaps} generates an ephemeral key pair, computes the Diffie--Hellman
+value with the receiver's public key, hashes it together with both public
+keys, and sends the ephemeral public key as the ``ciphertext''. The classical
+baseline therefore runs through exactly the same handshake code as the
+post-quantum suites, which makes the comparison like-for-like.
+
+Each algorithm has two interchangeable backends:
+\begin{itemize}
+\item \textbf{Native}: the \code{cryptography} library (version 47 or later),
+which bundles OpenSSL~3.5 with constant-time ML-KEM and ML-DSA. This is the
+default and what a deployment would use. The library exposes ML-KEM-768 and
+ML-KEM-1024 only, so L1's KEM always uses the pure backend.
+\item \textbf{Pure Python}: \code{kyber-py} and \code{dilithium-py}, which our
+Review~1 prototype used. They are readable but slow and, as their authors
+state, not constant-time.
+\end{itemize}
+The two backends are byte-compatible: a test encapsulates with one and
+decapsulates with the other, and signs with one and verifies with the other.
+
+\section{Distributed system}
+
+Every entity is a separate operating-system process started from one
+configuration file. A run of the demonstration scenario starts 19 processes:
+the TA, the cloud, one MEC, eight consensus nodes, three RSUs and five
+vehicles. Transport is TCP with a 4-byte length prefix per frame; the four
+handshake flights are frames, and afterwards every frame is one AES-GCM
+record. Registration and CRL retrieval use plain TCP, which is safe because
+certificates and CRLs are TA-signed and verified on receipt. Each process
+writes structured JSON logs, from which an end-to-end report is produced.
+
+The configuration injects faults: a consensus node can return wrong results
+(\code{wrong\_result}) or stay silent, a node can crash at a given time, the
+TA can revoke an entity, and vehicles follow a script of events, V2V messages,
+handovers and reconnections.
+
+\section{ns-3 simulation}
+
+\subsection{Method}
+
+ns-3 3.44~\cite{ns3} simulates the radio, MAC, backhaul and mobility. The
+scenario is written in C++ and compiled at run time through the ns-3 Python
+bindings. ns-3 does not execute the Python cryptography, which would mix
+wall-clock and simulated time. Instead the real protocol code is run first to
+produce a \emph{measurement profile}: the exact byte length of every message
+(the four handshake flights, cached flights, AEAD and signed beacons, events,
+alerts) and empirical samples of the processing time at each handshake stage,
+per beacon, and for a consensus commit. The simulation draws from these
+samples whenever a node processes a message, and each node has a
+single-server CPU queue.
+
+\begin{table}[h]
+\centering
+\caption{ns-3 scenario}
+\label{tab:ns3}
+\begin{tabular}{@{}p{4.2cm}p{9.8cm}@{}}
+\toprule
+Parameter & Value \\
+\midrule
+Radio & IEEE 802.11p, channel 172 (5.86\,GHz), 10\,MHz, 6\,Mb/s, 23\,dBm \\
+Propagation & log-distance ($n = 2.2$) + Nakagami fading, $m = 3 / 1.5 / 1$ below 50 / 150 / beyond~\cite{torrent} \\
+Detection, CCA & $-85$\,dBm (the 10\,MHz value) \\
+Area & 1.5\,km $\times$ 1.5\,km Manhattan grid, 250\,m blocks \\
+RSUs & at intersections every 500\,m: 9 RSUs, wired to one MEC (1\,Gb/s, 2\,ms) \\
+Vehicles & 50--200; 8--17\,m/s; straight 50\,\%, left or right 25\,\% each at intersections \\
+Beacons & 10\,Hz link-layer broadcast (no ACK, no retry) \\
+Fragmentation & 1,400-byte chunks; reassembly at the receiver \\
+Handshake & 200\,ms timeout, 3 retries; NACK for missing ServerHello chunks \\
+Association & start once $\ge 6$ of 10 announcements per second are heard; handover to an RSU heard $\ge 4$ per second better \\
+EDCA & beacons, events, alerts as AC\_VO; handshake flights as AC\_BE \\
+Backoff & after a failed handshake wait $U(0.5, 1) \times 2^k$\,s \\
+Run & 30\,s simulated, first 5\,s excluded; 3 seeds \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Simulator pitfalls found and corrected}
+
+Five ns-3 defaults distorted results by an order of magnitude before they
+were corrected, and they belong in any reproduction of this work:
+\begin{enumerate}
+\item \textbf{ARP.} The ARP cache queues only three packets per unresolved
+address, so most fragments of a first ServerHello were silently dropped.
+802.11p safety messaging has no ARP, so neighbour caches are pre-populated.
+\item \textbf{Preamble detection.} ns-3 defaults to the 20\,MHz value of
+$-82$\,dBm; 802.11p's 10\,MHz channel uses $-85$\,dBm. The wrong value cut
+coverage from 99\,\% to about 80\,\%.
+\item \textbf{Unicast beacons} suffered up to 7 MAC retries each; real beacons
+are broadcasts.
+\item \textbf{Whole-flight retransmission} after one lost fragment caused a
+retransmission storm; it was replaced with selective retransmission.
+\item \textbf{First-contact association.} Starting a 17-frame handshake on the
+first announcement heard, usually at the edge of coverage, gave 5\,\%
+success; association is now gated on link quality.
+\end{enumerate}
+
+\subsection{Certificate caching in the simulation}
+
+Mode 1 models the deployment of Section~\ref{sec:cache}: RSU certificates are
+pre-distributed, so every ServerHello carries a reference; after its first
+session a vehicle sends a reference too, and an RSU that has not seen the
+vehicle resolves it from the MEC directory at the cost of one backhaul round
+trip (no airtime). Mode 2, used as an upper bound, starts with all caches warm.
+
+\subsection{Replay viewer}
+
+For demonstration, the simulation can record an event trace (handshake
+start, session up, failure, link loss, handover, event, alert) and the
+channel airtime in 0.5\,s buckets. A script runs the same scenario (same
+mobility and seed) for the classical suite, DECK and DECK with caching, and
+writes a self-contained web page that replays the three runs on the city grid
+(Figure~\ref{fig:viewer}).
+
+\section{Evaluation harness}
+
+\begin{itemize}
+\item \textbf{Primitives}: 200 timed runs per operation natively and 40 in
+pure Python, after warm-up runs are discarded.
+\item \textbf{Handshakes}: 100 complete handshakes per suite in memory,
+recording each stage's processing time and every flight's size, with and
+without caching.
+\item \textbf{Beacon budget}: per-beacon cryptography plus airtime for AEAD
+records and for signed broadcasts.
+\item \textbf{Attacks}: \V{attacks-total} attacks run against the real
+implementation; an attack counts as rejected only if the protocol aborts or
+drops the message.
+\item \textbf{Consensus}: real replicas with real ML-DSA signatures in a
+discrete-event loop, for 8--24 nodes, AGS-PBFT with and without shadow
+validation against PBFT; fault tolerance; view change; score dynamics.
+\item \textbf{ns-3 sweeps}: five suites and DECK with caching at 50--200
+vehicles over three seeds, plus single-seed variants.
+\end{itemize}
+Timing measurements were taken with the machine otherwise idle, because
+benchmarks run alongside ns-3 inflated latencies.
+
+\section{Testing}
+
+57 automated tests (\code{pytest}) cover the codec, FIPS key and signature sizes, key derivation (output lengths and transcript binding), record
+counters and replay window, backend interoperability, registration (proof of
+possession, roster, duplicate keys), handshakes for all suites, role checks,
+certificate caching (savings, fallback, revocation, substituted references,
+forged HelloRetry), AGS-PBFT (normal case, scoring, regrouping, view change,
+Byzantine nodes, determinism) and one complete multi-process run of the
+distributed system.
+
+\section{Bugs found by our own verification}
+
+\begin{enumerate}
+\item \textbf{Consensus stalled about once in 14 runs.} Nodes checked whether
+the reporting vehicle was registered against the registry copy each had
+fetched at start-up; a node that started before the vehicle enrolled
+disagreed with the rest, and with one Byzantine node in a set of four no
+result reached $2f+1$. Found by tracing every message of a failing run, fixed
+by carrying the reporter's TA-signed certificate in the request so validation
+is a pure function of the request, and verified with 0 failures in 25 runs.
+\item \textbf{Sequence-number reuse after a view change}: the new leader
+re-issued prepared requests and then reused their numbers.
+\item \textbf{PRE-PREPAREs overtaking NEW-VIEW} were dropped as wrong-view;
+they are now buffered and replayed.
+\item \textbf{Measurement contention}: timings taken while ns-3 used both
+cores were inflated and were re-measured.
+\end{enumerate}

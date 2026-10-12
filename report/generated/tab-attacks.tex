@@ -1,0 +1,29 @@
+\begin{adjustbox}{max width=\linewidth}
+\begin{tabular}{p{5.4cm}cp{7.2cm}}
+\toprule
+Attack & Rejected & Mechanism \\
+\midrule
+record tampering (1 bit flipped) & yes & AES-256-GCM tag check fails \\
+record replay & yes & counter already seen in the 64-record window \\
+GCM nonce reuse with Finished & yes & data counters start at 1; 0 is Finished only \\
+ClientHello replay & yes & nonce already in the server's replay cache \\
+stale ClientHello (timestamp -300 s) & yes & outside the 30 s freshness window \\
+client impersonation with stolen certificate & yes & client signature over the transcript fails (deck design had no client signature) \\
+RSU impersonation with stolen certificate & yes & server signature over transcript + pk\_kem fails \\
+certificate from a rogue TA & yes & certificate signature does not verify under pk\_TA \\
+revoked credential & yes & certificate serial on the signed CRL \\
+cache: claim another vehicle's cached certificate & yes & client signature checked with the referenced certificate's key \\
+cache: revoked certificate still in the cache & yes & cached certificates are re-verified against the current CRL \\
+vehicle posing as an RSU & yes & role is bound into the certificate \\
+MITM substitutes the ephemeral ML-KEM key & yes & server signature covers pk\_kem \\
+MITM substitutes the KEM ciphertext & yes & client signature covers c \\
+downgrade to classical suite & yes & suite must match and is inside both signatures \\
+tampered Finished & yes & key confirmation under transcript-bound keys fails \\
+forward secrecy: ephemeral key retained & yes & ephemeral ML-KEM key per session, erased after decapsulation \\
+consensus vote from a non-member & yes & sender has no certificate in the directory \\
+consensus vote spoofing another member & yes & ML-DSA signature does not verify \\
+tampered block (result changed) & yes & leader signature and commit certificate \\
+ledger history rewrite & yes & Pr\_B\_Hash link broken \\
+\bottomrule
+\end{tabular}
+\end{adjustbox}

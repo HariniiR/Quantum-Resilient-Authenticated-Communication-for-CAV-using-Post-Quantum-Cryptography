@@ -16,8 +16,13 @@ import time
 from typing import Any, Awaitable, Callable
 
 from .. import codec
+from ..certcache import CertCache
 from ..handshake import ClientHandshake, HandshakeError, ReplayCache, ServerHandshake, Session
 from ..pki import Identity
+
+# Async lookup of a certificate by reference in the edge directory (here the
+# TA registry; in a deployment a directory at the MEC, over the wired backhaul).
+CertResolver = Callable[[bytes], Awaitable["bytes | None"]]
 
 MAX_FRAME = 8 * 1024 * 1024
 HANDSHAKE_TIMEOUT = 10.0
@@ -107,14 +112,18 @@ async def secure_connect(
     expected_role: str | tuple[str, ...] | None = None,
     expected_id: str | None = None,
     timeout: float = HANDSHAKE_TIMEOUT,
+    cache: CertCache | None = None,
 ) -> SecureChannel:
     """Open TCP, run the client side of the handshake, return the channel."""
     reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout)
     try:
-        hs = ClientHandshake(me, expected_role=expected_role, expected_id=expected_id)
+        hs = ClientHandshake(me, expected_role=expected_role, expected_id=expected_id, cache=cache)
         await write_frame(writer, hs.client_hello())
-        sh = await asyncio.wait_for(read_frame(reader), timeout)
-        await write_frame(writer, hs.on_server_hello(sh))
+        for _ in range(2):                     # at most one HelloRetry
+            sh = await asyncio.wait_for(read_frame(reader), timeout)
+            await write_frame(writer, hs.on_server_hello(sh))
+            if hs.state != "sent_ch":
+                break
         fs = await asyncio.wait_for(read_frame(reader), timeout)
         session = hs.on_server_finished(fs)
         return SecureChannel(session, reader, writer)
@@ -127,27 +136,61 @@ async def secure_accept(
     reader: asyncio.StreamReader, writer: asyncio.StreamWriter, me: Identity,
     allowed_roles: tuple[str, ...] | None, replay_cache: ReplayCache,
     timeout: float = HANDSHAKE_TIMEOUT,
+    cache: CertCache | None = None,
+    resolver: CertResolver | None = None,
 ) -> SecureChannel:
-    hs = ServerHandshake(me, allowed_roles=allowed_roles, replay_cache=replay_cache)
-    ch = await asyncio.wait_for(read_frame(reader), timeout)
-    await write_frame(writer, hs.on_client_hello(ch))
+    hs = ServerHandshake(me, allowed_roles=allowed_roles, replay_cache=replay_cache, cache=cache)
+    for _ in range(2):                         # at most one HelloRetry
+        ch = await asyncio.wait_for(read_frame(reader), timeout)
+        await _resolve_reference(ch, cache, resolver)
+        out = hs.on_client_hello(ch)
+        await write_frame(writer, out)
+        if hs.state != "start":
+            break
     ck = await asyncio.wait_for(read_frame(reader), timeout)
     fs, session = hs.on_client_key(ck)
     await write_frame(writer, fs)
     return SecureChannel(session, reader, writer)
 
 
+async def _resolve_reference(ch: bytes, cache: CertCache | None, resolver: CertResolver | None) -> None:
+    """
+    Before the (synchronous, sans-IO) handshake sees a ClientHello that names
+    the client's certificate only by reference, try the edge directory. The
+    fetched certificate is only a candidate: the handshake verifies it in full
+    and caches it only once its owner has proved possession of the key.
+    """
+    if cache is None or resolver is None:
+        return
+    try:
+        ref = codec.decode_dict(ch).get("cref")
+    except Exception:
+        return
+    if isinstance(ref, bytes) and ref not in cache:
+        try:
+            cert = await asyncio.wait_for(resolver(ref), 2.0)
+        except Exception:
+            cert = None
+        if cert is not None:
+            from ..certcache import cert_ref
+            if cert_ref(cert) == ref:          # the directory cannot substitute a different cert
+                cache.put(cert)
+
+
 async def start_secure_server(
     host: str, port: int, me: Identity, allowed_roles: tuple[str, ...] | None,
     on_channel: Callable[[SecureChannel], Awaitable[None]],
     on_reject: Callable[[str], None] | None = None,
+    cert_cache: CertCache | None = None,
+    resolver: CertResolver | None = None,
 ) -> asyncio.base_events.Server:
     cache = ReplayCache()
 
     async def _handle(reader, writer):
         peer = writer.get_extra_info("peername")
         try:
-            chan = await secure_accept(reader, writer, me, allowed_roles, cache)
+            chan = await secure_accept(reader, writer, me, allowed_roles, cache,
+                                       cache=cert_cache, resolver=resolver)
         except (HandshakeError, ChannelClosed, asyncio.TimeoutError, ConnectionError, OSError):
             if on_reject:
                 on_reject(str(peer))

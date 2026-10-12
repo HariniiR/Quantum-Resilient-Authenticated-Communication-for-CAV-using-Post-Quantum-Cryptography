@@ -1,0 +1,43 @@
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+Connected autonomous vehicles exchange safety messages with roadside units
+(RSUs) and edge servers. Those messages are authenticated today with ECDSA
+and keyed with ECDH, and Shor's algorithm breaks both on a large quantum
+computer. Recorded traffic can be decrypted later, so the transition to
+post-quantum cryptography has to start before such machines exist. In 2024
+NIST standardised ML-KEM (FIPS~203) for key establishment and ML-DSA
+(FIPS~204) for signatures. Both are far larger than the elliptic-curve
+schemes they replace, and vehicular radio is slow and shared.
+
+This project implements, end to end, a post-quantum security framework for
+vehicle-to-everything (V2X) communication based on the architecture of
+Aslam, Bhardwaj and Chaudhary (2025). It covers a Trusted Authority with
+ML-DSA certificates and a signed revocation list; a four-flight, mutually
+authenticated ML-KEM/ML-DSA handshake with transcript-bound key derivation;
+AES-256-GCM records with replay protection; criticality-based routing through
+edge servers; and an Adaptive Grouping Score PBFT (AGS-PBFT) consensus layer,
+with view change, over a hash-linked ledger. While implementing the published
+design we found and corrected defects that prevent it from working as written,
+among them a consensus layer that signs with a KEM, which has no signing
+operation, and a handshake in which only the server authenticates. We also
+add certificate caching, which sends 32-byte certificate references instead
+of 5.3\,KB ML-DSA certificates.
+
+The system runs as 19 separate processes over TCP, in an ns-3 IEEE 802.11p
+simulation with mobility for 50--200 vehicles, and in an evaluation suite
+covering five parameter sets, a classical baseline, \V{attacks-total} attacks and the
+consensus protocol. With a native implementation a full post-quantum
+handshake costs about \V{deck-hs-ms}\,ms of computation, but
+\V{deck-hs-bytes} bytes (\V{deck-hs-frames} radio frames) against
+\V{classic-hs-bytes} bytes classically. In ns-3 the classical handshake
+completes \V{ns3-success-classic-200}\,\% of the time even at 200 vehicles,
+while the post-quantum handshake falls to \V{ns3-success-deck-100}\,\% at
+100 vehicles and \V{ns3-success-deck-200}\,\% at 200. The limit is channel
+capacity, not computation. Inside an established session a beacon costs the
+same \V{deck-beacon-aead-bytes}-byte AES-GCM record for every suite.
+Certificate caching halves the handshake (\V{deck-cached-bytes} bytes) and
+raises completion to \V{ns3-success-deck-cache-100}\,\% at 100 vehicles.
+AGS-PBFT sends \V{cons-msg-lo}--\V{cons-msg-hi}\,\% fewer messages than PBFT
+but is not faster, and the safety path never waits for it: alerts reach
+vehicles in about 5\,ms. All \V{attacks-total} attacks were rejected.

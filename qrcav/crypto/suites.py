@@ -353,7 +353,8 @@ def _make_kem(name: str, backend: str) -> KEM:
         raise CryptoUnavailable("OpenSSL ML-KEM not available; install cryptography>=47")
     if not HAVE_PURE_PQC:
         raise CryptoUnavailable("kyber-py not installed")
-    # OpenSSL does not ship ML-KEM-512, so L1 always uses the pure backend for its KEM.
+    # The `cryptography` library exposes only ML-KEM-768 and -1024 (OpenSSL itself has 512),
+    # so L1 always uses the pure backend for its KEM.
     return _pure_kem(name)
 
 

@@ -108,11 +108,32 @@ def main() -> None:
     print(f"  5. CAV: check Finished_S                                               {t:.2f} ms")
     total = sum(c_sess.flight_sizes.values())
     print(f"  {G}mutually authenticated session established{X}: {total} B in 4 flights "
-          f"({-(-total // 1400)} frames of 1400 B)")
+          f"({sum(-(-v // 1400) for v in c_sess.flight_sizes.values())} frames of up to 1400 B)")
     print(f"  transcript hash {hx(c_sess.t_hash)}")
     print(f"  k_c2s {hx(c_sess.sender.key)}   k_s2c {hx(c_sess.receiver.key)}")
     print(f"  client crypto ms {{{', '.join(f'{k}: {v:.2f}' for k, v in c_sess.crypto_ms.items())}}}")
     print(f"  server crypto ms {{{', '.join(f'{k}: {v:.2f}' for k, v in s_sess.crypto_ms.items())}}}")
+
+    step("CERTIFICATE CACHING  (second handshake, both certificates already held)")
+    from qrcav.certcache import CertCache, cert_ref
+    cc, sc = CertCache(), CertCache()
+    cc.put(rsu.cert.encode(), rsu.id)           # RSU certificates are pre-distributed
+    sc.put(cav.cert.encode(), cav.id)           # the vehicle's certificate is in the edge directory
+    cc.mine_known = True
+    c2 = ClientHandshake(cav, expected_role="RSU", expected_id=rsu.id, cache=cc)
+    s2 = ServerHandshake(rsu, allowed_roles=("CAV",), cache=sc)
+    ch2 = c2.client_hello()
+    sh2 = s2.on_client_hello(ch2)
+    ck2 = c2.on_server_hello(sh2)
+    fs2, _ = s2.on_client_key(ck2)
+    cached = c2.on_server_finished(fs2)
+    print(f"  ClientHello carries cref = H(Cert_C) = {hx(cert_ref(cav.cert.encode()), 8)} instead of "
+          f"{len(cav.cert.encode())} B: {len(ch2):>6} B")
+    print(f"  ServerHello carries H(Cert_S) instead of the certificate:              {len(sh2):>6} B")
+    ctot = sum(cached.flight_sizes.values())
+    print(f"  {G}session established{X}: {ctot} B instead of {total} B "
+          f"({100 * (1 - ctot / total):.0f} % smaller, {sum(-(-v // 1400) for v in cached.flight_sizes.values())} frames)")
+    print(f"  {D}Both certificates are still verified in full (TA signature, CRL, role) on every handshake{X}")
 
     step("COMMUNICATION PHASE  (AES-256-GCM records, slide 17)")
     msg = {"type": "beacon", "src": "CAV_001", "seq": 1, "pos": [80.27, 13.08], "speed": 13.9}

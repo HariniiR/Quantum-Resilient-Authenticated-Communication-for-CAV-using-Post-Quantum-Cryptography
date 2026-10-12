@@ -16,6 +16,12 @@
 // Protocol carried (sizes and delays from the Python implementation)
 //   RSU  -> *   ANNOUNCE broadcast every 100 ms (service advertisement)
 //   CAV <-> RSU four-flight handshake: CH, SH, CK(+Finished), FS
+//               cert_cache = 0: certificates sent in full
+//               cert_cache = 1: RSU certificates pre-distributed (SH carries a
+//                 32-byte reference); after its first session a vehicle sends a
+//                 reference too, which a new RSU resolves from the MEC directory
+//                 over the backhaul (one backhaul round trip, no airtime)
+//               cert_cache = 2: both references from the start (warm caches)
 //               messages larger than one frame are fragmented into 1400-byte
 //               chunks; a lost chunk triggers a whole-flight retransmission
 //   CAV  -> RSU beacons at beacon_hz, AEAD records or ML-DSA-signed
@@ -90,6 +96,23 @@ uint32_t sz(const std::string& k)
 
 void count(const std::string& k, double v = 1.0) { C[k] += v; }
 void rec(const std::string& k, double v) { R[k].push_back(v); }
+
+// Event trace for the replay viewer (only when trace = 1): 4 doubles per event
+//   t, kind, vehicle, x
+//   kind 1 handshake start (x = rsu)   2 session up (x = rsu)   3 handshake failed (x = rsu)
+//        4 link lost (x = rsu)         5 handover (x = new rsu) 6 event sent (x = event id)
+//        7 alert received (x = event id)
+enum TraceKind { TR_HS_START = 1, TR_UP, TR_HS_FAIL, TR_LOST, TR_HANDOVER, TR_EVENT, TR_ALERT };
+void trace(int kind, double v, double x)
+{
+    if (par("trace", 0) <= 0)
+        return;
+    auto& t = R["trace"];
+    t.push_back(Simulator::Now().GetSeconds());
+    t.push_back(kind);
+    t.push_back(v);
+    t.push_back(x);
+}
 
 // ---- wire format -----------------------------------------------------------
 struct Hdr
@@ -264,6 +287,12 @@ class Rsu : public Endpoint
     //   1 processing CH, 2 SH sent, 3 processing CK, 4 FS sent (session up)
     std::map<uint32_t, uint32_t> hsMsg;
     std::map<uint32_t, int> phase;
+    std::set<uint32_t> knownVeh;   // vehicle certificates held locally
+
+    static uint32_t ShSize()
+    {
+        return par("cert_cache", 0) >= 1 ? sz("server_hello_cached") : sz("server_hello");
+    }
 
     void Start()
     {
@@ -284,14 +313,19 @@ class Rsu : public Endpoint
             if (hsMsg.count(m.src) && hsMsg[m.src] == m.msgid)
             {
                 if (phase[m.src] == 2)          // our SH was lost: resend it
-                    SendTo(m.src, SH, sz("server_hello"), m.msgid, 2);
+                    SendTo(m.src, SH, ShSize(), m.msgid, 2);
                 return;                          // otherwise a duplicate; ignore
             }
             hsMsg[m.src] = m.msgid;
             phase[m.src] = 1;
             double done = Cpu(sample("server_ch"));
+            if (m.aux == 1 && !knownVeh.count(m.src))
+            {   // certificate reference not held here: fetch it from the MEC directory
+                count("cert_directory_lookups");
+                done += 2.0 * par("backhaul_ms", 2.0) / 1000.0 + par("directory_ms", 0.1) / 1000.0;
+            }
             Simulator::Schedule(Seconds(done - now), &Rsu::SendTo, this, m.src, (uint8_t)SH,
-                                sz("server_hello"), m.msgid, 2);
+                                ShSize(), m.msgid, 2);
             break;
         }
         case NACK: {
@@ -299,7 +333,7 @@ class Rsu : public Endpoint
             if (hsMsg.count(m.src) && hsMsg[m.src] == m.msgid && phase[m.src] == 2)
             {
                 count("sh_selective_retx");
-                Send(g_addr[m.src], SH, sz("server_hello"), m.msgid, now, m.aux);
+                Send(g_addr[m.src], SH, ShSize(), m.msgid, now, m.aux);
             }
             break;
         }
@@ -314,6 +348,7 @@ class Rsu : public Endpoint
             if (phase[m.src] != 2)
                 return;
             phase[m.src] = 3;
+            knownVeh.insert(m.src);
             double done = Cpu(sample("server_ck"));
             Simulator::Schedule(Seconds(done - now), &Rsu::SendTo, this, m.src, (uint8_t)FS,
                                 sz("server_finished"), m.msgid, 4);
@@ -387,6 +422,13 @@ class Vehicle : public Endpoint
     std::set<uint32_t> alertsSeen;
     int failCount = 0;
     double notBefore = 0.0;     // exponential backoff after failed handshakes
+    bool everUp = false;        // our certificate is in the edge directory
+
+    bool UseRef()
+    {
+        double mode = par("cert_cache", 0);
+        return mode >= 2 || (mode >= 1 && everUp);
+    }
 
     void Backoff()
     {
@@ -432,6 +474,7 @@ class Vehicle : public Endpoint
     void SendEvent(uint32_t mid, double t0)
     {
         count("events_sent");
+        trace(TR_EVENT, id, mid);
         Send(g_addr[RSU_BASE + rsu], EVENT, sz("event"), mid, t0);
     }
 
@@ -491,6 +534,7 @@ class Vehicle : public Endpoint
                 Quality(best) >= par("assoc_min_announces", 6))
             {
                 count("handovers");
+                trace(TR_HANDOVER, id, best);
                 rec("session_s", now - upSince);
                 StartHandshake(best);
             }
@@ -500,6 +544,7 @@ class Vehicle : public Endpoint
             auto it = heard.find(rsu);
             if (it == heard.end() || now - it->second > par("link_timeout", 1.0))
             {
+                trace(st == UP ? TR_LOST : TR_HS_FAIL, id, rsu);
                 if (st == UP)
                 {
                     count("links_lost");
@@ -521,6 +566,7 @@ class Vehicle : public Endpoint
         hsMsg = nextMsg++;
         retries = 0;
         hsStart = Simulator::Now().GetSeconds();
+        trace(TR_HS_START, id, r);
         if (hsStart > par("warmup", 5))
             count("handshake_attempts");
         double done = Cpu(sample("client_ch"));
@@ -532,8 +578,11 @@ class Vehicle : public Endpoint
     {
         if ((type == CH && st != WAIT_SH) || (type == CK && st != WAIT_FS))
             return;
-        uint32_t bytes = sz(type == CH ? "client_hello" : "client_key");
-        Send(g_addr[RSU_BASE + rsu], type, bytes, hsMsg, hsStart);
+        bool ref = type == CH && UseRef();
+        uint32_t bytes = type == CH ? (ref ? sz("client_hello_cached") : sz("client_hello")) : sz("client_key");
+        if (ref)
+            count("ch_with_cert_ref");
+        Send(g_addr[RSU_BASE + rsu], type, bytes, hsMsg, hsStart, 0, ref ? 1 : 0);
         timer.Cancel();
         timer = Simulator::Schedule(MilliSeconds(par("hs_timeout_ms", 400)), &Vehicle::Timeout, this, type);
     }
@@ -544,6 +593,7 @@ class Vehicle : public Endpoint
         {
             if (hsStart > par("warmup", 5))
                 count("handshakes_failed");
+            trace(TR_HS_FAIL, id, rsu);
             st = IDLE;
             rsu = -1;
             Backoff();
@@ -592,6 +642,7 @@ class Vehicle : public Endpoint
                 return;                          // same alert from another RSU
             alertsSeen.insert(m.msgid);
             count("alert_rx");
+            trace(TR_ALERT, id, m.msgid);
             if (m.msgid / 100000u == id)
             {
                 count("alert_rx_origin");
@@ -618,6 +669,8 @@ class Vehicle : public Endpoint
             st = UP;
             upSince = done;
             failCount = 0;
+            everUp = true;
+            trace(TR_UP, id, rsu);
             if (hsStart > par("warmup", 5))
                 count("handshakes_ok");
             if (hsStart > par("warmup", 5))     // steady state: initial association storm excluded
@@ -632,6 +685,14 @@ void PhyState(Time start, Time duration, WifiPhyState state)
 {
     if (state == WifiPhyState::TX && start.GetSeconds() > par("warmup", 5))
         g_txAir += duration.GetSeconds();
+    if (state == WifiPhyState::TX && par("trace", 0) > 0)
+    {   // airtime per 0.5 s bucket, for the viewer's channel-load strip
+        auto& b = R["air_bucket"];
+        size_t i = static_cast<size_t>(start.GetSeconds() / 0.5);
+        if (b.size() <= i)
+            b.resize(i + 1, 0.0);
+        b[i] += duration.GetSeconds();
+    }
 }
 void MacTxFail(Mac48Address) { count("mac_tx_failed"); }
 void PhyTxBegin(Ptr<const Packet> p, double) { count("phy_tx_frames"); count("phy_tx_bytes", p->GetSize()); }

@@ -1,0 +1,335 @@
+\chapter{System Design}
+\label{ch:design}
+
+\section{Architecture}
+
+Figure~\ref{fig:arch} shows the entities and the links between them. Every
+link except registration is a mutually authenticated ML-KEM/ML-DSA session
+carrying AES-256-GCM records.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners=2pt, minimum height=9mm, minimum width=20mm, align=center, font=\small, fill=white},
+  lab/.style={font=\scriptsize, align=center, fill=white, inner sep=1.5pt},
+  layer/.style={draw, dashed, rounded corners=4pt, inner sep=7pt, gray},
+  >={Stealth[length=2.2mm]}]
+\node[box] (cav1) at (0,1.2) {CAV};
+\node[box] (cav2) at (0,-1.2) {CAV};
+\node[box] (rsu1) at (3.6,1.2) {RSU};
+\node[box] (rsu2) at (3.6,-1.2) {RSU};
+\node[box] (mec) at (6.6,0) {MEC};
+\node[box] (cons) at (10.2,1.4) {Consensus nodes\\(AGS-PBFT)};
+\node[box] (cloud) at (10.2,-1.4) {Cloud archive};
+\node[box] (ta) at (6.6,3.1) {Trusted Authority};
+\node[layer, fit=(cav1)(cav2), label={[font=\scriptsize]below:user layer}] {};
+\node[layer, fit=(rsu1)(rsu2)(mec), label={[font=\scriptsize]below:edge layer}] {};
+\draw[<->] (cav1) -- node[lab, above=1pt]{802.11p} (rsu1);
+\draw[<->] (cav2) -- node[lab, below=1pt]{802.11p} (rsu2);
+\draw[<->] (rsu1) -- node[lab]{V2V relay} (rsu2);
+\draw[<->] (rsu1) -- (mec);
+\draw[<->] (rsu2) -- (mec);
+\draw[->] (mec) -- node[lab, above, sloped]{critical} (cons);
+\draw[->] (mec) -- node[lab, below, sloped]{routine} (cloud);
+\draw[dashed, gray] (ta.west) -- (3.6,3.1);
+\draw[->, dashed, gray] (3.6,3.1) -- node[lab, left=2pt, text=gray]{certificates,\\CRL} (rsu1.north);
+\end{tikzpicture}
+\caption{Entities and links. The MEC sends alerts back through the RSUs before it submits a critical event to consensus.}
+\label{fig:arch}
+\end{figure}
+
+\begin{description}
+\item[Trusted Authority (TA).] Generates the root key pair, certifies the
+public keys of all entities, keeps the registry database and signs the
+certificate revocation list (CRL).
+\item[CAV.] A vehicle. It holds its own ML-DSA key pair and certificate,
+opens a session with the nearest RSU, sends beacons at 10\,Hz and reports
+events.
+\item[RSU.] Terminates vehicle sessions, relays V2V messages to neighbouring
+RSUs, and forwards events to the MEC over the wired backhaul.
+\item[MEC.] The edge server. It routes events by criticality: a critical
+event is first turned into an alert sent to every RSU (and so to every
+vehicle), \emph{then} submitted to consensus; routine data goes to the cloud.
+\item[Consensus nodes.] Eight validators running AGS-PBFT. Each committed
+block carries the event, the agreed validation result, a commit certificate,
+the score table and the consensus membership.
+\item[Cloud.] An archive for routine data.
+\end{description}
+
+\section{Threat model}
+
+The adversary controls the radio: it can record, drop, delay, replay, modify
+and inject any frame, and it can run its own transmitters. It may obtain copies
+of any certificate (they are public), run a rogue certificate authority, and
+hold credentials that the TA has since revoked. Up to $f$ consensus nodes may
+be Byzantine (arbitrary behaviour, including colluding on a wrong result), and
+a leader may crash. In the long term the adversary has a quantum computer and
+replays recorded traffic to it. The TA's private key and the private keys of
+honest entities are not compromised.
+
+\section{Registration and PKI}
+
+\begin{enumerate}
+\item The entity generates its own ML-DSA key pair. The TA never sees a
+private key (this removes the key escrow of defect D4).
+\item The entity sends $\{id, role, pk, alg\}$ and a proof of possession: a
+signature over the request with the new private key. Without it an attacker
+could have someone else's public key certified under its own name.
+\item The TA checks the identity against its roster (the identities vetted out
+of band, such as manufacturer records and the RSU deployment list), the
+algorithm, the key length and the proof, and returns
+\[ Cert = \mathsf{Sign}(sk_{TA},\ \{id, role, pk, alg, serial, nb, na\}). \]
+\item The entity verifies the certificate with $pk_{TA}$ before using it.
+\end{enumerate}
+
+The certificate binds the \emph{role}, so a vehicle cannot present itself as
+an RSU, and a validity period and serial number, so it can expire and be
+revoked. An ML-DSA-65 certificate is \V{deck-cert} bytes. Revocation is a
+TA-signed CRL holding a version number, an issue time and the revoked serial
+numbers; nodes accept only a
+newer, validly signed CRL and close any open session with a revoked peer.
+
+\section{Handshake}
+\label{sec:handshake}
+
+Figure~\ref{fig:hs} shows the four-flight handshake between a client
+(initiator, usually a vehicle) and a server (responder, usually an RSU).
+
+\begin{figure}[h]
+\centering
+\begin{adjustbox}{max width=\linewidth}
+\begin{tikzpicture}[font=\small, >={Stealth[length=2.2mm]}]
+\def\L{0} \def\R{10.5}
+\node[font=\bfseries] at (\L,0.4) {Client (CAV)};
+\node[font=\bfseries] at (\R,0.4) {Server (RSU)};
+\draw[gray] (\L,0) -- (\L,-8.2); \draw[gray] (\R,0) -- (\R,-8.2);
+\draw[->] (\L,-0.6) -- node[above]{1. ClientHello $\{v, suite, Cert_C, n_C, ts\}$} (\R,-1.0);
+\node[align=left, font=\scriptsize, anchor=west] at (\R+0.15,-1.6)
+  {verify $Cert_C$ (TA sig, role, CRL)\\freshness, replay cache\\$(pk_{kem}, sk_{kem}) \leftarrow \mathsf{KeyGen}()$};
+\draw[<-] (\L,-2.6) -- node[above]{2. ServerHello $\{Cert_S, pk_{kem}, n_S, \sigma_S\}$} (\R,-2.2);
+\node[align=left, font=\scriptsize, anchor=east] at (\L-0.15,-3.4)
+  {verify $Cert_S$, $\sigma_S$\\$(ss, c) \leftarrow \mathsf{Encaps}(pk_{kem})$\\$\sigma_C$; keys $\leftarrow$ HKDF$(ss, T)$};
+\draw[->] (\L,-4.4) -- node[above]{3. ClientKey $\{c, \sigma_C, \mathit{Fin}_C\}$} (\R,-4.8);
+\node[align=left, font=\scriptsize, anchor=west] at (\R+0.15,-5.5)
+  {verify $\sigma_C$; $ss \leftarrow \mathsf{Decaps}(sk_{kem}, c)$\\erase $sk_{kem}$; keys; check $\mathit{Fin}_C$};
+\draw[<-] (\L,-6.6) -- node[above]{4. ServerFinished $\{\mathit{Fin}_S\}$} (\R,-6.2);
+\draw[<->, thick] (\L,-7.6) -- node[above]{AES-256-GCM records, counter from 1} (\R,-7.6);
+\end{tikzpicture}
+\end{adjustbox}
+\caption{The mutually authenticated handshake. $T$ is the transcript of all four flights.}
+\label{fig:hs}
+\end{figure}
+
+\begin{align*}
+\sigma_S &= \mathsf{Sign}(sk_S,\ \text{``sh''} \parallel H(CH, SH_{body})) \\
+\sigma_C &= \mathsf{Sign}(sk_C,\ \text{``ck''} \parallel H(CH \parallel SH \parallel CK_{body})) \\
+T_{hash} &= H(CH \parallel SH \parallel CK_{body} \parallel \sigma_C) \\
+(k_{c2s}, v_{c2s}, k_{s2c}, v_{s2c}) &= \mathrm{HKDF}(ss, T_{hash}) \\
+\mathit{Fin}_C &= \mathrm{AES\text{-}GCM}(k_{c2s}, v_{c2s} \oplus 0, H(\text{``client\_finished''}, T_{hash}))
+\end{align*}
+
+Design properties:
+\begin{itemize}
+\item \textbf{Forward secrecy.} The server's KEM key pair is ephemeral and
+erased after decapsulation, so a later compromise of long-term signing keys
+does not reveal past session keys.
+\item \textbf{Mutual authentication.} $\sigma_S$ binds the server's identity
+to the client's fresh nonce and to $pk_{kem}$; $\sigma_C$ binds the client's
+identity to the whole transcript including the ciphertext $c$.
+\item \textbf{Key confirmation.} Because ML-KEM rejects implicitly, a
+tampered $c$ silently produces a different key. The Finished messages detect
+it: each side proves it derived the same keys.
+\item \textbf{Downgrade protection.} The suite is in the ClientHello, must
+match exactly, and is covered by both signatures.
+\item \textbf{Uniform abort.} Every failed check raises the same error with no
+detail, so a probing attacker cannot tell which check failed.
+\item \textbf{Sans-IO.} The handshake state machines consume and return bytes
+and never touch a socket, so the same code runs over TCP, in memory for tests
+and benchmarks, and supplies exact message sizes to ns-3.
+\end{itemize}
+
+\section{Certificate caching}
+\label{sec:cache}
+
+With ML-DSA-65 each certificate is \V{deck-cert} bytes, and the full handshake
+carries two of them: about half of its \V{deck-hs-bytes} bytes. Peers usually
+hold these certificates already. RSU certificates are few and long-lived, so
+they can be distributed to vehicles in advance with the CRL. A vehicle's
+certificate can be kept, after its first handshake, in an edge directory at the
+MEC that every RSU reaches over the wired backhaul.
+
+When a peer is known to hold a certificate, the handshake sends a 32-byte
+reference $\mathit{cref} = H(\text{``qrcav-cert''}, Cert)$ instead, in the
+spirit of TLS cached information~\cite{rfc7924}:
+
+\begin{enumerate}
+\item ClientHello carries $\mathit{cref}_C$ instead of $Cert_C$ once the
+vehicle's certificate is in the directory, and $known = H(Cert_S)$ when the
+vehicle holds the RSU's certificate.
+\item If $known$ matches, ServerHello carries $\mathit{cref}_S$ instead of
+$Cert_S$.
+\item If the RSU cannot resolve $\mathit{cref}_C$ (locally or from the
+directory) it answers \emph{HelloRetry} $\{n_C\}$, and the client resends its
+ClientHello with the full certificate and a new nonce.
+\end{enumerate}
+
+The security argument:
+\begin{itemize}
+\item \textbf{Checks are not cached.} A cached certificate is verified in full
+on every handshake (TA signature, validity, role, expected identity, current
+CRL), so revocation still takes effect at the next CRL refresh.
+\item \textbf{The reference is bound by both signatures.} $\mathit{cref}$ is
+a collision-resistant hash of the exact certificate bytes and lies inside the
+messages that $\sigma_C$ and $\sigma_S$ cover. Claiming another vehicle's
+cached certificate fails $\sigma_C$; replacing the server's reference fails
+$\sigma_S$.
+\item \textbf{The directory is not trusted.} A fetched certificate must hash
+to the requested reference and is verified against $pk_{TA}$.
+\item \textbf{The cache cannot be filled by strangers.} A server caches a
+client certificate only after a handshake with its owner has completed, and
+the cache is a bounded LRU.
+\item \textbf{HelloRetry is unauthenticated, and that is acceptable.} It must
+echo the client's nonce and is honoured once per handshake. Forging it only
+forces the full-certificate path, the same property as TLS~1.3's
+HelloRetryRequest~\cite{tls13}.
+\end{itemize}
+
+For DECK the handshake shrinks from \V{deck-hs-bytes} to
+\V{deck-cached-bytes} bytes (\V{deck-cache-saving}\,\% smaller) and from
+\V{deck-hs-frames} to \V{deck-cached-frames} radio frames. The cached
+ClientHello is \V{deck-ch-cached} bytes, one frame.
+
+\section{Record layer}
+
+\begin{align*}
+record &= ctr\ (8\,\mathrm{B}) \parallel \mathrm{AES\text{-}256\text{-}GCM}(k_{dir},\ nonce,\ pt,\ aad = dir \parallel ctr) \\
+nonce &= v_{dir} \oplus (0^{32} \parallel \mathrm{be64}(ctr))
+\end{align*}
+
+Counter 0 is reserved for the Finished message and application data starts at
+1, so no (key, nonce) pair is ever reused. A 64-record sliding window accepts
+reordered records once and rejects replays; it is checked \emph{before}
+decryption, so a replay flood costs a lookup rather than an AES operation. A
+session refuses to send more than $2^{32}$ records.
+
+\section{Defects found and corrected}
+\label{sec:defects}
+
+\subsection{In the base paper}
+
+\begin{table}[h]
+\centering
+\caption{Defects in the base paper and their corrections}
+\label{tab:defects}
+\begin{tabular}{@{}p{0.6cm}p{6.2cm}p{6.8cm}@{}}
+\toprule
+& Defect & Correction \\
+\midrule
+D1 & Consensus messages are signed and verified ``using Kyber'', a KEM with no signing operation. & ML-DSA signatures on every consensus message. \\
+D2 & The encapsulation listing defines $k_i$ in terms of itself, and decapsulation uses $k_i$, which the receiver does not have. & The standard \textsf{Encaps}/\textsf{Decaps} interface. \\
+D3 & The session key is $H(k_i \parallel k'_j)$, a value hashed with itself, since a correct KEM gives $k_i = k'_j$. & HKDF over the shared secret and the hash of the whole transcript. \\
+D4 & The TA generates entities' private keys (key escrow) although the paper claims ``no key escrow''. & Entities generate their own keys; the TA certifies public keys only, with proof of possession. \\
+D5 & Hyperledger Fabric 2.2 orders with Raft and cannot host a PBFT-family protocol. & A ledger implemented directly, driven by AGS-PBFT. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{In our Review 1 design}
+
+\begin{table}[h]
+\centering
+\caption{Corrections to the Review 1 handshake design}
+\label{tab:fixes}
+\begin{tabular}{@{}p{0.6cm}p{6.2cm}p{6.8cm}@{}}
+\toprule
+& Review 1 & Now, and why \\
+\midrule
+F1 & The server signs $T \parallel pk_{kem}$, but nothing initialises $T$. & A ClientHello with a fresh nonce and timestamp opens $T$, so a recorded ServerHello cannot be replayed. \\
+F2 & Only the server signs. & The client signs the transcript. Otherwise anyone holding a copy of a vehicle's (public) certificate can open a session as that vehicle. \\
+F3 & Finished uses counter 0; where data starts is unspecified. & Data starts at counter 1: no GCM nonce reuse. \\
+F4 & Key generation shown as $sk_{kem} \leftarrow (s, e, pk_{kem})$. & \textsf{KeyGen()}; FIPS 203's $dk$ is $(s, ek, H(ek), z)$. \\
+F5 & The certificate signs only $ID \parallel pk$. & Role, serial and validity are bound too. \\
+F6 & No downgrade protection. & Suite in the ClientHello, matched exactly, signed. \\
+F7 & Abort reasons unspecified. & One uniform error. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Edge routing}
+
+Each event carries a criticality level set by the reporting vehicle, and the
+MEC routes on it. A critical event (collision ahead, pedestrian on the road,
+ice) is broadcast as an alert to every RSU, which re-encrypts it
+for each vehicle's session, and only then submitted to consensus for the
+ledger. A routine event (a pothole report, road condition) goes to the cloud
+archive. Safety warnings therefore never wait for a consensus round.
+
+\section{AGS-PBFT}
+
+\subsection{Normal case}
+
+\begin{enumerate}
+\item The MEC sends a signed REQUEST to the leader, $R[v \bmod |R|]$, where
+$R$ is the sorted consensus set.
+\item The leader sends a signed PRE-PREPARE to the consensus set and to the
+candidates.
+\item Consensus nodes broadcast PREPARE. On $2f+1$ matching prepares each node
+\emph{validates} the event (fields present, reporter's TA certificate valid,
+event not already recorded) and sends its result in a RESPONSE to the leader.
+Candidates send a SHADOW-RESPONSE that is scored but not counted towards the
+quorum.
+\item On $2f+1$ matching responses the leader builds a block containing the
+request, the agreed result, the signed responses as a commit certificate, the
+updated scores and the membership, signs it, sends COMMIT to every node and
+REPLY to the MEC.
+\item Every node re-verifies the block (hash link, leader signature, commit
+certificate, recomputed scores and membership) before appending it.
+\end{enumerate}
+
+\subsection{Scores and regrouping}
+
+A node gains $+1$ if its result matches the committed one and loses $5$ if it
+differs. Every \emph{regroup interval} (50 blocks in the paper), nodes compute
+$\mu$ and $\sigma$ over all scores; consensus nodes below $\mu - \sigma$ are
+demoted and candidates above $\mu + \sigma$ promoted, and the set is resized
+to $3f+1$. Because scores and membership are written into each block and
+re-derived by every node, all nodes agree on the consensus set without extra
+messages.
+
+\subsection{Decisions where the paper is undefined}
+
+\begin{table}[h]
+\centering
+\caption{Design decisions for AGS-PBFT}
+\label{tab:dd}
+\begin{tabular}{@{}p{0.6cm}p{6.2cm}p{6.8cm}@{}}
+\toprule
+& Gap in the paper & Decision \\
+\midrule
+D6 & All nodes start at 100, so at the first regroup $\sigma = 0$ and $\mu - \sigma = \mu + \sigma$: every node is both above and below threshold. & Skip regrouping while $\sigma = 0$. \\
+D7 & Candidates never take part, so they can never gain score or be promoted. & Candidates validate as shadows and are scored. Absent nodes score 0, not $-5$, so a Byzantine leader cannot punish honest nodes by omitting their responses. \\
+D8 & ``Group size is adjusted based on network activity'' is not specified. & Request rate $r$ over the interval, from request timestamps so every node computes the same value: $f$ falls linearly from $f_{max}$ at $r \le 2$/s to 1 at $r \ge 20$/s. \\
+D9 & $2f+1$ prepares are required, but the leader sends none, so the quorum is unreachable with $f$ faulty backups. & The leader also sends a PREPARE for its own proposal. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{View change}
+
+A consensus node that has seen a request but not its commit within a timeout
+broadcasts VIEW-CHANGE$\{v+1, h, head, P\}$, where $P$ holds its prepared
+certificates above its ledger height $h$. On $2f+1$ view changes the new
+leader computes the set $O$ of requests to re-issue (the highest-view prepared
+request for each sequence number, or a no-op for a gap) and sends
+NEW-VIEW$\{v+1, V, O\}$. Replicas verify the signatures, recompute $O$, and on
+a match enter the new view. The timeout doubles after each failed view.
+Messages for a future view are buffered, because a pre-prepare can overtake
+the NEW-VIEW that precedes it.
+
+\section{Ledger}
+
+A block is $(B\_ID, Pr\_B\_Hash, T\_Block)$ as in the paper, plus view,
+sequence number, signed request, agreed result, commit certificate, score
+table, membership, leader identity and leader signature. Any party holding
+$pk_{TA}$ can replay a ledger from genesis and check every hash link,
+signature, certificate, score and membership change.

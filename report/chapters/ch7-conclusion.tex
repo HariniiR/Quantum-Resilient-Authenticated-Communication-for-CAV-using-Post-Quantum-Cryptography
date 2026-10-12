@@ -1,0 +1,70 @@
+\chapter{Conclusion and Future Work}
+\label{ch:conc}
+
+\section{Conclusion}
+
+We built a complete post-quantum security framework for connected vehicles,
+from registration with a Trusted Authority through a mutually authenticated
+ML-KEM/ML-DSA handshake and encrypted records to AGS-PBFT consensus over a
+verifiable ledger, and ran it as a distributed system, in an 802.11p
+simulation with mobility, and under attack. Implementing the base paper
+exposed defects that prevent it from working as published, the most serious
+being a consensus layer that signs with a KEM; implementing our own Review~1
+design exposed the lack of client authentication. Both were corrected and the
+corrections tested.
+
+The measurements answer the project's question. Post-quantum cryptography
+fits the vehicular latency budget per message, at every NIST security level,
+once it is implemented natively: a beacon inside a session is a
+\V{deck-beacon-aead-bytes}-byte AES-GCM record whatever the suite, and a full
+handshake takes about \V{deck-hs-ms}\,ms of computation. The binding
+constraint is size. A post-quantum handshake is about twenty times larger
+than a classical one, and on a shared 6\,Mb/s channel that is what fails as
+density grows: at 100 vehicles in our scenario DECK completes
+\V{ns3-success-deck-100}\,\% of handshakes, against
+\V{ns3-success-classic-100}\,\% classically. Protocol design recovers much of
+the loss. Certificate caching halves the handshake and raises completion to
+\V{ns3-success-deck-cache-100}\,\%, and exponential backoff after a failed
+handshake prevents congestion collapse. Safety warnings do not wait
+for consensus at all, and AGS-PBFT saves messages, and CPU at light load, but not time.
+
+\section{Limitations}
+
+\begin{itemize}
+\item \textbf{One machine.} The distributed system runs on localhost, so its
+latencies include TCP over loopback, not radio. Radio effects come only from
+ns-3.
+\item \textbf{ns-3 replays measured costs.} The simulation uses measured
+message sizes and processing-time distributions rather than executing the
+cryptography.
+\item \textbf{No WAVE module.} The ns-3 Python package provides the 802.11p
+PHY and MAC but no WAVE/OCB module, so the ad-hoc MAC is used. Ad-hoc mode
+also has no association, so behaviour is close.
+\item \textbf{Certificate caching relies on infrastructure we model.} The
+edge directory is the TA registry in the distributed system and one backhaul
+round trip in ns-3. A vehicle's first handshake still sends its certificate in
+full.
+\item \textbf{Linkability.} Certificates and certificate references identify a
+vehicle across handshakes; pseudonym certificates would be needed for
+location privacy.
+\item \textbf{V2V through RSUs is not end-to-end.} Relaying RSUs see the
+plaintext, as in the original design.
+\item \textbf{No formal verification} of the handshake.
+\end{itemize}
+
+\section{Future work}
+
+\begin{itemize}
+\item \textbf{Smaller handshakes.} KEM-based authentication in the style of
+KEMTLS, which replaces the server's signature with a KEM, or certificates
+signed with a scheme that has smaller signatures, would attack the remaining
+size directly.
+\item \textbf{Robust regrouping.} Replace AGS-PBFT's $\mu \pm \sigma$ rule
+with the median and median absolute deviation, so that one outlier cannot
+shield a silent node.
+\item \textbf{Formal analysis} of the handshake, including certificate
+caching, with a protocol verifier such as ProVerif or Tamarin.
+\item \textbf{Pseudonymous certificates} compatible with caching.
+\item \textbf{Realistic mobility} from a traffic simulator on a real road
+network, and evaluation on vehicular hardware.
+\end{itemize}

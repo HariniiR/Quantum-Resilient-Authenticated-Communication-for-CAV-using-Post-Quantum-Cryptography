@@ -118,6 +118,37 @@ def run_attacks(suite_name: str = "DECK") -> list[dict]:
         return False
     record("revoked credential", revoked, "certificate serial on the signed CRL")
 
+    # ---- certificate cache -----------------------------------------------
+    def cache_foreign_ref():
+        # the RSU has CAV_02's certificate cached; CAV_01's key holder claims it by reference
+        from ..certcache import CertCache, cert_ref
+        sc = CertCache()
+        sc.put(cav2.cert.encode(), cav2.id)
+        hs_c = ClientHandshake(cav, expected_id=rsu.id)
+        d = codec.decode(hs_c.client_hello())
+        d.pop("cert")
+        d["cref"] = cert_ref(cav2.cert.encode())
+        forged = codec.encode(d)
+        hs_s = ServerHandshake(rsu, cache=sc)
+        sh = hs_s.on_client_hello(forged)
+        hs_c._ch = forged
+        hs_s.on_client_key(hs_c.on_server_hello(sh))
+        return False
+    record("cache: claim another vehicle's cached certificate", cache_foreign_ref,
+           "client signature checked with the referenced certificate's key")
+
+    def cache_revoked():
+        from ..certcache import CertCache
+        ta3 = TrustedAuthority(suite)
+        i3 = enrol_all(ta3, [("CAV_C", "CAV"), ("RSU_C", "RSU")])
+        cc, sc = CertCache(), CertCache()
+        handshake_in_memory(i3["CAV_C"], i3["RSU_C"], client_cache=cc, server_cache=sc)
+        i3["RSU_C"].anchor.update_crl(ta3.revoke("CAV_C"))
+        handshake_in_memory(i3["CAV_C"], i3["RSU_C"], client_cache=cc, server_cache=sc)
+        return False
+    record("cache: revoked certificate still in the cache", cache_revoked,
+           "cached certificates are re-verified against the current CRL")
+
     def role_confusion():
         handshake_in_memory(cav, cav2, expected_role="RSU")
         return False

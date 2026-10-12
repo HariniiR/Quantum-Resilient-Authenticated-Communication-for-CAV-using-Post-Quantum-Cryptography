@@ -72,6 +72,13 @@ class TANode:
                     resp = self._revoke(req["id"])
             elif op == "registry":
                 resp = {"ok": True, "registry": [list(r) for r in self.ta.registry()]}
+            elif op == "cert":
+                # edge-directory lookup by reference H(cert); the certificate is
+                # TA-signed, so it is served in the clear like the CRL
+                from ..certcache import cert_ref
+                rows = self.ta._db.execute("SELECT cert FROM registry").fetchall()
+                hit = next((bytes(r[0]) for r in rows if cert_ref(bytes(r[0])) == req.get("ref")), None)
+                resp = {"ok": hit is not None, "cert": hit}
             elif op == "certs":
                 rows = self.ta._db.execute("SELECT cert FROM registry").fetchall()
                 resp = {"ok": True, "certs": [bytes(r[0]) for r in rows]}

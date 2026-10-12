@@ -1,0 +1,122 @@
+\chapter{Background}
+\label{ch:bg}
+
+\section{Learning With Errors}
+
+Given a public matrix $A$ and a vector $b = As + e \pmod q$, where $s$ is
+secret and $e$ is a vector of small random ``errors'', the Learning With Errors
+(LWE) problem~\cite{regev} asks for $s$. Without $e$ this is linear algebra.
+With it, the best known classical and quantum algorithms take exponential
+time, and Regev showed that solving random instances is as hard as
+worst-case lattice problems. Module-LWE~\cite{langlois} replaces the entries
+of $A$ with polynomials in $R_q = \mathbb{Z}_q[X]/(X^{256}+1)$, which shrinks
+keys and allows fast multiplication with the number-theoretic transform. Both
+ML-KEM and ML-DSA use $n = 256$; ML-KEM uses $q = 3329$ and ML-DSA uses
+$q = 8\,380\,417$.
+
+\section{ML-KEM (FIPS 203)}
+
+A key-encapsulation mechanism has three algorithms:
+\begin{align*}
+(ek, dk) &\leftarrow \mathsf{KeyGen}() \\
+(K, c) &\leftarrow \mathsf{Encaps}(ek) \\
+K &\leftarrow \mathsf{Decaps}(dk, c)
+\end{align*}
+\textsf{Encaps} chooses a random 32-byte message $m$, derives $(K, r) =
+G(m \parallel H(ek))$, and encrypts $m$ under $ek$ with randomness $r$.
+\textsf{Decaps} decrypts to $m'$, re-derives $(K', r')$, re-encrypts and
+compares. If the ciphertexts differ it returns a pseudorandom key derived from
+a secret value $z$ instead of an error (implicit rejection), so an attacker
+learns nothing from malformed ciphertexts.
+
+Two properties matter for protocol design. First, \textbf{a KEM is not
+Diffie--Hellman}: only the receiver has a key pair, and the sender's
+contribution is fresh randomness. A KEM therefore authenticates neither party
+by itself; authentication must come from signatures. Second, \textbf{a KEM
+has no signing operation}, which is the root of defect D1 in the base paper.
+
+\begin{table}[h]
+\centering
+\caption{ML-KEM parameter sets (FIPS 203)}
+\label{tab:mlkem}
+\begin{tabular}{lrrrrr}
+\toprule
+Parameter set & $k$ & category & $ek$ (B) & $dk$ (B) & ciphertext (B) \\
+\midrule
+ML-KEM-512 & 2 & 1 & 800 & 1,632 & 768 \\
+ML-KEM-768 & 3 & 3 & 1,184 & 2,400 & 1,088 \\
+ML-KEM-1024 & 4 & 5 & 1,568 & 3,168 & 1,568 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The encapsulation key is $k$ polynomials of 256 coefficients at 12 bits each,
+plus a 32-byte seed for $A$: for ML-KEM-1024, $4 \times 384 + 32 = 1{,}568$
+bytes. The shared secret is always 32 bytes.
+
+\section{ML-DSA (FIPS 204)}
+
+ML-DSA signs with a Fiat--Shamir-with-aborts construction. The signer picks a
+masking vector $y$, computes $w = Ay$, derives a challenge $c$ from the hash of
+the message representative $\mu$ and the high bits of $w$, and outputs $z = y
++ cs_1$ only if $z$ leaks nothing about the secret $s_1$; otherwise it starts
+again. The verifier recomputes the high bits of $Az - ct_1$ from the public
+key, hashes them with $\mu$, and checks the result against $c$. The message is
+never inside the signature: the verifier needs the message, the signature and
+the public key. FIPS~204 adds a \emph{context string} to the signed message;
+we use \code{qrcav-v1} for domain separation.
+
+\begin{table}[h]
+\centering
+\caption{ML-DSA parameter sets (FIPS 204) and ECDSA P-256 for comparison}
+\label{tab:mldsa}
+\begin{tabular}{lrrr}
+\toprule
+Scheme & category & public key (B) & signature (B) \\
+\midrule
+ML-DSA-44 & 2 & 1,312 & 2,420 \\
+ML-DSA-65 & 3 & 1,952 & 3,309 \\
+ML-DSA-87 & 5 & 2,592 & 4,627 \\
+ECDSA P-256 & -- & 65 & 70--72 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Symmetric building blocks}
+
+\paragraph{Hash.} $H$ is SHAKE-256 over length-prefixed inputs, so
+$H(ab, c) \neq H(a, bc)$.
+
+\paragraph{Key derivation.} HKDF~\cite{hkdf} with HMAC-SHA3-256 extracts a
+pseudorandom key from the KEM shared secret and expands it into independent
+keys and IVs for each direction, each with its own label.
+
+\paragraph{Records.} AES-256-GCM~\cite{gcm} provides confidentiality and
+integrity. Its one hard rule is that a (key, nonce) pair must never repeat:
+reuse reveals the authentication key and allows forgeries. We derive the
+nonce as $v \oplus (0^{32} \parallel \mathrm{be64}(ctr))$ from a per-direction
+IV $v$ and a record counter.
+
+\section{PBFT}
+
+PBFT~\cite{pbft} runs on $n \ge 3f + 1$ replicas, one of which is the leader
+(primary) for the current view. The leader assigns a sequence number to a
+request in a PRE-PREPARE; replicas broadcast PREPARE, and after $2f+1$
+matching prepares broadcast COMMIT; after $2f+1$ commits they execute and
+reply. Any two quorums of $2f+1$ intersect in at least one honest replica,
+which gives \emph{safety} (no two honest replicas commit different values at
+one sequence number). \emph{Liveness} needs the leader to make progress; if it
+does not, replicas time out and run a view change that installs the next
+leader and carries prepared requests across. Messages per request grow as
+$O(n^2)$.
+
+\section{IEEE 802.11p}
+
+IEEE~802.11p~\cite{ieee80211p} is Wi-Fi adapted for vehicles: 10\,MHz
+channels at 5.9\,GHz, typically 6\,Mb/s for safety messages, no association
+(communication outside the context of a BSS), and EDCA access categories that
+let safety traffic (AC\_VO) win the channel before bulk traffic (AC\_BE).
+Periodic beacons are link-layer broadcasts with no acknowledgement or
+retransmission. A 1,400-byte payload occupies the channel for about 2\,ms at
+6\,Mb/s, so a 20\,KB handshake costs about 30\,ms of airtime before any
+contention or loss.
