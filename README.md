@@ -36,6 +36,7 @@ python -m venv .venv
 pip install -r requirements.txt
 
 python scripts\demo_protocol.py   # the protocol step by step (1 s)
+python scripts\demo_parts.py pki  # one component on its own (see --help)
 python scripts\run_network.py     # the whole distributed system (50 s)
 python -m pytest                  # 55 tests (~1 min)
 python scripts\run_evaluation.py  # benchmarks + figures into results\ (~4 min)
@@ -66,7 +67,7 @@ qrcav/                         the system (v2)
   nodes/                       one process per entity: ta, cloud, mec, consensus_node, rsu, cav
   sim/                         ns-3 802.11p scenario (C++ via cppyy) + measurement profiles
   eval/                        benchmarks, attacks, consensus experiments, ns-3 sweeps, plots, replay viewer
-scripts/                       demo_protocol, run_network, run_evaluation, run_ns3_sweeps, make_viewer, make_tables
+scripts/                       demo_protocol, demo_parts, run_network, run_evaluation, run_ns3_sweeps, make_viewer, make_tables
 config/demo.json               the Review 2 scenario (faults, revocation, handover, V2V)
 tests/                         pytest suite, including a real multi-process run
 docs/                          00 start here; 05 design; 06 running + demo; 07 results; review1/ archived
