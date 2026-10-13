@@ -74,25 +74,18 @@ def fig_handshake_time(res: Path, out: Path):
         return
     fig, ax = plt.subplots(figsize=(7.5, 3.8))
     suites = [s for s in ORDER if any(r["suite"] == s for r in rows)]
-    w = 0.38
-    for j, be in enumerate(["openssl", "pure"]):
-        xs, ys = [], []
-        for i, s in enumerate(suites):
-            r = next((r for r in rows if r["suite"] == s and str(r["backend"]).startswith(be)), None)
-            if r is None and be == "pure" and s == "L1":
-                r = next((r for r in rows if r["suite"] == s and "pure" in str(r["backend"])), None)
-            if r:
-                xs.append(i + (j - 0.5) * w)
-                ys.append(r["mean_ms"])
-        bars = ax.bar(xs, ys, w * 0.92, color=["#2a78d6", "#eb6834"][j],
-                      label={"openssl": "native (OpenSSL)", "pure": "pure Python"}[be])
-        for x, y in zip(xs, ys):
-            ax.text(x, y * 1.12, f"{y:.1f}" if y < 100 else f"{y:.0f}", ha="center", fontsize=8, color=INK2)
-    ax.set_yscale("log")
-    ax.set_xticks(range(len(suites)), [s if s != "DECK" else "DECK\n(review 1)" for s in suites])
-    ax.set_ylabel("full handshake, ms (log)")
+    means = [next(r for r in rows if r["suite"] == s)["mean_ms"] for s in suites]
+    p95 = [next(r for r in rows if r["suite"] == s)["p95_ms"] for s in suites]
+    ax.bar(range(len(suites)), means, 0.6, color=[SUITE_COLOR[s] for s in suites], label="mean")
+    ax.errorbar(range(len(suites)), means, yerr=[[0] * len(suites), [p - m for p, m in zip(p95, means)]],
+                fmt="none", ecolor=INK2, capsize=4, lw=1, label="up to p95")
+    for i, (m, p) in enumerate(zip(means, p95)):
+        ax.text(i, p + 0.3, f"{m:.1f}", ha="center", fontsize=8.5, color=INK)
+    ax.set_xticks(range(len(suites)), [s if s != "L1" else "L1\n(KEM in kyber-py)" for s in suites])
+    ax.set_ylabel("full handshake, ms")
+    ax.set_ylim(0, max(p95) * 1.25)
     ax.set_title("Full mutual handshake: compute time, both sides")
-    ax.legend(loc="upper left")
+    ax.legend(loc="upper left", fontsize=8.5)
     _save(fig, out, "fig1_handshake_compute.png")
 
 
@@ -123,7 +116,7 @@ def fig_handshake_size(res: Path, out: Path):
 
 
 def fig_beacon_budget(res: Path, out: Path):
-    rows = [r for r in read_csv(res / "beacon_budget.csv") if r["backend"] in ("openssl", "pure+openssl")]
+    rows = read_csv(res / "beacon_budget.csv")
     if not rows:
         return
     fig, ax = plt.subplots(figsize=(7.5, 3.8))
@@ -141,7 +134,7 @@ def fig_beacon_budget(res: Path, out: Path):
     ax.set_ylim(0.01, 400)
     ax.set_xticks(range(len(suites)), suites)
     ax.set_ylabel("per-beacon cost, ms (log)")
-    ax.set_title("Per-beacon cost against the 100 ms budget (native backend)")
+    ax.set_title("Per-beacon cost against the 100 ms budget")
     ax.legend(loc="upper left", bbox_to_anchor=(0, 0.86), fontsize=8.5)
     _save(fig, out, "fig3_beacon_budget.png")
 
@@ -225,8 +218,6 @@ def _agg(rows, key):
     """(suite, vehicles) -> (mean, min, max) across seeds."""
     groups: dict = {}
     for r in rows:
-        if str(r.get("backend")) == "pure":
-            continue
         suite = str(r["suite"]) + ("+cache" if float(r.get("cert_cache") or 0) > 0 else "")
         groups.setdefault((suite, int(r["vehicles"])), []).append(float(r[key]))
     return {k: (sum(v) / len(v), min(v), max(v), len(v)) for k, v in groups.items()}
@@ -278,7 +269,7 @@ def fig_ns3(res: Path, out: Path):
 
 def fig_ns3_ablation(res: Path, out: Path):
     rows = read_csv(res / "ns3_variants.csv")
-    deck = [r for r in rows if str(r.get("suite")) == "DECK" and str(r.get("backend")) == "openssl"
+    deck = [r for r in rows if str(r.get("suite")) == "DECK"
             and not r.get("signed_beacons") and not float(r.get("cert_cache") or 0)]
     if not deck:
         return
@@ -335,7 +326,7 @@ def fig_cert_cache(res: Path, out: Path):
     ax.set_title("Bytes per handshake")
     ax.legend(loc="upper left", fontsize=8)
     if has_ns3:
-        sub = [r for r in dens if str(r["suite"]) in ("DECK", "CLASSIC") and str(r.get("backend")) != "pure"]
+        sub = [r for r in dens if str(r["suite"]) in ("DECK", "CLASSIC")]
         _ns3_lines(axs[1], sub, "handshake_success_pct", "%", "ns-3: handshakes completed")
         axs[1].set_ylim(0, 105)
         _ns3_lines(axs[2], sub, "airtime_pct", "% of one channel (sum over cells)", "ns-3: channel airtime")

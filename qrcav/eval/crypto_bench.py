@@ -1,6 +1,6 @@
 """
 Cryptographic measurements: primitives, sizes, full handshakes, and the
-per-beacon budget, for every suite and both backends.
+per-beacon budget, for every suite.
 """
 
 from __future__ import annotations
@@ -11,7 +11,7 @@ import time
 
 from .. import codec
 from ..crypto.records import RECORD_OVERHEAD
-from ..crypto.suites import HAVE_OPENSSL_PQC, HAVE_PURE_PQC, get_suite
+from ..crypto.suites import get_suite
 from ..handshake import handshake_in_memory
 from ..pki import TrustedAuthority, enrol_all
 
@@ -56,40 +56,27 @@ def bench(fn, n: int = 200, warmup: int = 10) -> dict:
     }
 
 
-def backends() -> list[str]:
-    out = []
-    if HAVE_OPENSSL_PQC:
-        out.append("openssl")
-    if HAVE_PURE_PQC:
-        out.append("pure")
-    return out
-
-
-def primitives(n: int = 200, pure_n: int = 40) -> list[dict]:
+def primitives(n: int = 200) -> list[dict]:
     rows = []
-    for be in backends():
-        for name in SUITES:
-            if name == "CLASSIC" and be == "pure":
-                continue
-            s = get_suite(name, be)
-            m = b"m" * 256
-            ek, dk = s.kem.keygen()
-            _, ct = s.kem.encaps(ek)
-            pk, sk = s.sig.keygen()
-            sig = s.sig.sign(sk, m)
-            k = pure_n if s.backend != "openssl" else n
-            ops = {
-                f"{s.kem.name} keygen": s.kem.keygen,
-                f"{s.kem.name} encaps": lambda: s.kem.encaps(ek),
-                f"{s.kem.name} decaps": lambda: s.kem.decaps(dk, ct),
-                f"{s.sig.name} keygen": s.sig.keygen,
-                f"{s.sig.name} sign": lambda: s.sig.sign(sk, m),
-                f"{s.sig.name} verify": lambda: s.sig.verify(pk, m, sig),
-            }
-            for op, fn in ops.items():
-                r = bench(fn, k, 5)
-                rows.append({"suite": name, "backend": s.backend, "operation": op,
-                             **{kk: round(v, 4) if isinstance(v, float) else v for kk, v in r.items()}})
+    for name in SUITES:
+        s = get_suite(name)
+        m = b"m" * 256
+        ek, dk = s.kem.keygen()
+        _, ct = s.kem.encaps(ek)
+        pk, sk = s.sig.keygen()
+        sig = s.sig.sign(sk, m)
+        ops = {
+            f"{s.kem.name} keygen": s.kem.keygen,
+            f"{s.kem.name} encaps": lambda: s.kem.encaps(ek),
+            f"{s.kem.name} decaps": lambda: s.kem.decaps(dk, ct),
+            f"{s.sig.name} keygen": s.sig.keygen,
+            f"{s.sig.name} sign": lambda: s.sig.sign(sk, m),
+            f"{s.sig.name} verify": lambda: s.sig.verify(pk, m, sig),
+        }
+        for op, fn in ops.items():
+            r = bench(fn, n, 5)
+            rows.append({"suite": name, "operation": op,
+                         **{kk: round(v, 4) if isinstance(v, float) else v for kk, v in r.items()}})
     return rows
 
 
@@ -106,7 +93,7 @@ def sizes() -> list[dict]:
     from ..certcache import CertCache
     rows = []
     for name in SUITES:
-        s = get_suite(name, "auto")
+        s = get_suite(name)
         ta = TrustedAuthority(s)
         ids = enrol_all(ta, [("CAV_00001", "CAV"), ("RSU_001", "RSU")])
         c, _ = handshake_in_memory(ids["CAV_00001"], ids["RSU_001"])
@@ -134,23 +121,19 @@ def sizes() -> list[dict]:
     return rows
 
 
-def handshakes(n: int = 100, pure_n: int = 15) -> list[dict]:
+def handshakes(n: int = 100) -> list[dict]:
     rows = []
-    for be in backends():
-        for name in SUITES:
-            if name == "CLASSIC" and be == "pure":
-                continue
-            s = get_suite(name, be)
-            ta = TrustedAuthority(s)
-            ids = enrol_all(ta, [("CAV_00001", "CAV"), ("RSU_001", "RSU")])
-            k = pure_n if s.backend != "openssl" else n
-            r = bench(lambda: handshake_in_memory(ids["CAV_00001"], ids["RSU_001"]), k, 3)
-            c, srv = handshake_in_memory(ids["CAV_00001"], ids["RSU_001"])
-            row = {"suite": name, "backend": s.backend, **{kk: round(v, 3) for kk, v in r.items()}}
-            for op, v in sorted({**{f"client_{a}": b for a, b in c.crypto_ms.items()},
-                                 **{f"server_{a}": b for a, b in srv.crypto_ms.items()}}.items()):
-                row[op] = round(v, 3)
-            rows.append(row)
+    for name in SUITES:
+        s = get_suite(name)
+        ta = TrustedAuthority(s)
+        ids = enrol_all(ta, [("CAV_00001", "CAV"), ("RSU_001", "RSU")])
+        r = bench(lambda: handshake_in_memory(ids["CAV_00001"], ids["RSU_001"]), n, 3)
+        c, srv = handshake_in_memory(ids["CAV_00001"], ids["RSU_001"])
+        row = {"suite": name, **{kk: round(v, 3) for kk, v in r.items()}}
+        for op, v in sorted({**{f"client_{a}": b for a, b in c.crypto_ms.items()},
+                             **{f"server_{a}": b for a, b in srv.crypto_ms.items()}}.items()):
+            row[op] = round(v, 3)
+        rows.append(row)
     return rows
 
 
@@ -166,40 +149,37 @@ def beacon_budget(n: int = 300) -> list[dict]:
     beacon = {"type": "beacon", "src": "CAV_00001", "seq": 1, "ts": 1.0e9, "pos": [1234.5, 678.9],
               "speed": 13.9, "heading": 90.0}
     raw = codec.encode(beacon)
-    for be in backends():
-        for name in SUITES:
-            if name == "CLASSIC" and be == "pure":
-                continue
-            s = get_suite(name, be)
-            ta = TrustedAuthority(s)
-            ids = enrol_all(ta, [("CAV_00001", "CAV"), ("RSU_001", "RSU")])
-            c, srv = handshake_in_memory(ids["CAV_00001"], ids["RSU_001"])
-            k = 40 if s.backend != "openssl" else n
-            # AEAD path
-            recs = []
+    for name in SUITES:
+        s = get_suite(name)
+        ta = TrustedAuthority(s)
+        ids = enrol_all(ta, [("CAV_00001", "CAV"), ("RSU_001", "RSU")])
+        c, srv = handshake_in_memory(ids["CAV_00001"], ids["RSU_001"])
+        k = n
+        # AEAD path
+        recs = []
 
-            def seal_open():
-                r = c.seal(beacon)
-                srv.open(r)
-                recs.append(len(r))
-            a = bench(seal_open, k, 5)
-            fr, air = message_airtime_ms(recs[-1])
-            rows.append({"suite": name, "backend": s.backend, "mode": "AEAD (session)",
-                         "bytes": recs[-1], "frames": fr, "crypto_mean_ms": round(a["mean_ms"], 4),
-                         "crypto_p99_ms": round(a["p99_ms"], 4), "airtime_ms": round(air, 3),
-                         "total_p99_ms": round(a["p99_ms"] + air, 3),
-                         "fits_100ms": a["p99_ms"] + air <= 100})
-            sk, pk = ids["CAV_00001"].sk, ids["CAV_00001"].pk
-            size = len(codec.encode({"b": raw, "sig": s.sig.sign(sk, raw), "cert": bytes(32)}))
+        def seal_open():
+            r = c.seal(beacon)
+            srv.open(r)
+            recs.append(len(r))
+        a = bench(seal_open, k, 5)
+        fr, air = message_airtime_ms(recs[-1])
+        rows.append({"suite": name, "mode": "AEAD (session)",
+                     "bytes": recs[-1], "frames": fr, "crypto_mean_ms": round(a["mean_ms"], 4),
+                     "crypto_p99_ms": round(a["p99_ms"], 4), "airtime_ms": round(air, 3),
+                     "total_p99_ms": round(a["p99_ms"] + air, 3),
+                     "fits_100ms": a["p99_ms"] + air <= 100})
+        sk, pk = ids["CAV_00001"].sk, ids["CAV_00001"].pk
+        size = len(codec.encode({"b": raw, "sig": s.sig.sign(sk, raw), "cert": bytes(32)}))
 
-            def sign_verify():
-                sg = s.sig.sign(sk, raw)
-                s.sig.verify(pk, raw, sg)
-            g = bench(sign_verify, k, 5)
-            fr, air = message_airtime_ms(size)
-            rows.append({"suite": name, "backend": s.backend, "mode": "signed (broadcast)",
-                         "bytes": size, "frames": fr, "crypto_mean_ms": round(g["mean_ms"], 4),
-                         "crypto_p99_ms": round(g["p99_ms"], 4), "airtime_ms": round(air, 3),
-                         "total_p99_ms": round(g["p99_ms"] + air, 3),
-                         "fits_100ms": g["p99_ms"] + air <= 100})
+        def sign_verify():
+            sg = s.sig.sign(sk, raw)
+            s.sig.verify(pk, raw, sg)
+        g = bench(sign_verify, k, 5)
+        fr, air = message_airtime_ms(size)
+        rows.append({"suite": name, "mode": "signed (broadcast)",
+                     "bytes": size, "frames": fr, "crypto_mean_ms": round(g["mean_ms"], 4),
+                     "crypto_p99_ms": round(g["p99_ms"], 4), "airtime_ms": round(air, 3),
+                     "total_p99_ms": round(g["p99_ms"] + air, 3),
+                     "fits_100ms": g["p99_ms"] + air <= 100})
     return rows

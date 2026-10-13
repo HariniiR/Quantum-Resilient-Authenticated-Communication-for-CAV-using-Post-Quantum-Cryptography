@@ -242,7 +242,7 @@ class Identity:
     def save(self, path: Path) -> None:
         d = {
             "id": self.id, "role": self.role, "suite": self.suite.name,
-            "backend": self.suite.backend, "pk": self.pk,
+            "pk": self.pk,
             "sk": self.suite.sig.sk_to_bytes(self.sk),
             "cert": self.cert.encode() if self.cert else None,
             "ta_pk": self.anchor.ta_pk if self.anchor else None,
@@ -253,8 +253,7 @@ class Identity:
     @classmethod
     def load(cls, path: Path) -> "Identity":
         d = codec.decode_dict(path.read_bytes())
-        backend = d["backend"] if d["backend"] in ("openssl", "pure") else "auto"
-        suite = get_suite(d["suite"], backend)
+        suite = get_suite(d["suite"])
         ident = cls(d["id"], d["role"], suite, suite.sig.sk_from_bytes(d["sk"]), d["pk"])
         if d["cert"] and d["ta_pk"]:
             ident.cert = Certificate.decode(d["cert"])

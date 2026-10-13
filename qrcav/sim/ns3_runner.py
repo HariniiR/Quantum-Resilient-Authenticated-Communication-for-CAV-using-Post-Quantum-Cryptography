@@ -176,7 +176,7 @@ def run_scenario(
     measured = C.get("measured_s", sim_time - warmup)
     slots = C.get("beacon_slots", 0.0)
     res = {
-        "suite": profile["suite"], "backend": profile["backend"], "vehicles": n_vehicles,
+        "suite": profile["suite"], "vehicles": n_vehicles,
         "rsus": len(rsus), "area_km2": width * height / 1e6, "signed_beacons": signed_beacons,
         "consensus": "pbft" if pbft else "ags", "edca": edca, "backoff": backoff,
         "cert_cache": cert_cache,

@@ -36,7 +36,7 @@ class TANode:
         self.run_dir = Path(cfg["run_dir"])
         self.run_dir.mkdir(parents=True, exist_ok=True)
         self.log = NodeLogger("TA", "TA", self.run_dir / "logs")
-        suite = get_suite(cfg["suite"], cfg["backend"])
+        suite = get_suite(cfg["suite"])
         roster = None
         if cfg.get("ta", {}).get("use_roster", True):
             roster = {eid: e["role"] for eid, e in all_entities(cfg).items()}
@@ -46,7 +46,7 @@ class TANode:
         (self.run_dir / "ta_public.bin").write_bytes(codec.encode(params))
         self.token = secrets.token_hex(16)
         (self.run_dir / "admin.token").write_text(self.token)
-        self.log("prepared", f"preparation phase done: {suite.label} [{suite.backend}], "
+        self.log("prepared", f"preparation phase done: {suite.label}, "
                  f"pk_TA {len(self.ta.pk)} B, H=SHAKE-256, KDF=HKDF-SHA3-256 "
                  f"({(time.perf_counter() - t) * 1000:.1f} ms)", suite=suite.name)
 

@@ -6,7 +6,7 @@
 \begin{lstlisting}
 python -m venv .venv
 .venv\Scripts\activate              # Linux/macOS: source .venv/bin/activate
-pip install -r requirements.txt     # cryptography>=47, kyber-py, dilithium-py, ...
+pip install -r requirements.txt     # cryptography>=47, kyber-py, ...
 \end{lstlisting}
 
 The ns-3 experiments need Linux or WSL2:
@@ -26,7 +26,7 @@ Command & Purpose \\
 \midrule
 \code{python scripts/demo\_protocol.py} & the protocol step by step, with attacks \\
 \code{python scripts/run\_network.py} & the 19-process distributed system \\
-\code{python -m pytest} & the 57 tests \\
+\code{python -m pytest} & the 55 tests \\
 \code{python scripts/run\_evaluation.py} & benchmarks, attacks, consensus, figures \\
 \code{python scripts/run\_ns3\_sweeps.py} & ns-3 density sweep and variants \\
 \code{python scripts/run\_ns3\_sweeps.py --seeds 2 3} & extra seeds \\

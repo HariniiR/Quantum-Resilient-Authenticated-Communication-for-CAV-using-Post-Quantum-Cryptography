@@ -14,7 +14,7 @@ layers never import upper ones, and the protocol code performs no I/O.
 \toprule
 Module & Responsibility \\
 \midrule
-\code{crypto/suites.py} & ML-KEM and ML-DSA behind one interface; native (OpenSSL) and pure-Python backends; ECDH/ECDSA baseline \\
+\code{crypto/suites.py} & ML-KEM and ML-DSA behind one interface (OpenSSL); ECDH/ECDSA baseline \\
 \code{crypto/kdf.py} & SHAKE-256 hash, HKDF-SHA3-256, session key derivation \\
 \code{crypto/records.py} & AES-256-GCM records, counters, replay window \\
 \code{codec.py} & canonical compact binary encoding (signatures need identical bytes on both sides) \\
@@ -32,7 +32,7 @@ Module & Responsibility \\
 \end{tabular}
 \end{table}
 
-\section{Cryptographic suites and backends}
+\section{Cryptographic suites}
 
 A \emph{suite} pairs a KEM with a signature scheme. Five are implemented:
 \textbf{DECK} (ML-KEM-1024 + ML-DSA-65, the pairing in our Review~1 design and
@@ -48,18 +48,14 @@ keys, and sends the ephemeral public key as the ``ciphertext''. The classical
 baseline therefore runs through exactly the same handshake code as the
 post-quantum suites, which makes the comparison like-for-like.
 
-Each algorithm has two interchangeable backends:
-\begin{itemize}
-\item \textbf{Native}: the \code{cryptography} library (version 47 or later),
-which bundles OpenSSL~3.5 with constant-time ML-KEM and ML-DSA. This is the
-default and what a deployment would use. The library exposes ML-KEM-768 and
-ML-KEM-1024 only, so L1's KEM always uses the pure backend.
-\item \textbf{Pure Python}: \code{kyber-py} and \code{dilithium-py}, which our
-Review~1 prototype used. They are readable but slow and, as their authors
-state, not constant-time.
-\end{itemize}
-The two backends are byte-compatible: a test encapsulates with one and
-decapsulates with the other, and signs with one and verifies with the other.
+All algorithms come from the \code{cryptography} library (version 47 or
+later), which bundles OpenSSL~3.5 with native, constant-time ML-KEM and
+ML-DSA, as a deployment would use. One exception: the library exposes
+ML-KEM-768 and ML-KEM-1024 but not ML-KEM-512, so the L1 suite takes its KEM
+from \code{kyber-py}, a pure-Python implementation of FIPS~203. It produces
+the same sizes and encodings, but it is slower and, as its authors state, not
+constant-time, which is why L1's handshake is the slowest in
+Section~\ref{ch:results}.
 
 \section{Distributed system}
 
@@ -157,8 +153,8 @@ writes a self-contained web page that replays the three runs on the city grid
 \section{Evaluation harness}
 
 \begin{itemize}
-\item \textbf{Primitives}: 200 timed runs per operation natively and 40 in
-pure Python, after warm-up runs are discarded.
+\item \textbf{Primitives}: 200 timed runs per operation, after warm-up runs
+are discarded.
 \item \textbf{Handshakes}: 100 complete handshakes per suite in memory,
 recording each stage's processing time and every flight's size, with and
 without caching.
@@ -178,8 +174,8 @@ benchmarks run alongside ns-3 inflated latencies.
 
 \section{Testing}
 
-57 automated tests (\code{pytest}) cover the codec, FIPS key and signature sizes, key derivation (output lengths and transcript binding), record
-counters and replay window, backend interoperability, registration (proof of
+55 automated tests (\code{pytest}) cover the codec, FIPS key and signature sizes, key derivation (output lengths and transcript binding), record
+counters and replay window, ML-KEM-512 sizes, registration (proof of
 possession, roster, duplicate keys), handshakes for all suites, role checks,
 certificate caching (savings, fallback, revocation, substituted references,
 forged HelloRetry), AGS-PBFT (normal case, scoring, regrouping, view change,

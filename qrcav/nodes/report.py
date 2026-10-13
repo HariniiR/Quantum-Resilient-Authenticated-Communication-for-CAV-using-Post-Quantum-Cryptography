@@ -64,7 +64,7 @@ def build_report(config_path: str) -> dict:
     rep["handover"] = [(r["node"], r["old"], r["new"], r["ok"]) for r in all_ev("handover")]
 
     # ledgers: every node's copy must be a prefix of the longest, and verify from genesis
-    suite = get_suite(cfg["suite"], cfg["backend"])
+    suite = get_suite(cfg["suite"])
     pub = codec.decode((run / "ta_public.bin").read_bytes()) if (run / "ta_public.bin").exists() else {}
     d = Directory(suite, pub.get("ta_pk"))
     db = run / "ta_registry.db"

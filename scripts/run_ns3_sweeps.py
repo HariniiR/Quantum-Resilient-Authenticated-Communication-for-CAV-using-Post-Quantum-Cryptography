@@ -23,7 +23,7 @@ sys.path.insert(0, str(ROOT))
 
 from qrcav.eval.ns3_sweeps import density_jobs, run_many, write_rows  # noqa: E402
 from qrcav.sim.ns3_runner import ns3_available  # noqa: E402
-from qrcav.sim.profile import load_or_build  # noqa: E402
+from qrcav.sim.profile import load_or_build, profile_path  # noqa: E402
 
 
 def main() -> None:
@@ -52,10 +52,8 @@ def main() -> None:
     print(f"[ns3] building measurement profiles for {suites} ...", flush=True)
     paths = {}
     for s in suites:
-        load_or_build(s, "auto", prof_dir)
-        paths[s] = str(prof_dir / f"profile_{s}_auto.json")
-    if "DECK" in suites:
-        load_or_build("DECK", "pure", prof_dir, samples=40, consensus_requests=10)
+        load_or_build(s, prof_dir)
+        paths[s] = str(profile_path(s, prof_dir))
 
     def cached(seed=1):
         # DECK with certificate caching (pre-distributed RSU certificates + edge directory)
@@ -86,7 +84,6 @@ def main() -> None:
     for s in [x for x in ("CLASSIC", "DECK") if x in paths]:     # broadcast-signed beacons
         extra.append((paths[s], {"n_vehicles": mid, "sim_time": args.sim_time, "signed_beacons": True}))
     if "DECK" in paths:
-        extra.append((str(prof_dir / "profile_DECK_pure.json"), {"n_vehicles": mid, "sim_time": args.sim_time}))
         # ablation: what EDCA prioritisation and handshake backoff each contribute
         for edca, backoff in ((False, False), (True, False), (False, True)):
             extra.append((paths["DECK"], {"n_vehicles": mid, "sim_time": args.sim_time,

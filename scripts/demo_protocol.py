@@ -3,7 +3,6 @@ Step-by-step walkthrough of the protocol for a viva or review, in one process.
 
     python scripts/demo_protocol.py               # ML-KEM-1024 + ML-DSA-65 (the deck's suite)
     python scripts/demo_protocol.py --suite L3
-    python scripts/demo_protocol.py --backend pure
 
 Prints every phase of the deck (preparation, registration, handshake,
 communication) with real sizes, timings and key material, then shows a few
@@ -51,16 +50,15 @@ def timed(fn, *a):
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--suite", default="DECK")
-    ap.add_argument("--backend", default="auto")
     args = ap.parse_args()
     if os.name == "nt":
         os.system("")
-    suite = get_suite(args.suite, args.backend)
-    # warm up the backend so first-call loading does not pollute the timings
+    suite = get_suite(args.suite)
+    # warm up so first-call loading does not pollute the timings
     pk, sk = suite.sig.keygen(); suite.sig.sign(sk, b"w"); ek, dk = suite.kem.keygen(); suite.kem.encaps(ek)
 
     print(f"{B}Quantum-resilient authenticated communication for CAVs{X}")
-    print(f"suite {suite.name}: {suite.label}   backend: {suite.backend}")
+    print(f"suite {suite.name}: {suite.label}")
 
     step("PREPARATION PHASE  (Trusted Authority)")
     ta, t = timed(TrustedAuthority, suite)

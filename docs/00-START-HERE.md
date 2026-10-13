@@ -38,7 +38,7 @@ above are current.
 ## Code map
 
 ```
-qrcav/crypto/      suites (ML-KEM/ML-DSA, two backends, classical baseline), KDF, records
+qrcav/crypto/      suites (ML-KEM/ML-DSA via OpenSSL, classical baseline), KDF, records
 qrcav/pki.py       Trusted Authority, certificates, CRL
 qrcav/handshake.py the four-flight handshake (sans-IO)
 qrcav/certcache.py certificate caching
@@ -48,5 +48,5 @@ qrcav/nodes/       one process per entity
 qrcav/sim/         ns-3 scenario and measurement profiles
 qrcav/eval/        benchmarks, attacks, consensus experiments, plots, viewer
 scripts/           the commands you run
-tests/             57 tests
+tests/             55 tests
 ```

@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT))
 
 from qrcav.eval.ns3_sweeps import RADIO  # noqa: E402
 from qrcav.sim.ns3_runner import ns3_available  # noqa: E402
-from qrcav.sim.profile import load_or_build  # noqa: E402
+from qrcav.sim.profile import load_or_build, profile_path  # noqa: E402
 
 SCENARIOS = [
     ("CLASSIC", 0, "Classical", "ECDH-P256 + ECDSA-P256 (today's V2X)"),
@@ -73,8 +73,8 @@ def main() -> None:
     prof_dir = ROOT / "results" / "profiles"
     jobs = []
     for suite, cache, *_ in SCENARIOS:
-        prof = load_or_build(suite, "auto", prof_dir)
-        jobs.append((str(prof_dir / f"profile_{suite}_auto.json"),
+        prof = load_or_build(suite, prof_dir)
+        jobs.append((str(profile_path(suite, prof_dir)),
                      {"n_vehicles": args.vehicles, "sim_time": args.sim_time, "seed": args.seed,
                       "cert_cache": cache, "trace": True}))
         jobs[-1][1]["_sizes"] = prof["sizes"]

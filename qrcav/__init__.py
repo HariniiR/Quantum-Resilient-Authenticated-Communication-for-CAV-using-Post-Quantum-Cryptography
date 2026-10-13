@@ -1,7 +1,7 @@
 """
 qrcav: quantum-resilient authenticated communication for connected autonomous vehicles.
 
-  crypto/     ML-KEM / ML-DSA suites (OpenSSL and pure-Python backends), HKDF-SHA3-256, AES-GCM records
+  crypto/     ML-KEM / ML-DSA suites (native, via OpenSSL), HKDF-SHA3-256, AES-GCM records
   pki.py      Trusted Authority, certificates, CRL
   handshake.py  mutually authenticated four-flight handshake (sans-IO)
   consensus/  AGS-PBFT with view change, PBFT baseline, client, simulator

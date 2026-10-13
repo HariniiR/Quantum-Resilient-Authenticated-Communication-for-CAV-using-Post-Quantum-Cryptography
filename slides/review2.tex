@@ -85,7 +85,7 @@ certificate & \V{classic-cert} B & \V{deck-cert} B \\
 \item[\textcolor{teal}{\checkmark}] Distributed system: 19 processes over TCP
 \item[\textcolor{teal}{\checkmark}] ns-3: 5 suites + caching $\times$ 50--200 vehicles $\times$ \V{ns3-seeds} seeds
 \item[\textcolor{teal}{\checkmark}] \V{attacks-total} attacks, \V{attacks-rejected} rejected
-\item[\textcolor{teal}{\checkmark}] 57 automated tests
+\item[\textcolor{teal}{\checkmark}] 55 automated tests
 \item[\textcolor{teal}{\checkmark}] New: certificate caching (handshake $-$\V{deck-cache-saving}\,\%)
 \item[\textcolor{teal}{\checkmark}] Replay viewer for the simulation
 \end{itemize}
@@ -249,7 +249,7 @@ radio frames & \V{deck-hs-frames} & \V{deck-cached-frames} \\
 \textbf{Stack}
 \begin{itemize}
 \item Python, \code{cryptography} (OpenSSL 3.5: native ML-KEM / ML-DSA)
-\item \code{kyber-py}, \code{dilithium-py}: pure-Python comparison backend
+\item \code{kyber-py}: ML-KEM-512 only (not exposed by \code{cryptography})
 \item ns-3 3.44 (C++ scenario via Python bindings)
 \item 5 suites: Classical, L1, L3, DECK (1024/65), L5
 \item Classical runs through the \textbf{same protocol code}
@@ -272,12 +272,11 @@ radio frames & \V{deck-hs-frames} & \V{deck-cached-frames} \\
 bytes & \V{classic-hs-bytes} & \V{deck-hs-bytes} \\
 frames & \V{classic-hs-frames} & \V{deck-hs-frames} \\
 airtime (ms) & \V{classic-hs-air} & \V{deck-hs-air} \\
-compute, native (ms) & \V{classic-hs-ms} & \V{deck-hs-ms} \\
-compute, pure (ms) & -- & \V{deck-hs-ms-pure} \\
+compute (ms) & \V{classic-hs-ms} & \V{deck-hs-ms} \\
 \end{tabular}
 
 \vspace{6pt}
-ML-DSA-65 signs in \V{deck-sign-native}\,ms natively vs \V{deck-sign-pure}\,ms in pure Python: \textbf{implementation matters more than the algorithm}.
+ML-DSA-65 signs in \V{deck-sign-native}\,ms (p99 \V{deck-sign-native-p99}\,ms): \textbf{CPU is not the bottleneck}.
 \end{column}
 \end{columns}
 \end{frame}
@@ -292,7 +291,7 @@ ML-DSA-65 signs in \V{deck-sign-native}\,ms natively vs \V{deck-sign-pure}\,ms i
 \small
 \begin{itemize}
 \item In a session a beacon is a \V{deck-beacon-aead-bytes}-byte AES-GCM record for \textbf{every} suite: \V{deck-beacon-aead}\,ms of a 100\,ms budget.
-\item Signing every beacon fits natively (\V{deck-beacon-signed}\,ms) but costs \V{deck-beacon-signed-frames} frames per beacon.
+\item Signing every beacon fits (\V{deck-beacon-signed}\,ms) but costs \V{deck-beacon-signed-frames} frames per beacon.
 \item The base paper folds the one-off handshake into per-message latency.
 \end{itemize}
 \end{column}
@@ -383,7 +382,7 @@ Revocation & session closed, reconnection rejected \\
 % -----------------------------------------------------------------------------
 \begin{frame}{Findings}
 \begin{enumerate}
-\item \textbf{Per message, post-quantum V2X fits} the 100\,ms budget at every security level, natively.
+\item \textbf{Per message, post-quantum V2X fits} the 100\,ms budget at every security level.
 \item \textbf{Bandwidth is the binding constraint}: a PQ handshake is $\sim$20$\times$ classical, and dense cells saturate.
 \item \textbf{Certificate caching halves the handshake}; exponential backoff prevents congestion collapse.
 \item \textbf{DECK = category 3}: L3 gives the same security with a smaller KEM.

@@ -13,7 +13,7 @@ view change over a hash-linked ledger. It runs three ways:
 2. **In ns-3:** IEEE 802.11p with mobility for 50–200 vehicles, carrying the
    protocol's real message sizes and measured processing times.
 3. **As an evaluation suite:** benchmarks, 21 attacks, consensus experiments,
-   figures, and 57 tests.
+   figures, and 55 tests.
 
 It adds **certificate caching** (32-byte certificate references instead of
 5.3 KB ML-DSA certificates), which halves the post-quantum handshake, and a
@@ -37,7 +37,7 @@ pip install -r requirements.txt
 
 python scripts\demo_protocol.py   # the protocol step by step (1 s)
 python scripts\run_network.py     # the whole distributed system (50 s)
-python -m pytest                  # 57 tests (~2 min)
+python -m pytest                  # 55 tests (~1 min)
 python scripts\run_evaluation.py  # benchmarks + figures into results\ (~4 min)
 ```
 
@@ -52,7 +52,7 @@ script are in [`docs/06-RUNNING-AND-DEMO.md`](docs/06-RUNNING-AND-DEMO.md).
 
 ```
 qrcav/                         the system (v2)
-  crypto/suites.py             ML-KEM / ML-DSA suites; OpenSSL and pure-Python backends; ECDH/ECDSA baseline
+  crypto/suites.py             ML-KEM / ML-DSA suites (OpenSSL; kyber-py for ML-KEM-512 only); ECDH/ECDSA baseline
   crypto/kdf.py                SHAKE-256, HKDF-SHA3-256, DERIVE_SESSION_KEYS (deck slide 14)
   crypto/records.py            AES-256-GCM <ctr, ciphertext, tag> records, replay window (slide 17)
   pki.py                       Trusted Authority, certificates, signed CRL, registry DB (slides 12-13)
@@ -84,7 +84,7 @@ cavpqc/, demo.py, handshake.py, run_evaluation.py, why_composition_matters.py
 
 | Area | Review 1 | Now |
 |---|---|---|
-| Crypto backend | pure Python only (not constant-time, ~45 ms per ML-DSA-65 signature) | native OpenSSL (constant-time, ~1 ms per signature) by default; pure Python kept for comparison |
+| Cryptography library | pure Python (not constant-time) | native OpenSSL (constant-time, ~1 ms per ML-DSA-65 signature) |
 | Registration | HMAC-style token checked online by the TA | ML-DSA certificates (role, serial, validity) checked offline; proof of possession; signed CRL |
 | Handshake | server-only signature; keys compared in memory | ClientHello, then mutual signatures and encrypted Finished messages in both directions |
 | Records | sequential nonce | `<ctr, ct, tag>`, data counter from 1, 64-record replay window |
@@ -92,7 +92,7 @@ cavpqc/, demo.py, handshake.py, run_evaluation.py, why_composition_matters.py
 | Consensus | no view change; textbook PBFT baseline only counted messages | full view change; certified blocks; a PBFT baseline that runs with real signatures |
 | Simulation | analytic 802.11p model, SUMO planned | ns-3 802.11p, mobility, handover, EDCA, fragmentation |
 | Handshake size | 6,494 B counted (certificates left out) | 20,779 B full; 10,173 B with certificate caching |
-| Tests | none | 57, including a multi-process run |
+| Tests | none | 55, including a multi-process run |
 
 ## Corrections to the Review 1 design
 
@@ -128,8 +128,7 @@ not in shape. Full tables and figures are in
 | | Classical (ECDH + ECDSA P-256) | Post-quantum (ML-KEM-1024 + ML-DSA-65) | PQ + certificate caching |
 |---|---|---|---|
 | Handshake size | 1,043 B, 4 frames | 20,779 B, 17 frames | 10,173 B, 10 frames |
-| Handshake compute, both sides, native | 1.2 ms | 4.8 ms | same |
-| Handshake compute, pure Python | n/a | 209 ms | same |
+| Handshake compute, both sides | 1.2 ms | 4.8 ms | same |
 | Per-beacon cost in a session (p99) | 0.40 ms | 0.41 ms | 0.41 ms |
 | ns-3, 50 vehicles: completed / median | 100 % / 7 ms | 100 % / 90 ms | 100 % / 54 ms |
 | ns-3, 100 vehicles | 100 % / 8 ms | 74 % / 285 ms | 98 % / 73 ms |
@@ -137,12 +136,12 @@ not in shape. Full tables and figures are in
 
 ns-3 figures are the mean of 3 seeds over 1.5 km × 1.5 km with 9 RSUs.
 
-1. **Compute is no longer the problem; bytes are.** With a native
-   implementation a post-quantum handshake costs about 5 ms of CPU, but
+1. **Compute is not the problem; bytes are.** A post-quantum handshake
+   costs about 5 ms of CPU, but
    20.8 KB on a shared 6 Mb/s channel, and in a dense cell that is what fails.
 2. **Session beacons cost nothing extra.** Inside a session a beacon is a
    135-byte AES-GCM record whatever the suite. Per-beacon ML-DSA signatures
-   fit natively (9.5 ms p99) but are 3 frames each and collapse coverage in
+   fit (9.5 ms p99) but are 3 frames each and collapse coverage in
    ns-3.
 3. **Dense traffic breaks post-quantum handshakes, roughly in order of size.**
    At 100 vehicles: L1 97 %, DECK 74 %, L3 70 %, L5 56 %; classical 100 %.
@@ -152,7 +151,7 @@ ns-3 figures are the mean of 3 seeds over 1.5 km × 1.5 km with 9 RSUs.
    from 27 % to 57 %. Exponential backoff after failed handshakes is what
    prevents congestion collapse (7–11 % without it).
 5. **Consensus never sits on the safety path.** Alerts reach vehicles in about
-   5 ms; the ledger follows in about 60 ms.
+   5 ms; the ledger follows in about 50 ms.
 6. **AGS-PBFT sends 73–86 % fewer messages than PBFT and uses 18–25 % less
    CPU at light load, but is not faster** (+41–58 % commit latency): its
    leader-centred certificate step adds a hop. Bytes fall only 8–30 %,

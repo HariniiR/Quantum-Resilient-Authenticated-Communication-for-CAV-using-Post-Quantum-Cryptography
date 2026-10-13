@@ -8,7 +8,6 @@ from qrcav.crypto import (
     hkdf_expand, hkdf_extract, make_nonce,
 )
 from qrcav.crypto.records import WINDOW
-from qrcav.crypto.suites import HAVE_OPENSSL_PQC, HAVE_PURE_PQC
 
 SUITES = ["DECK", "L1", "L3", "L5", "CLASSIC"]
 
@@ -48,21 +47,13 @@ def test_kem_and_signature_roundtrip(name):
     assert not s.sig.verify(pk, b"hello", sig[:-1] + bytes([sig[-1] ^ 1]))
 
 
-@pytest.mark.skipif(not (HAVE_OPENSSL_PQC and HAVE_PURE_PQC), reason="needs both backends")
-@pytest.mark.parametrize("name", ["L3", "DECK", "L5"])
-def test_backends_interoperate(name):
-    """OpenSSL and the pure-Python libraries implement the same FIPS 203/204 encodings."""
-    o, p = get_suite(name, "openssl"), get_suite(name, "pure")
-    ek, dk = o.kem.keygen()
-    ss, ct = p.kem.encaps(ek)
-    assert o.kem.decaps(dk, ct) == ss
-    ek2, dk2 = p.kem.keygen()
-    ss2, ct2 = o.kem.encaps(ek2)
-    assert p.kem.decaps(dk2, ct2) == ss2
-    pk, sk = o.sig.keygen()
-    assert p.sig.verify(pk, b"m", o.sig.sign(sk, b"m"))
-    pk2, sk2 = p.sig.keygen()
-    assert o.sig.verify(pk2, b"m", p.sig.sign(sk2, b"m"))
+def test_l1_mixes_kyber_py_kem_with_native_signature():
+    """ML-KEM-512 comes from kyber-py; its sizes follow FIPS 203 and it works in a handshake suite."""
+    s = get_suite("L1")
+    ek, dk = s.kem.keygen()
+    assert (len(ek), s.kem.ct_len) == (800, 768)
+    ss, ct = s.kem.encaps(ek)
+    assert len(ct) == 768 and s.kem.decaps(dk, ct) == ss
 
 
 def test_fips_sizes():

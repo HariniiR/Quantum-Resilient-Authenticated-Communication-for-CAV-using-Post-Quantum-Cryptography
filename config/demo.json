@@ -1,7 +1,6 @@
 {
   "_comment": "Review 2 demonstration: 1 TA, 1 cloud, 1 MEC, 8 consensus nodes, 3 RSUs, 5 vehicles on localhost.",
   "suite": "DECK",
-  "backend": "auto",
   "host": "127.0.0.1",
   "run_dir": "run",
   "beacon_hz": 10,

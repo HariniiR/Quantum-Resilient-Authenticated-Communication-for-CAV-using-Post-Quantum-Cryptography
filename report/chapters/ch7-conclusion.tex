@@ -14,8 +14,8 @@ design exposed the lack of client authentication. Both were corrected and the
 corrections tested.
 
 The measurements answer the project's question. Post-quantum cryptography
-fits the vehicular latency budget per message, at every NIST security level,
-once it is implemented natively: a beacon inside a session is a
+fits the vehicular latency budget per message, at every NIST security level:
+a beacon inside a session is a
 \V{deck-beacon-aead-bytes}-byte AES-GCM record whatever the suite, and a full
 handshake takes about \V{deck-hs-ms}\,ms of computation. The binding
 constraint is size. A post-quantum handshake is about twenty times larger

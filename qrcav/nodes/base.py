@@ -32,7 +32,6 @@ def load_config(path: str | Path) -> dict:
     cfg = json.loads(Path(path).read_text())
     cfg.setdefault("run_dir", "run")
     cfg.setdefault("suite", "DECK")
-    cfg.setdefault("backend", "auto")
     cfg.setdefault("host", "127.0.0.1")
     cfg.setdefault("cert_cache", True)
     return cfg
@@ -87,7 +86,7 @@ class NodeBase:
         self.me_cfg = self.entities.get(node_id, {})
         self.host = cfg["host"]
         self.run_dir = Path(cfg["run_dir"])
-        self.suite = get_suite(cfg["suite"], cfg["backend"])
+        self.suite = get_suite(cfg["suite"])
         self.log = NodeLogger(node_id, self.ROLE, self.run_dir / "logs")
         self.identity: Identity | None = None
         self.channels: dict[str, SecureChannel] = {}

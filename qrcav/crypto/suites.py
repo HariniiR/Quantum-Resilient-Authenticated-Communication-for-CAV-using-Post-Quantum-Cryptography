@@ -1,18 +1,10 @@
 """
 Cryptographic suites: one KEM plus one signature scheme.
 
-Two interchangeable backends implement the same NIST algorithms:
-
-  openssl  -- `cryptography` >= 47 bundling OpenSSL >= 3.5. Native code,
-              constant-time, the backend a deployment would use. Default.
-  pure     -- `kyber-py` / `dilithium-py`. Pure Python, documented by their
-              authors as educational and NOT constant-time. Kept because it is
-              readable, it is what Review 1 demonstrated, and it gives a second
-              independent implementation to cross-check against.
-
-Both backends are byte-compatible (FIPS 203 / FIPS 204 encodings), which
-tests/test_crypto.py checks by encapsulating with one and decapsulating with
-the other.
+Implementation: the `cryptography` library (version 47 or later), which bundles
+OpenSSL 3.5 with native, constant-time ML-KEM and ML-DSA. One exception: the
+library exposes only ML-KEM-768 and ML-KEM-1024, so the L1 suite takes its
+ML-KEM-512 from `kyber-py`, a pure-Python implementation of FIPS 203.
 
 Suites
 ------
@@ -34,34 +26,18 @@ import os
 from dataclasses import dataclass
 from typing import Any, Callable
 
-# ---------------------------------------------------------------------------
-# backend discovery
-# ---------------------------------------------------------------------------
-
 try:  # native ML-KEM / ML-DSA (cryptography >= 47 with OpenSSL >= 3.5)
     from cryptography.hazmat.primitives.asymmetric import mldsa as _mldsa
     from cryptography.hazmat.primitives.asymmetric import mlkem as _mlkem
-
-    HAVE_OPENSSL_PQC = True
-except Exception:  # pragma: no cover - depends on installed wheel
-    _mldsa = _mlkem = None
-    HAVE_OPENSSL_PQC = False
-
-try:
-    from kyber_py.ml_kem import ML_KEM_512, ML_KEM_768, ML_KEM_1024
-    from dilithium_py.ml_dsa import ML_DSA_44, ML_DSA_65, ML_DSA_87
-
-    HAVE_PURE_PQC = True
-except Exception:  # pragma: no cover
-    HAVE_PURE_PQC = False
+except ImportError as e:  # pragma: no cover - depends on the installed version
+    raise ImportError(
+        "this project needs native ML-KEM / ML-DSA: pip install -U 'cryptography>=47'"
+    ) from e
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-
-
-class CryptoUnavailable(RuntimeError):
-    pass
+from kyber_py.ml_kem import ML_KEM_512
 
 
 # ---------------------------------------------------------------------------
@@ -71,7 +47,6 @@ class CryptoUnavailable(RuntimeError):
 @dataclass(frozen=True)
 class KEM:
     name: str
-    backend: str
     pk_len: int
     ct_len: int
     _keygen: Callable[[], tuple[bytes, Any]]
@@ -101,7 +76,8 @@ _KEM_SIZES = {
 }
 
 
-def _openssl_kem(name: str) -> KEM:
+def _mlkem_kem(name: str) -> KEM:
+    """ML-KEM-768 / ML-KEM-1024 through OpenSSL."""
     cls_priv = {
         "ML-KEM-768": _mlkem.MLKEM768PrivateKey,
         "ML-KEM-1024": _mlkem.MLKEM1024PrivateKey,
@@ -123,25 +99,25 @@ def _openssl_kem(name: str) -> KEM:
         return dk.decapsulate(ct)
 
     pk, ct = _KEM_SIZES[name]
-    return KEM(name, "openssl", pk, ct, keygen, encaps, decaps)
+    return KEM(name, pk, ct, keygen, encaps, decaps)
 
 
-def _pure_kem(name: str) -> KEM:
-    impl = {"ML-KEM-512": ML_KEM_512, "ML-KEM-768": ML_KEM_768, "ML-KEM-1024": ML_KEM_1024}[name]
+def _mlkem512_kem() -> KEM:
+    """ML-KEM-512 from kyber-py (the `cryptography` library does not expose it)."""
 
     def keygen():
-        ek, dk = impl.keygen()
+        ek, dk = ML_KEM_512.keygen()
         return ek, dk
 
     def encaps(ek):
-        ss, ct = impl.encaps(ek)
+        ss, ct = ML_KEM_512.encaps(ek)
         return ss, ct
 
     def decaps(dk, ct):
-        return impl.decaps(dk, ct)
+        return ML_KEM_512.decaps(dk, ct)
 
-    pk, ct = _KEM_SIZES[name]
-    return KEM(name, "pure", pk, ct, keygen, encaps, decaps)
+    pk, ct = _KEM_SIZES["ML-KEM-512"]
+    return KEM("ML-KEM-512", pk, ct, keygen, encaps, decaps)
 
 
 def _ecdh_kem() -> KEM:
@@ -174,7 +150,7 @@ def _ecdh_kem() -> KEM:
         z = dk.exchange(ec.ECDH(), peer)
         return _kdf(z, ct, dk.public_key().public_bytes(enc, fmt))
 
-    return KEM("ECDH-P256", "openssl", 65, 65, keygen, encaps, decaps)
+    return KEM("ECDH-P256", 65, 65, keygen, encaps, decaps)
 
 
 # ---------------------------------------------------------------------------
@@ -184,7 +160,6 @@ def _ecdh_kem() -> KEM:
 @dataclass(frozen=True)
 class Signature:
     name: str
-    backend: str
     pk_len: int
     sig_len: int          # maximum; ECDSA DER signatures vary by a few bytes
     _keygen: Callable[[], tuple[bytes, Any]]
@@ -225,7 +200,7 @@ _SIG_SIZES = {
 SIG_CONTEXT = b"qrcav-v1"
 
 
-def _openssl_sig(name: str) -> Signature:
+def _mldsa_sig(name: str) -> Signature:
     priv = {
         "ML-DSA-44": _mldsa.MLDSA44PrivateKey,
         "ML-DSA-65": _mldsa.MLDSA65PrivateKey,
@@ -253,27 +228,10 @@ def _openssl_sig(name: str) -> Signature:
 
     pk, sl = _SIG_SIZES[name]
     return Signature(
-        name, "openssl", pk, sl, keygen, sign, verify,
+        name, pk, sl, keygen, sign, verify,
         lambda sk: sk.private_bytes_raw(),          # 32-byte seed
         lambda raw: priv.from_seed_bytes(raw),
     )
-
-
-def _pure_sig(name: str) -> Signature:
-    impl = {"ML-DSA-44": ML_DSA_44, "ML-DSA-65": ML_DSA_65, "ML-DSA-87": ML_DSA_87}[name]
-
-    def keygen():
-        pk, sk = impl.keygen()
-        return pk, sk
-
-    def sign(sk, m):
-        return impl.sign(sk, m, ctx=SIG_CONTEXT)
-
-    def verify(pk, m, s):
-        return impl.verify(pk, m, s, ctx=SIG_CONTEXT)
-
-    pk, sl = _SIG_SIZES[name]
-    return Signature(name, "pure", pk, sl, keygen, sign, verify, lambda sk: sk, lambda raw: raw)
 
 
 def _ecdsa_sig() -> Signature:
@@ -303,7 +261,7 @@ def _ecdsa_sig() -> Signature:
     def from_bytes(raw):
         return ec.derive_private_key(int.from_bytes(raw, "big"), curve)
 
-    return Signature("ECDSA-P256", "openssl", 65, 72, keygen, sign, verify, to_bytes, from_bytes)
+    return Signature("ECDSA-P256", 65, 72, keygen, sign, verify, to_bytes, from_bytes)
 
 
 # ---------------------------------------------------------------------------
@@ -319,7 +277,6 @@ SUITE_DEFS = {
 }
 
 DEFAULT_SUITE = os.environ.get("QRCAV_SUITE", "DECK")
-DEFAULT_BACKEND = os.environ.get("QRCAV_BACKEND", "auto")
 
 
 @dataclass(frozen=True)
@@ -327,12 +284,6 @@ class Suite:
     name: str
     kem: KEM
     sig: Signature
-
-    @property
-    def backend(self) -> str:
-        if self.kem.backend == self.sig.backend:
-            return self.kem.backend
-        return f"{self.kem.backend}+{self.sig.backend}"
 
     @property
     def label(self) -> str:
@@ -343,46 +294,29 @@ class Suite:
         return self.name != "CLASSIC"
 
 
-def _make_kem(name: str, backend: str) -> KEM:
+def _make_kem(name: str) -> KEM:
     if name == "ECDH-P256":
         return _ecdh_kem()
-    want_openssl = backend in ("openssl", "auto")
-    if want_openssl and HAVE_OPENSSL_PQC and name != "ML-KEM-512":
-        return _openssl_kem(name)
-    if backend == "openssl" and name != "ML-KEM-512":
-        raise CryptoUnavailable("OpenSSL ML-KEM not available; install cryptography>=47")
-    if not HAVE_PURE_PQC:
-        raise CryptoUnavailable("kyber-py not installed")
-    # The `cryptography` library exposes only ML-KEM-768 and -1024 (OpenSSL itself has 512),
-    # so L1 always uses the pure backend for its KEM.
-    return _pure_kem(name)
+    if name == "ML-KEM-512":
+        return _mlkem512_kem()
+    return _mlkem_kem(name)
 
 
-def _make_sig(name: str, backend: str) -> Signature:
+def _make_sig(name: str) -> Signature:
     if name == "ECDSA-P256":
         return _ecdsa_sig()
-    if backend in ("openssl", "auto") and HAVE_OPENSSL_PQC:
-        return _openssl_sig(name)
-    if backend == "openssl":
-        raise CryptoUnavailable("OpenSSL ML-DSA not available; install cryptography>=47")
-    if not HAVE_PURE_PQC:
-        raise CryptoUnavailable("dilithium-py not installed")
-    return _pure_sig(name)
+    return _mldsa_sig(name)
 
 
-_cache: dict[tuple[str, str], Suite] = {}
+_cache: dict[str, Suite] = {}
 
 
-def get_suite(name: str | None = None, backend: str | None = None) -> Suite:
+def get_suite(name: str | None = None) -> Suite:
     """Return a suite by name ('DECK', 'L1', 'L3', 'L5', 'CLASSIC')."""
     name = (name or DEFAULT_SUITE).upper()
-    backend = (backend or DEFAULT_BACKEND).lower()
     if name not in SUITE_DEFS:
         raise ValueError(f"unknown suite {name!r}; choose from {sorted(SUITE_DEFS)}")
-    if backend not in ("auto", "openssl", "pure"):
-        raise ValueError("backend must be auto, openssl or pure")
-    key = (name, backend)
-    if key not in _cache:
+    if name not in _cache:
         kem_name, sig_name = SUITE_DEFS[name]
-        _cache[key] = Suite(name, _make_kem(kem_name, backend), _make_sig(sig_name, backend))
-    return _cache[key]
+        _cache[name] = Suite(name, _make_kem(kem_name), _make_sig(sig_name))
+    return _cache[name]

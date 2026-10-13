@@ -115,84 +115,61 @@ def main() -> None:
     # ---- primitives -----------------------------------------------------------------
     prim = rd("primitives.csv")
 
-    def p(suite, backend, op, key="mean_ms"):
+    def p(suite, op, key="mean_ms"):
         for r in prim:
-            if r["suite"] == suite and r["backend"] == backend and r["operation"].endswith(op):
+            if r["suite"] == suite and r["operation"].endswith(op):
                 return float(r[key])
         return None
 
     rows = []
     for s in SUITES:
-        be = "openssl"
-        for b in sorted({r["backend"] for r in prim if r["suite"] == s}, key=lambda x: x == "pure"):
-            label = SUITE_TEX[s] + (" (pure)" if b == "pure" else "")
-            vals = [p(s, b, "keygen") if s == "CLASSIC" else None]
-            kem_ops = [p(s, b, x) for x in ("encaps", "decaps")]
-            # first keygen row is the KEM keygen
-            kg = next((float(r["mean_ms"]) for r in prim if r["suite"] == s and r["backend"] == b
-                       and ("KEM" in r["operation"] or "ECDH" in r["operation"]) and r["operation"].endswith("keygen")),
-                      None)
-            sign = p(s, b, "sign")
-            sign99 = p(s, b, "sign", "p99_ms")
-            ver = p(s, b, "verify")
-            rows.append([label, ms(kg) if kg is not None else "--", ms(kem_ops[0]), ms(kem_ops[1]),
-                         ms(sign), ms(sign99), ms(ver)])
+        kg = next(float(r["mean_ms"]) for r in prim if r["suite"] == s
+                  and ("KEM" in r["operation"] or "ECDH" in r["operation"]) and r["operation"].endswith("keygen"))
+        rows.append([SUITE_TEX[s] + (" (KEM in kyber-py)" if s == "L1" else ""), ms(kg), ms(p(s, "encaps")),
+                     ms(p(s, "decaps")), ms(p(s, "sign")), ms(p(s, "sign", "p99_ms")), ms(p(s, "verify"))])
     table("primitives", "lrrrrrr", ["Suite", "KEM keygen", "encaps", "decaps", "sign", "sign p99", "verify"], rows,
-          "Mean of 200 runs (native) or 40 runs (pure Python) after warm-up, in ms. L1's KEM is always pure "
-          "Python because the \\texttt{cryptography} library exposes no ML-KEM-512.")
-    V["deck-sign-native"] = ms(p("DECK", "openssl", "ML-DSA-65 sign"))
-    V["deck-sign-native-p99"] = ms(p("DECK", "openssl", "ML-DSA-65 sign", "p99_ms"))
-    V["deck-sign-pure"] = ms(p("DECK", "pure", "ML-DSA-65 sign"))
-    V["deck-sign-pure-p99"] = ms(p("DECK", "pure", "ML-DSA-65 sign", "p99_ms"))
-    V["deck-verify-native"] = ms(p("DECK", "openssl", "ML-DSA-65 verify"))
-    V["deck-encaps-native"] = ms(p("DECK", "openssl", "ML-KEM-1024 encaps"))
-    V["deck-decaps-native"] = ms(p("DECK", "openssl", "ML-KEM-1024 decaps"))
-    V["sign-speedup"] = num(p("DECK", "pure", "ML-DSA-65 sign") / p("DECK", "openssl", "ML-DSA-65 sign"), 0)
-    V["classic-sign"] = ms(p("CLASSIC", "openssl", "ECDSA-P256 sign"))
+          "Mean of 200 runs after warm-up, in ms. All operations use OpenSSL through the \\texttt{cryptography} "
+          "library, except L1's ML-KEM-512, which that library does not expose; it comes from \\texttt{kyber-py} "
+          "(pure Python).")
+    V["deck-sign-native"] = ms(p("DECK", "ML-DSA-65 sign"))
+    V["deck-sign-native-p99"] = ms(p("DECK", "ML-DSA-65 sign", "p99_ms"))
+    V["deck-verify-native"] = ms(p("DECK", "ML-DSA-65 verify"))
+    V["deck-encaps-native"] = ms(p("DECK", "ML-KEM-1024 encaps"))
+    V["deck-decaps-native"] = ms(p("DECK", "ML-KEM-1024 decaps"))
+    V["l1-encaps"] = ms(p("L1", "ML-KEM-512 encaps"))
+    V["l1-decaps"] = ms(p("L1", "ML-KEM-512 decaps"))
+    V["classic-sign"] = ms(p("CLASSIC", "ECDSA-P256 sign"))
 
     # ---- handshake timing -------------------------------------------------------------
     ht = rd("handshake_timing.csv")
     rows = []
     for s in SUITES:
-        nat = next((r for r in ht if r["suite"] == s and r["backend"] != "pure"), None)
-        pur = next((r for r in ht if r["suite"] == s and r["backend"] == "pure"), None)
-        rows.append([SUITE_TEX[s], ms(nat["mean_ms"]), ms(nat["p95_ms"]),
-                     ms(pur["mean_ms"]) if pur else "--", ms(pur["p95_ms"]) if pur else "--"])
-        V[f"{s.lower()}-hs-ms"] = ms(nat["mean_ms"])
-        if pur:
-            V[f"{s.lower()}-hs-ms-pure"] = ms(pur["mean_ms"])
-    table("hstime", "lrrrr", ["Suite", "native mean", "native p95", "pure mean", "pure p95"], rows,
+        r = next(r for r in ht if r["suite"] == s)
+        rows.append([SUITE_TEX[s], ms(r["mean_ms"]), ms(r["p95_ms"])])
+        V[f"{s.lower()}-hs-ms"] = ms(r["mean_ms"])
+    table("hstime", "lrr", ["Suite", "mean", "p95"], rows,
           "Compute time of one complete mutual handshake, both sides together, in ms (no network).")
 
     # ---- beacon budget ------------------------------------------------------------------
     bb = rd("beacon_budget.csv")
     rows = []
     for s in SUITES:
-        def b(mode, backend):
-            return next((r for r in bb if r["suite"] == s and r["mode"].startswith(mode)
-                         and (r["backend"] == backend or (backend == "openssl" and r["backend"] == "pure+openssl"))),
-                        None)
-        a, sn, sp = b("AEAD", "openssl"), b("signed", "openssl"), b("signed", "pure")
+        a = next(r for r in bb if r["suite"] == s and r["mode"].startswith("AEAD"))
+        sn = next(r for r in bb if r["suite"] == s and r["mode"].startswith("signed"))
         rows.append([SUITE_TEX[s], f"{ms(a['total_p99_ms'])} ({num(a['bytes'])} B)",
-                     f"{ms(sn['total_p99_ms'])} ({num(sn['bytes'])} B, {sn['frames']} fr.)",
-                     (ms(sp["total_p99_ms"]) + ("" if sp["fits_100ms"] == "True" else r" \textbf{(misses)}"))
-                     if sp else "--"])
+                     f"{ms(sn['total_p99_ms'])} ({num(sn['bytes'])} B, {sn['frames']} fr.)"])
         V[f"{s.lower()}-beacon-aead"] = ms(a["total_p99_ms"])
         V[f"{s.lower()}-beacon-aead-bytes"] = num(a["bytes"])
         V[f"{s.lower()}-beacon-signed"] = ms(sn["total_p99_ms"])
         V[f"{s.lower()}-beacon-signed-bytes"] = num(sn["bytes"])
         V[f"{s.lower()}-beacon-signed-frames"] = sn["frames"]
-        if sp:
-            V[f"{s.lower()}-beacon-signed-pure"] = ms(sp["total_p99_ms"])
-    table("beacon", "lrrr", ["Suite", "AEAD in a session", "signed broadcast, native", "signed, pure Python"], rows,
+    table("beacon", "lrr", ["Suite", "AEAD in a session", "signed broadcast"], rows,
           "p99 of cryptographic processing plus 802.11p airtime per beacon, in ms, against the 100 ms beacon interval.")
 
     # ---- ns-3 ---------------------------------------------------------------------------
     dens = rd("ns3_density.csv") + rd("ns3_density_seeds.csv")
     groups: dict = {}
     for r in dens:
-        if r["backend"] == "pure":
-            continue
         key = r["suite"] + ("+cache" if float(r.get("cert_cache") or 0) > 0 else "")
         groups.setdefault((key, int(float(r["vehicles"]))), []).append(r)
     veh = sorted({v for _, v in groups})
@@ -255,20 +232,19 @@ def main() -> None:
         return None
 
     cases = [
-        ("DECK, EDCA + backoff (baseline)", vpick(suite="DECK", backend="openssl", signed_beacons="False", edca="True",
+        ("DECK, EDCA + backoff (baseline)", vpick(suite="DECK", signed_beacons="False", edca="True",
                                                   backoff="True", cert_cache="0")),
-        ("DECK, neither", vpick(suite="DECK", backend="openssl", signed_beacons="False", edca="False", backoff="False")),
-        ("DECK, EDCA only", vpick(suite="DECK", backend="openssl", signed_beacons="False", edca="True", backoff="False")),
-        ("DECK, backoff only", vpick(suite="DECK", backend="openssl", signed_beacons="False", edca="False", backoff="True")),
+        ("DECK, neither", vpick(suite="DECK", signed_beacons="False", edca="False", backoff="False")),
+        ("DECK, EDCA only", vpick(suite="DECK", signed_beacons="False", edca="True", backoff="False")),
+        ("DECK, backoff only", vpick(suite="DECK", signed_beacons="False", edca="False", backoff="True")),
         ("--mid--", None),
-        ("DECK + cache (directory)", vpick(suite="DECK", backend="openssl", signed_beacons="False", edca="True",
+        ("DECK + cache (directory)", vpick(suite="DECK", signed_beacons="False", edca="True",
                                            backoff="True", cert_cache="1")),
-        ("DECK + cache (all warm)", vpick(suite="DECK", backend="openssl", cert_cache="2")),
+        ("DECK + cache (all warm)", vpick(suite="DECK", cert_cache="2")),
         ("L3 + cache (directory)", vpick(suite="L3", cert_cache="1")),
         ("--mid--", None),
-        ("DECK, signed beacons", vpick(suite="DECK", backend="openssl", signed_beacons="True")),
+        ("DECK, signed beacons", vpick(suite="DECK", signed_beacons="True")),
         ("Classical, signed beacons", vpick(suite="CLASSIC", signed_beacons="True")),
-        ("DECK, pure-Python timings", vpick(suite="DECK", backend="pure")),
     ]
     rows = []
     for label, r in cases:

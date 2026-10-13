@@ -19,32 +19,31 @@ benchmarks were run with the CPU otherwise idle.
 | Suite | KEM keygen | encaps | decaps | sign | sign p99 | verify |
 |---|---|---|---|---|---|---|
 | Classical (ECDH/ECDSA P-256) | 0.024 | 0.12 | 0.091 | 0.031 | 0.072 | 0.12 |
-| DECK (ML-KEM-1024 / ML-DSA-65), native | 0.23 | 0.067 | 0.052 | 1.28 | 4.38 | 0.23 |
-| DECK, pure Python | 6.87 | 6.82 | 7.60 | 74.0 | 258 | 14.7 |
+| DECK (ML-KEM-1024 / ML-DSA-65) | 0.23 | 0.067 | 0.052 | 1.28 | 4.38 | 0.23 |
+| L1 (ML-KEM-512 in kyber-py / ML-DSA-44) | 1.80 | 2.70 | 3.63 | 1.27 | 3.32 | 0.16 |
 
-Full table: `results/primitives.csv` (all five suites, both backends).
+Full table: `results/primitives.csv` (all five suites).
 
 **What it means.**
-- **Signing is the only expensive post-quantum operation, and its variance is
-  intrinsic.** ML-DSA's rejection sampling gives a long tail: p99 is 2–4× the
-  mean depending on suite and backend. Verification is deterministic.
-- **The implementation matters far more than the algorithm.** The same
-  ML-DSA-65 signs in 1.3 ms natively and 74 ms in pure Python (about 58×).
-  Review 1's conclusion that signing might not fit 100 ms was a property of
-  the pure-Python library, not of ML-DSA.
+- **Every operation is fast; signing is the most expensive and the most
+  variable.** ML-DSA's rejection sampling gives a long tail: p99 is 2.5–3.5×
+  the mean. Verification is deterministic.
+- **L1's ML-KEM-512 is the outlier** (2.7 ms per encapsulation against
+  0.07 ms for native ML-KEM-1024) because it runs in pure Python: the
+  `cryptography` library does not expose ML-KEM-512.
 
 ### Handshake (Figures 1, 2)
 
-| Suite | Bytes | Frames | Airtime at 6 Mb/s | Bytes, cached certs | Frames | Compute, native | Compute, pure |
-|---|---|---|---|---|---|---|---|
-| Classical | 1,043 | 4 | 2.05 ms | 691 | 4 | 1.2 ms | n/a |
-| L1 | 14,373 | 13 | 21.3 ms | 6,825 | 8 | 11.6 ms* | 106 ms |
-| L3 | 19,913 | 17 | 29.4 ms | 9,307 | 10 | 4.8 ms | 178 ms |
-| DECK | 20,779 | 17 | 30.5 ms | 10,173 | 10 | 4.8 ms | 209 ms |
-| L5 | 27,329 | 22 | 40.1 ms | 12,807 | 12 | 5.7 ms | 219 ms |
+| Suite | Bytes | Frames | Airtime at 6 Mb/s | Bytes, cached certs | Frames | Compute |
+|---|---|---|---|---|---|---|
+| Classical | 1,043 | 4 | 2.05 ms | 691 | 4 | 1.2 ms |
+| L1 | 14,373 | 13 | 21.3 ms | 6,825 | 8 | 11.6 ms* |
+| L3 | 19,913 | 17 | 29.4 ms | 9,307 | 10 | 4.8 ms |
+| DECK | 20,779 | 17 | 30.5 ms | 10,173 | 10 | 4.8 ms |
+| L5 | 27,329 | 22 | 40.1 ms | 12,807 | 12 | 5.7 ms |
 
-\* L1's KEM is always pure Python: the `cryptography` library exposes no
-ML-KEM-512.
+\* L1's KEM runs in pure Python (`kyber-py`): the `cryptography` library
+exposes no ML-KEM-512.
 
 **What it means.**
 - **A post-quantum handshake is 14–26× the bytes of a classical one.** An
@@ -53,7 +52,7 @@ ML-KEM-512.
   (DECK: 20,779 → 10,173 B, 17 → 10 frames). See `docs/05` §4 for the design
   and its security argument.
 - **Computation is not the problem.** About 5 ms for a complete DECK
-  handshake natively; 0.2 s in pure Python.
+  handshake.
 - **The Review 1 figure was an undercount.** 6,494 B left the certificates
   out.
 
@@ -61,16 +60,16 @@ ML-KEM-512.
 
 p99 crypto plus airtime, against the 100 ms beacon interval:
 
-| Suite | AEAD inside a session | ML-DSA-signed broadcast, native | signed, pure Python |
-|---|---|---|---|
-| Classical | 0.40 ms (135 B) | 0.88 ms (234 B) | n/a |
-| DECK | 0.41 ms (135 B) | 9.5 ms (3,472 B, 3 frames) | **236 ms: misses** |
-| L5 | 0.47 ms (135 B) | 12.6 ms (4,790 B, 4 frames) | **184 ms: misses** |
+| Suite | AEAD inside a session | ML-DSA-signed broadcast |
+|---|---|---|
+| Classical | 0.40 ms (135 B) | 0.88 ms (234 B) |
+| DECK | 0.41 ms (135 B) | 9.5 ms (3,472 B, 3 frames) |
+| L5 | 0.47 ms (135 B) | 12.6 ms (4,790 B, 4 frames) |
 
 **What it means.** The base paper folds the one-off handshake into its
 per-message latency. Separated, the per-beacon cost of the session design is
 identical for classical and post-quantum: a 135-byte AES-GCM record. Signing
-every beacon (as IEEE 1609.2 does today) fits natively but costs 3 frames per
+every beacon (as IEEE 1609.2 does today) fits the budget but costs 3 frames per
 beacon, and that matters in ns-3 (§3).
 
 ---
@@ -82,8 +81,8 @@ One run of `config/demo.json` (19 processes over TCP on one machine):
 | Measure | Result |
 |---|---|
 | Secure sessions established | 48 (10,173–20,779 B each, depending on cached certificates); 6 rejected |
-| Critical event → alert at vehicles | median 5.4 ms |
-| Event → on the ledger (vehicle notified) | median 62 ms |
+| Critical event → alert at vehicles | median 4.1 ms |
+| Event → on the ledger (vehicle notified) | median 47 ms |
 | V2V via two RSUs | ≈ 1 ms |
 | Byzantine NODE_03 (wrong results) | demoted at block 8; NODE_05 promoted |
 | Leader NODE_01 crashes at 34 s | view change to view 1; later events commit |
@@ -92,7 +91,7 @@ One run of `config/demo.json` (19 processes over TCP on one machine):
 | 8 ledger copies | consistent (the crashed leader's copy is a prefix of the others); verify from genesis |
 
 **What it means.** The MEC sends the alert *before* it submits to consensus,
-so the safety path (about 5 ms) never waits for the ledger (about 60 ms).
+so the safety path (about 4 ms) never waits for the ledger (about 50 ms).
 
 ---
 
@@ -166,7 +165,6 @@ Alerts at 200 vehicles: 5.7 ms classical, 218 ms DECK, 33 ms DECK + cache.
 | L3 + cache (directory) | 100 % | 76 ms | 97 % | 5.9 ms |
 | DECK, signed beacons | 23 % | 704 ms | 46 % | 233 ms |
 | Classical, signed beacons | 100 % | 9 ms | 100 % | 5.4 ms |
-| DECK, pure-Python timings | 69 % | 593 ms | 74 % | 8.6 ms |
 
 - **Exponential backoff is what prevents congestion collapse.** Without it,
   failed handshakes retry immediately: 7–11 % complete and alerts queue for
@@ -180,8 +178,6 @@ Alerts at 200 vehicles: 5.7 ms classical, 218 ms DECK, 33 ms DECK + cache.
 - **Warm caches from the start (all warm) are no better than the directory
   model**: by the time measurement starts (after 5 s) almost every vehicle has
   had its first, full-certificate handshake.
-- **Implementation still matters in the network**: pure-Python processing
-  times double the median handshake (593 vs 283 ms).
 
 ---
 
@@ -276,7 +272,7 @@ Review 1 slide design**, which has no client signature (F2).
 
 **"Does post-quantum fit the 100 ms budget?"**
 Per message, yes, at every security level, provided beacons travel inside a
-session (0.4 ms) or an ML-DSA signature is computed natively (≈ 10 ms). The
+session (0.4 ms) or signed individually with ML-DSA (≈ 10 ms). The
 real limit is channel capacity during handshakes in dense traffic.
 
 **"Why ML-KEM-1024 with ML-DSA-65?"**

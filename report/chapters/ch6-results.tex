@@ -18,15 +18,15 @@ hardware differ; the comparisons between suites do not.
 \input{generated/tab-primitives}
 \end{table}
 
-Table~\ref{tab:prim} gives two findings. First, \textbf{signing is the only
-expensive post-quantum operation, and its variance is intrinsic}: ML-DSA's
-rejection sampling repeats until a candidate passes, so the 99th percentile
-is several times the mean in both backends, while verification is
-deterministic and fast. Second, \textbf{the implementation matters more than
-the algorithm}: the same ML-DSA-65 signs in \V{deck-sign-native}\,ms natively
-and \V{deck-sign-pure}\,ms in pure Python, a factor of about \V{sign-speedup}.
-Our Review~1 conclusion, that signing might not fit the 100\,ms budget, was a
-property of the pure-Python library, not of ML-DSA.
+Table~\ref{tab:prim} shows that \textbf{every operation is fast, and signing
+is the most expensive and the most variable one}. ML-DSA-65 signs in
+\V{deck-sign-native}\,ms on average; its rejection sampling repeats until a
+candidate passes, so the 99th percentile (\V{deck-sign-native-p99}\,ms) is
+several times the mean, while verification is deterministic and takes
+\V{deck-verify-native}\,ms. The only outlier is L1's ML-KEM-512, which comes from
+the pure-Python \code{kyber-py} library because the \code{cryptography}
+library does not expose it: its encapsulation takes \V{l1-encaps}\,ms against
+\V{deck-encaps-native}\,ms for the native ML-KEM-1024.
 
 \subsection{Handshake size and compute}
 
@@ -63,14 +63,14 @@ are the largest single item, \V{deck-cert} bytes each. The Review~1 figure of
 
 Computation is small by comparison (Table~\ref{tab:hstime},
 Figure~\ref{fig:compute}): about \V{deck-hs-ms}\,ms for a complete DECK
-handshake natively against \V{classic-hs-ms}\,ms classically, but
-\V{deck-hs-ms-pure}\,ms with the pure-Python library. With a native
-implementation, \textbf{the cost of post-quantum V2X is bytes, not CPU time}.
+handshake against \V{classic-hs-ms}\,ms classically. L1 is the slowest
+suite (\V{l1-hs-ms}\,ms) only because its KEM runs in pure Python. \textbf{The
+cost of post-quantum V2X is bytes, not CPU time}.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.85\textwidth]{fig1_handshake_compute.png}
-\caption{Full handshake compute time, native and pure-Python backends (log scale).}
+\caption{Full handshake compute time, both sides together (bars: mean; whiskers: up to the 95th percentile).}
 \label{fig:compute}
 \end{figure}
 
@@ -89,9 +89,9 @@ Separated (Table~\ref{tab:beacon}, Figure~\ref{fig:beacon}), the per-beacon
 cost inside a session is the same for every suite: a
 \V{deck-beacon-aead-bytes}-byte AES-GCM record costing
 \V{deck-beacon-aead}\,ms against a 100\,ms interval. Signing every beacon, as
-IEEE~1609.2 does today, also fits natively (\V{deck-beacon-signed}\,ms for
-DECK) but costs \V{deck-beacon-signed-bytes} bytes, \V{deck-beacon-signed-frames}
-frames per beacon, and misses the deadline with the pure-Python library.
+IEEE~1609.2 does today, also fits (\V{deck-beacon-signed}\,ms for DECK) but
+costs \V{deck-beacon-signed-bytes} bytes, \V{deck-beacon-signed-frames} frames
+per beacon.
 
 \begin{figure}[h]
 \centering
@@ -229,7 +229,7 @@ signatures cannot be cached.
 \label{fig:ablation}
 \end{figure}
 
-Table~\ref{tab:variants} and Figure~\ref{fig:ablation} show four further
+Table~\ref{tab:variants} and Figure~\ref{fig:ablation} show three further
 results.
 \begin{enumerate}
 \item \textbf{Exponential backoff prevents congestion collapse.} Without it,
@@ -249,12 +249,6 @@ Signing every beacon (\V{deck-beacon-signed-frames} frames each) leaves
 \V{var-deck-signed-beacons-coverage}\,\% of beacon slots covered, against
 \V{var-classical-signed-beacons-coverage}\,\% classically. Session-based AEAD
 beacons are the design that scales.
-\item \textbf{The implementation still matters in the network.} With
-processing times from the pure-Python library, DECK completes
-\V{var-deck-pure-python-timings-success}\,\% of handshakes (native:
-\V{var-deck-edca-backoff-baseline-success}\,\%) and its median handshake takes
-\V{var-deck-pure-python-timings-p50}\,ms instead of
-\V{var-deck-edca-backoff-baseline-p50}\,ms.
 \end{enumerate}
 
 \section{Consensus}
@@ -360,8 +354,8 @@ decisions D6--D9; the result runs as a distributed system and withstands the
 tested attacks.
 \item \textbf{Does post-quantum protection fit the 100\,ms budget?} Per
 message, yes, at every security level: \V{deck-beacon-aead}\,ms per beacon
-inside a session, or \V{deck-beacon-signed}\,ms for a natively signed beacon.
-A full handshake costs about \V{deck-hs-ms}\,ms of computation natively.
+inside a session, or \V{deck-beacon-signed}\,ms for a signed beacon. A full
+handshake costs about \V{deck-hs-ms}\,ms of computation.
 \item \textbf{How does the channel behave as density grows?} The handshake
 is the problem: at 100 vehicles DECK completes \V{ns3-success-deck-100}\,\% of
 handshakes against \V{ns3-success-classic-100}\,\% classically. Certificate

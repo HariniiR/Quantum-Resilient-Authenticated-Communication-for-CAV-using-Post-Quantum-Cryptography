@@ -15,11 +15,12 @@ Python 3.10 or newer. `cryptography` 49 bundles OpenSSL with native ML-KEM and
 ML-DSA, so nothing else needs installing. Check it with:
 
 ```powershell
-python -c "from qrcav.crypto import get_suite; print(get_suite('DECK').label, get_suite('DECK').backend)"
-# ML-KEM-1024 + ML-DSA-65 openssl
+python -c "from qrcav.crypto import get_suite; print(get_suite('DECK').label)"
+# ML-KEM-1024 + ML-DSA-65
 ```
 
-If it prints `pure` instead of `openssl`, run `pip install -U "cryptography>=47"`.
+If it fails with "this project needs native ML-KEM / ML-DSA", run
+`pip install -U "cryptography>=47"`.
 
 ## 2. Setup for ns-3 (WSL2, once)
 
@@ -47,7 +48,6 @@ python scripts/run_ns3_sweeps.py --quick       # ~3 min; checks the setup
 | What | Command | Time |
 |---|---|---|
 | Protocol walkthrough (viva) | `python scripts/demo_protocol.py` | 1 s |
-| Same, pure-Python backend | `python scripts/demo_protocol.py --backend pure` | 3 s |
 | Distributed system, 19 processes | `python scripts/run_network.py` | 50 s |
 | Same, classical crypto for comparison | `python scripts/run_network.py --suite CLASSIC` | 50 s |
 | Same, certificate caching off | set `"cert_cache": false` in `config/demo.json` | 50 s |
@@ -150,7 +150,7 @@ Everything is in `config/demo.json`:
 | Symptom | Fix |
 |---|---|
 | `Address already in use` | a previous run is still alive: close it, or change the ports in the config |
-| Everything prints `pure` and is slow | `pip install -U "cryptography>=47"` |
+| "this project needs native ML-KEM / ML-DSA" | `pip install -U "cryptography>=47"` |
 | `ns-3 Python bindings not found` | run in WSL2 with `pip install -r requirements-ns3.txt` |
 | ns-3 run fails compiling | `sudo apt install build-essential` in WSL2 |
 | Colours show as `[92m` | use Windows Terminal or the VS Code terminal |

@@ -63,22 +63,16 @@ ECDH is wrapped as a KEM (ephemeral-static DH, the DHKEM construction of RFC
 9180). The classical baseline therefore runs through **exactly the same protocol
 code** as the post-quantum suites, so the comparison is like-for-like.
 
-### Two backends
+### Implementation
 
-| Backend | Library | Notes |
-|---|---|---|
-| `openssl` (default) | `cryptography` ≥ 47 (bundles OpenSSL ≥ 3.5) | native, constant-time; ML-DSA-65 signs in about 1 ms |
-| `pure` | `kyber-py`, `dilithium-py` | pure Python, what Review 1 used, *not* constant-time; about 50 ms per signature |
+Every algorithm comes from `cryptography` ≥ 47, which bundles OpenSSL ≥ 3.5
+with native, constant-time ML-KEM and ML-DSA (ML-DSA-65 signs in about 1 ms).
 
-The two are byte-compatible: `tests/test_crypto.py::test_backends_interoperate`
-encapsulates with one and decapsulates with the other, and signs with one and
-verifies with the other. The `cryptography` library exposes only ML-KEM-768 and ML-KEM-1024 (OpenSSL itself implements 512), so `L1` always uses
-the pure KEM.
-
-Moving to the native backend removes the Review 1 limitation that the
-cryptography was not constant-time. The pure backend stays for comparison:
-it shows how strongly implementation quality, not the algorithm, decides
-whether PQC fits the latency budget.
+One exception: the library exposes ML-KEM-768 and ML-KEM-1024 but not
+ML-KEM-512 (OpenSSL itself implements it), so `L1` takes its KEM from
+`kyber-py`, a pure-Python implementation of FIPS 203. Same sizes and
+encodings, but slower and not constant-time, which is why L1's handshake is
+the slowest of the five suites.
 
 ### Hash and KDF
 
@@ -430,11 +424,11 @@ are evaluated by ablation (`results/ns3_variants.csv`, Figure 10):
 | Script | Produces |
 |---|---|
 | `scripts/run_evaluation.py` | primitives, sizes (full and cached), handshake timing, beacon budget, 21 attacks, consensus scaling, throughput, fault tolerance, view change, score dynamics; all figures |
-| `scripts/run_ns3_sweeps.py` | density sweep for 5 suites + DECK with certificate caching × 50–200 vehicles, signed vs AEAD beacons, pure vs native backend, EDCA/backoff ablation |
+| `scripts/run_ns3_sweeps.py` | density sweep for 5 suites + DECK with certificate caching × 50–200 vehicles, signed vs AEAD beacons, EDCA/backoff ablation |
 | `scripts/make_viewer.py` | `results/viewer.html`: browser replay of one traced ns-3 run per scenario (classical, PQ, PQ + cache) |
 | `scripts/run_network.py` | the distributed system run, with the end-to-end report |
 | `scripts/demo_protocol.py` | step-by-step protocol walkthrough for the viva |
-| `pytest` | 57 tests (unit tests plus a real multi-process run) |
+| `pytest` | 55 tests (unit tests plus a real multi-process run) |
 
 ---
 

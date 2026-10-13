@@ -38,9 +38,9 @@ def _t(fn, *a):
     return r, (time.perf_counter() - t0) * 1000
 
 
-def build_profile(suite_name: str, backend: str = "auto", samples: int = 150,
+def build_profile(suite_name: str, samples: int = 150,
                   consensus_requests: int = 30, seed: int = 1) -> dict:
-    suite = get_suite(suite_name, backend)
+    suite = get_suite(suite_name)
     ta = TrustedAuthority(suite)
     ids = enrol_all(ta, [("CAV_00001", "CAV"), ("RSU_001", "RSU")])
     cav, rsu = ids["CAV_00001"], ids["RSU_001"]
@@ -57,7 +57,7 @@ def build_profile(suite_name: str, backend: str = "auto", samples: int = 150,
         (fs, s_sess), t4 = _t(s.on_client_key, ck)
         c_sess, t5 = _t(c.on_server_finished, fs)
         if i < 5:
-            continue  # warm-up: first calls load backends and fill caches
+            continue  # warm-up: first calls load libraries and fill caches
         for k, v in zip(stages, (t1, t2, t3, t4, t5)):
             stages[k].append(v)
         sizes = {"client_hello": len(ch), "server_hello": len(sh), "client_key": len(ck),
@@ -102,7 +102,7 @@ def build_profile(suite_name: str, backend: str = "auto", samples: int = 150,
             commit[mode] = [c.latency * 1000 for c in sim.done]
 
     prof = {
-        "suite": suite.name, "label": suite.label, "backend": suite.backend,
+        "suite": suite.name, "label": suite.label,
         "sizes": sizes,
         "timing_ms": {
             **stages,
@@ -116,11 +116,15 @@ def build_profile(suite_name: str, backend: str = "auto", samples: int = 150,
     return prof
 
 
-def load_or_build(suite_name: str, backend: str, cache_dir: Path, **kw) -> dict:
+def profile_path(suite_name: str, cache_dir: Path) -> Path:
+    return cache_dir / f"profile_{suite_name}.json"
+
+
+def load_or_build(suite_name: str, cache_dir: Path, **kw) -> dict:
     cache_dir.mkdir(parents=True, exist_ok=True)
-    p = cache_dir / f"profile_{suite_name}_{backend}.json"
+    p = profile_path(suite_name, cache_dir)
     if p.exists():
         return json.loads(p.read_text())
-    prof = build_profile(suite_name, backend, **kw)
+    prof = build_profile(suite_name, **kw)
     p.write_text(json.dumps(prof))
     return prof
