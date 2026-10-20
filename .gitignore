@@ -16,3 +16,4 @@ node_modules/
 *.snm
 *.vrb
 *.synctex.gz
+run_two/
