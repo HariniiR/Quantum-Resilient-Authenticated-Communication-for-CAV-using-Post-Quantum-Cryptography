@@ -1,0 +1,1611 @@
+<title>qrcav Project Explorer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a module rail on the left (the order data travels through the system),
+   one module page at a time on the right; the rail becomes a scrolling strip on phones.
+   Same visual language as results/viewer.html: road-signage type, asphalt neutrals,
+   state colours borrowed from traffic signals. */
+:root {
+  --bg: #eef0ec; --panel: #f8f9f6; --ink: #1b211f; --ink2: #56605b; --ink3: #8b948f;
+  --line: #d3d8d1; --road: #dde1da; --block: #e7eae4;
+  --accent: #0f7a63;   /* session up, accepted, verified */
+  --amber: #c27100;    /* in progress, certificates */
+  --red: #c0392b;      /* rejected, faulty, crashed */
+  --violet: #6d4bd1;   /* alerts, signatures */
+  --blue: #2a6db0;     /* key exchange, proposals */
+  --display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111513; --panel: #171c1a; --ink: #e6ebe7; --ink2: #9aa59f; --ink3: #6d7672;
+    --line: #2c3430; --road: #262d2a; --block: #1a201d;
+    --accent: #2fbf98; --amber: #f0a330; --red: #ef6a5b; --violet: #a48bf2; --blue: #6ba6e8; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111513; --panel: #171c1a; --ink: #e6ebe7; --ink2: #9aa59f; --ink3: #6d7672;
+  --line: #2c3430; --road: #262d2a; --block: #1a201d;
+  --accent: #2fbf98; --amber: #f0a330; --red: #ef6a5b; --violet: #a48bf2; --blue: #6ba6e8; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--body); font-size: 15.5px; line-height: 1.5; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: 0.005em; line-height: 1.12; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(30px, 4.2vw, 46px); }
+h2 { font-size: clamp(26px, 3vw, 34px); }
+h3 { font-size: 19px; font-weight: 600; }
+p { margin: 0; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+a { color: var(--accent); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
+.rail { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; height: 100vh; overflow-y: auto;
+  border-right: 1px solid var(--line); background: var(--panel); padding-block: 22px 28px; padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: 14px;
+  display: grid; align-content: start; gap: 18px; }
+.brand { display: grid; gap: 4px; }
+.brand .tag { font-family: var(--mono); font-size: 12px; color: var(--ink2); }
+.brand b { font-family: var(--display); font-size: 21px; font-weight: 700; line-height: 1.1; }
+.navgroup { display: grid; gap: 2px; }
+.navgroup > span { font-family: var(--display); font-weight: 600; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); padding: 0 8px 4px; }
+.nav { display: grid; grid-template-columns: 26px 1fr; align-items: baseline; gap: 4px; padding: 6px 8px; border-radius: 5px; border: 0; background: transparent; text-align: left; cursor: pointer; color: var(--ink2); }
+.nav .n { font-family: var(--mono); font-size: 12px; color: var(--ink3); }
+.nav .t { font-family: var(--display); font-weight: 600; font-size: 16px; }
+.nav:hover { background: var(--block); color: var(--ink); }
+.nav[aria-current="page"] { background: var(--ink); color: var(--panel); }
+.nav[aria-current="page"] .n { color: var(--panel); opacity: 0.7; }
+.railnote { font-size: 12.5px; color: var(--ink3); line-height: 1.45; }
+
+main { min-width: 0; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.page { max-width: 1120px; margin: 0 auto; display: grid; gap: 22px; }
+.phead { display: grid; gap: 10px; }
+.eyebrow { font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); }
+.lead { font-size: 17px; color: var(--ink2); max-width: 70ch; }
+.lead b { color: var(--ink); font-weight: 600; }
+.files { display: flex; flex-wrap: wrap; gap: 6px; }
+.file { font-family: var(--mono); font-size: 12px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 4px; color: var(--ink2); background: var(--panel); }
+.run { font-family: var(--mono); font-size: 12.5px; color: var(--ink2); }
+.run b { color: var(--ink); font-weight: 500; }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
+.label { font-family: var(--display); font-weight: 600; font-size: 12.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink2); }
+.cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.cols.even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+@media (max-width: 1000px) { .cols, .cols.even { grid-template-columns: minmax(0, 1fr); } }
+.note { font-size: 13.5px; color: var(--ink2); max-width: 78ch; }
+.plain { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; font-size: 15px; max-width: 75ch; }
+.plain b { font-weight: 600; }
+ul.notice { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14.5px; max-width: 75ch; }
+
+.btn { font: 600 14.5px var(--display); letter-spacing: 0.02em; padding: 7px 14px; border-radius: 5px; border: 1px solid var(--ink); background: var(--ink); color: var(--panel); cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn.ghost:hover { border-color: var(--ink2); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ctl select { font: 14px var(--body); padding: 6px 8px; border-radius: 5px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.clock { font-family: var(--mono); font-size: 13.5px; font-variant-numeric: tabular-nums; color: var(--ink2); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; flex-wrap: wrap; }
+.seg button { font: 600 14px var(--display); padding: 7px 12px; background: transparent; color: var(--ink2); border: 0; border-left: 1px solid var(--line); cursor: pointer; }
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+
+.pill { display: inline-block; font: 600 12px var(--display); letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
+.pill.ok { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.pill.bad { background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); }
+.pill.warn { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber); }
+.pill.info { background: color-mix(in srgb, var(--blue) 15%, transparent); color: var(--blue); }
+.pill.vio { background: color-mix(in srgb, var(--violet) 15%, transparent); color: var(--violet); }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); overflow: hidden; }
+.stat { padding: 14px 16px; border-left: 1px solid var(--line); display: grid; gap: 2px; align-content: start; }
+.stat:first-child { border-left: 0; }
+.stat b { font-family: var(--mono); font-weight: 500; font-size: 22px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 13px; color: var(--ink2); }
+@media (max-width: 640px) { .stat { border-left: 0; border-top: 1px solid var(--line); } .stat:first-child { border-top: 0; } }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th { font-family: var(--display); font-weight: 600; font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.hl td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+
+.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px 14px; font-size: 14px; }
+.kv > span:nth-child(odd) { color: var(--ink2); }
+.kv > span:nth-child(even) { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+@media (max-width: 640px) { .kv { grid-template-columns: minmax(0, 1fr); gap: 1px; } .kv > span:nth-child(odd) { margin-top: 6px; font-size: 12.5px; } }
+.hex { font-family: var(--mono); font-size: 12.5px; overflow-wrap: anywhere; color: var(--ink2); }
+
+svg text { font-family: var(--body); }
+.diagram { width: 100%; height: auto; display: block; }
+.dwrap { overflow-x: auto; }
+.dwrap svg { min-width: 620px; }
+.click { cursor: pointer; }
+.click:hover .hit, .click:focus-visible .hit { stroke: var(--accent); stroke-width: 2.5; }
+.click:focus { outline: none; }
+
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+.steps li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 4px; border-top: 1px solid var(--line); align-items: baseline; }
+.steps li:first-child { border-top: 0; }
+.steps .k { font-family: var(--mono); font-size: 13px; color: var(--ink3); }
+.steps .w b { font-family: var(--display); font-weight: 600; font-size: 17px; }
+.steps .w p { font-size: 14.5px; color: var(--ink2); }
+.steps .fig { font-family: var(--mono); font-size: 13px; text-align: right; }
+.steps .go { grid-column: 2 / -1; justify-self: start; font: 600 13.5px var(--display); background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; }
+@media (max-width: 640px) { .steps li { grid-template-columns: 28px minmax(0, 1fr); } .steps .fig { grid-column: 2; text-align: left; } }
+
+.bytebar { display: flex; height: 28px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
+.bytebar > div { min-width: 2px; display: flex; align-items: center; justify-content: center; font: 500 11.5px var(--mono); color: #fff; white-space: nowrap; overflow: hidden; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink2); }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.frames { display: flex; flex-wrap: wrap; gap: 4px; }
+.frames span { width: 18px; height: 12px; border-radius: 2px; background: var(--amber); }
+.frames.small span { background: var(--accent); }
+
+.feed { font-family: var(--mono); font-size: 12.5px; display: grid; gap: 1px; max-height: 300px; overflow-y: auto; border-top: 1px solid var(--line); padding-top: 6px; }
+.feed button { all: unset; display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 8px; padding: 3px 4px; border-radius: 3px; cursor: pointer; color: var(--ink2); }
+.feed button:hover { background: var(--block); }
+.feed button.now { background: var(--block); color: var(--ink); }
+.feed .tt { color: var(--ink3); text-align: right; font-variant-numeric: tabular-nums; }
+.feed .ok { color: var(--accent); } .feed .bad { color: var(--red); } .feed .vio { color: var(--violet); } .feed .warn { color: var(--amber); } .feed .info { color: var(--blue); }
+.chapters { display: flex; flex-wrap: wrap; gap: 6px; }
+.chapters button { font: 600 13.5px var(--display); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
+.chapters button:hover { border-color: var(--ink2); }
+.caption { min-height: 46px; font-size: 15px; border-left: 3px solid var(--violet); padding: 4px 0 4px 12px; }
+.caption b { font-weight: 600; }
+
+.window { display: grid; grid-template-columns: repeat(32, 1fr); gap: 2px; }
+.window span { aspect-ratio: 1; border-radius: 2px; background: var(--block); border: 1px solid var(--line); }
+.window span.on { background: var(--accent); border-color: var(--accent); }
+.window span.top { outline: 2px solid var(--ink); outline-offset: 0; }
+.log { font-family: var(--mono); font-size: 12.5px; display: grid; gap: 2px; max-height: 190px; overflow-y: auto; }
+.log .ok { color: var(--accent); } .log .bad { color: var(--red); } .log div { color: var(--ink2); }
+
+.chain { display: flex; gap: 0; overflow-x: auto; padding-bottom: 8px; align-items: stretch; }
+.blk { flex: none; width: 168px; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; background: var(--panel); display: grid; gap: 3px; cursor: pointer; text-align: left; font-size: 12.5px; }
+.blk b { font-family: var(--display); font-size: 17px; font-weight: 700; }
+.blk .h { font-family: var(--mono); font-size: 11.5px; color: var(--ink2); }
+.blk[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.blk.broken { border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red); }
+.link { flex: none; width: 26px; align-self: center; height: 2px; background: var(--ink3); position: relative; }
+.link.broken { background: var(--red); }
+.link.broken::after { content: "✕"; position: absolute; left: 7px; top: -10px; color: var(--red); font-size: 13px; font-weight: 700; }
+
+.scoreRow { display: grid; grid-template-columns: 74px minmax(0, 1fr) 46px 40px; gap: 8px; align-items: center; font-size: 13px; }
+.scoreRow .bar { height: 10px; background: var(--block); border-radius: 2px; overflow: hidden; }
+.scoreRow .bar i { display: block; height: 100%; background: var(--ink2); }
+.scoreRow .bar i.cn { background: var(--accent); }
+.scoreRow .bar i.bz { background: var(--red); }
+.scoreRow .v { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.scoreRow .d { font-family: var(--mono); font-size: 12px; }
+
+.chart { width: 100%; height: auto; display: block; max-width: 780px; }
+.chartbox { display: grid; gap: 8px; }
+canvas.map { width: 100%; aspect-ratio: 1 / 1; display: block; max-width: 100%; }
+canvas.air { width: 100%; height: 70px; display: block; }
+.empty { padding: 30px; text-align: center; color: var(--ink2); border: 1px dashed var(--line); border-radius: 7px; }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; height: auto; border-right: 0; border-bottom: 1px solid var(--line);
+    padding-block: 10px; padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px));
+    grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; overflow-y: hidden; gap: 12px; align-items: center; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--panel); }
+  .brand, .railnote, .navgroup > span { display: none; }
+  .navgroup { grid-auto-flow: column; }
+  .nav { grid-template-columns: auto auto; white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+</style>
+
+<div class="app">
+  <nav class="rail" aria-label="Modules">
+    <div class="brand"><span class="tag">qrcav · review2-complete</span><b>Quantum-resilient V2X, module by module</b></div>
+    <div class="navgroup" id="nav"></div>
+    <p class="railnote" id="railnote"></p>
+  </nav>
+  <main id="main"></main>
+</div>
+<script>
+const D = /*__DATA__*/null;
+(function () {
+"use strict";
+const main = document.getElementById("main");
+if (!D) { main.innerHTML = '<div class="empty">No data embedded. Run <code>python scripts/make_explorer.py</code>.</div>'; return; }
+
+// ---------- helpers ---------------------------------------------------------
+const SVGNS = "http://www.w3.org/2000/svg";
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  setAttrs(e, attrs); add(e, kids); return e;
+}
+function s(tag, attrs, ...kids) {
+  const e = document.createElementNS(SVGNS, tag);
+  setAttrs(e, attrs); add(e, kids); return e;
+}
+function setAttrs(e, attrs) {
+  if (!attrs) return;
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "text") e.textContent = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? "" : v);
+  }
+}
+function add(e, kids) {
+  for (const k of kids.flat(3)) {
+    if (k === null || k === undefined || k === false) continue;
+    e.appendChild(typeof k === "string" || typeof k === "number" ? document.createTextNode(String(k)) : k);
+  }
+}
+const nf = (n, d = 0) => (n === null || n === undefined || Number.isNaN(+n)) ? "–" : Number(n).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d });
+const B = n => nf(n) + " B";
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const median = a => { if (!a.length) return null; const b = [...a].sort((x, y) => x - y), m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; };
+const reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+const short = id => id.replace("NODE_", "N").replace("CAV_", "CAV ").replace("RSU_", "RSU ");
+const R = D.results || {};
+const NET = D.network;
+const NE = NET ? NET.events : [];
+
+function pageHead(eyebrow, title, lead, files, run) {
+  return h("div", { class: "phead" },
+    h("div", { class: "eyebrow", text: eyebrow }),
+    h("h2", { text: title }),
+    h("p", { class: "lead", html: lead }),
+    files && files.length ? h("div", { class: "files" }, files.map(f => h("span", { class: "file", text: f }))) : null,
+    run ? h("div", { class: "run", html: "Run it yourself: <b>" + esc(run) + "</b>" }) : null);
+}
+function panel(label, ...kids) { return h("div", { class: "panel" }, label ? h("div", { class: "label", text: label }) : null, ...kids); }
+function plain(html) { return h("p", { class: "plain", html }); }
+function notice(items) { return h("ul", { class: "notice" }, items.map(t => h("li", { html: t }))); }
+function seg(options, current, onPick) {
+  const wrap = h("div", { class: "seg", role: "group" });
+  options.forEach(([val, label]) => {
+    const b = h("button", { type: "button", "aria-pressed": String(val === current), text: label,
+      onclick: () => { [...wrap.children].forEach(x => x.setAttribute("aria-pressed", String(x === b))); onPick(val); } });
+    wrap.appendChild(b);
+  });
+  return wrap;
+}
+function table(cols, rows, opts = {}) {
+  const t = h("table", null,
+    h("thead", null, h("tr", null, cols.map(c => h("th", { class: c.num ? "num" : null, text: c.label })))),
+    h("tbody", null, rows.map(r => h("tr", { class: opts.hl && opts.hl(r) ? "hl" : null },
+      cols.map(c => { const v = c.get(r); return h("td", { class: c.num ? "num" : null }, v instanceof Node ? v : String(v)); })))));
+  return h("div", { class: "tbl" }, t);
+}
+function goto(id) { return () => show(id); }
+
+// small SVG charts drawn to one scale ----------------------------------------
+function niceMax(v) { if (v <= 0) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))); for (const m of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * p >= v) return m * p; return 10 * p; }
+function lineChart({ xs, series, xLabel, yLabel, yMax, yFmt = v => nf(v), height = 260, marks }) {
+  const W = 640, H = height, L = 52, Rr = 16, T = 14, Bt = 40;
+  const ym = yMax || niceMax(Math.max(...series.flatMap(s => s.values.filter(v => v !== null))));
+  const xi = i => L + (W - L - Rr) * (xs.length === 1 ? 0.5 : i / (xs.length - 1));
+  const yv = v => T + (H - T - Bt) * (1 - v / ym);
+  const g = s("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": yLabel + " against " + xLabel });
+  for (let k = 0; k <= 4; k++) {
+    const v = ym * k / 4, y = yv(v);
+    g.appendChild(s("line", { x1: L, x2: W - Rr, y1: y, y2: y, stroke: "var(--line)", "stroke-width": 1 }));
+    g.appendChild(s("text", { x: L - 6, y: y + 4, "text-anchor": "end", "font-size": 11, fill: "var(--ink2)", "font-family": "var(--mono)", text: yFmt(v) }));
+  }
+  xs.forEach((x, i) => g.appendChild(s("text", { x: xi(i), y: H - Bt + 16, "text-anchor": "middle", "font-size": 11.5, fill: "var(--ink2)", "font-family": "var(--mono)", text: x })));
+  g.appendChild(s("text", { x: (L + W - Rr) / 2, y: H - 6, "text-anchor": "middle", "font-size": 12, fill: "var(--ink2)", text: xLabel }));
+  g.appendChild(s("text", { x: 12, y: (T + H - Bt) / 2, "text-anchor": "middle", "font-size": 12, fill: "var(--ink2)", transform: `rotate(-90 12 ${(T + H - Bt) / 2})`, text: yLabel }));
+  if (marks) marks(g, { xi, yv, W, H, L, T, Bt, Rr });
+  for (const se of series) {
+    const pts = se.values.map((v, i) => v === null ? null : [xi(i), yv(Math.min(v, ym))]).filter(Boolean);
+    g.appendChild(s("polyline", { points: pts.map(p => p.join(",")).join(" "), fill: "none", stroke: se.color, "stroke-width": se.width || 2.2, "stroke-dasharray": se.dash || null }));
+    pts.forEach(p => g.appendChild(s("circle", { cx: p[0], cy: p[1], r: 3.3, fill: se.color })));
+  }
+  return g;
+}
+function barChart({ cats, series, yLabel, yMax, yFmt = v => nf(v), height = 250, valueFmt, refLine }) {
+  const W = 640, H = height, L = 52, Rr = 12, T = 18, Bt = 40;
+  const ym = yMax || niceMax(Math.max(...series.flatMap(s => s.values), refLine ? refLine.v : 0));
+  const yv = v => T + (H - T - Bt) * (1 - v / ym);
+  const g = s("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart", role: "img", "aria-label": yLabel });
+  for (let k = 0; k <= 4; k++) {
+    const v = ym * k / 4, y = yv(v);
+    g.appendChild(s("line", { x1: L, x2: W - Rr, y1: y, y2: y, stroke: "var(--line)", "stroke-width": 1 }));
+    g.appendChild(s("text", { x: L - 6, y: y + 4, "text-anchor": "end", "font-size": 11, fill: "var(--ink2)", "font-family": "var(--mono)", text: yFmt(v) }));
+  }
+  const gw = (W - L - Rr) / cats.length, bw = Math.min(34, (gw - 14) / series.length);
+  cats.forEach((c, i) => {
+    const x0 = L + gw * i + (gw - bw * series.length) / 2;
+    series.forEach((se, j) => {
+      const v = se.values[i], y = yv(Math.min(v, ym));
+      g.appendChild(s("rect", { x: x0 + j * bw + 1, y, width: bw - 2, height: Math.max(0.5, yv(0) - y), fill: se.color, rx: 1.5 }));
+      if (valueFmt) g.appendChild(s("text", { x: x0 + j * bw + bw / 2, y: y - 4, "text-anchor": "middle", "font-size": 10.5, fill: "var(--ink2)", "font-family": "var(--mono)", text: valueFmt(v) }));
+    });
+    g.appendChild(s("text", { x: L + gw * i + gw / 2, y: H - Bt + 16, "text-anchor": "middle", "font-size": 12, fill: "var(--ink2)", "font-family": "var(--mono)", text: c }));
+  });
+  if (refLine) {
+    const y = yv(refLine.v);
+    g.appendChild(s("line", { x1: L, x2: W - Rr, y1: y, y2: y, stroke: "var(--red)", "stroke-width": 1.5, "stroke-dasharray": "5 4" }));
+    g.appendChild(s("text", { x: W - Rr - 4, y: y - 5, "text-anchor": "end", "font-size": 11.5, fill: "var(--red)", text: refLine.label }));
+  }
+  g.appendChild(s("text", { x: 12, y: (T + H - Bt) / 2, "text-anchor": "middle", "font-size": 12, fill: "var(--ink2)", transform: `rotate(-90 12 ${(T + H - Bt) / 2})`, text: yLabel }));
+  return g;
+}
+function legend(items) { return h("div", { class: "legend" }, items.map(([c, t]) => h("span", null, h("i", { style: `background:${c}` }), t))); }
+
+// ---------- routing ------------------------------------------------------------
+const PAGES = [];
+const groups = [["Start", []], ["Security track", []], ["Systems track", []], ["Evidence", []]];
+function page(id, num, title, group, build) {
+  const sec = h("section", { class: "page", id: "p-" + id, hidden: true });
+  main.appendChild(sec);
+  const p = { id, num, title, sec, build, built: false, onShow: null, onHide: null };
+  PAGES.push(p);
+  groups[group][1].push(p);
+  return p;
+}
+let current = null;
+function show(id) {
+  const p = PAGES.find(x => x.id === id) || PAGES[0];
+  if (current && current !== p) { current.sec.hidden = true; current.onHide && current.onHide(); }
+  if (!p.built) { p.built = true; p.build(p); }
+  p.sec.hidden = false;
+  current = p;
+  document.querySelectorAll(".nav").forEach(n => n.setAttribute("aria-current", n.dataset.id === p.id ? "page" : "false"));
+  try { if (location.hash.slice(1) !== p.id) history.replaceState(null, "", "#" + p.id); } catch (e) { /* sandboxed */ }
+  p.onShow && p.onShow();
+  window.scrollTo({ top: 0 });
+  const nb = document.querySelector(`.nav[data-id="${p.id}"]`);
+  if (nb && nb.scrollIntoView && window.innerWidth <= 900) nb.scrollIntoView({ inline: "center", block: "nearest" });
+}
+
+// ---------- network-run figures shared by several pages -------------------------
+const netAlerts = NE.filter(e => e.event === "alert").map(e => e.latency_ms);
+const netRecorded = NE.filter(e => e.event === "recorded").map(e => e.latency_ms);
+const netHs = NE.filter(e => e.event === "handshake" && e.side === "initiator");
+const netCommits = NE.filter(e => e.event === "commit" && e.node === "NODE_02");
+const HS = D.handshake, PKI = D.pki, SUITE = D.suite;
+const attacks = R.attacks || [];
+const sizesRow = name => (R.sizes || []).find(r => r.suite === name) || {};
+
+// =================================================================================
+// OVERVIEW
+// =================================================================================
+page("overview", "", "Overview", 0, p => {
+  const sec = p.sec;
+  const critical = NE.filter(e => e.event === "critical").map(e => e.mec_delay_ms);
+  const committed = NE.filter(e => e.event === "committed").map(e => e.latency_ms);
+  const rejected = attacks.filter(a => a.rejected).length;
+
+  sec.appendChild(h("div", { class: "phead" },
+    h("div", { class: "eyebrow", text: "Final-year project · post-quantum V2X" }),
+    h("h1", { text: "Vehicles warn each other in milliseconds, over links a quantum computer cannot break" }),
+    h("p", { class: "lead", html:
+      "Connected vehicles (CAVs) report hazards to roadside units (RSUs). An edge server (MEC) warns nearby vehicles at once, " +
+      "then a group of validators agrees on the event and writes it to a tamper-evident ledger. Every link is protected with " +
+      "<b>ML-KEM</b> (key exchange) and <b>ML-DSA</b> (signatures), the NIST post-quantum standards, instead of the elliptic-curve " +
+      "cryptography that a large quantum computer would break." }),
+    h("p", { class: "note", html: `Everything on these pages was produced by the project's own code when this page was generated (${esc(D.generated)}, suite <b>${esc(D.suite_label)}</b>): real handshakes, real signatures, a real 19-process run, and the ns-3 radio simulation. Pick a module on the left, or click a box in the diagram.` })));
+
+  const stats = h("div", { class: "stats" },
+    h("div", { class: "stat" }, h("b", { text: `${nf(HS.full.total / 1000, 1)} → ${nf(HS.cached.total / 1000, 1)} KB` }), h("span", { text: "post-quantum handshake, full → with certificate caching" })),
+    h("div", { class: "stat" }, h("b", { text: netAlerts.length ? nf(median(netAlerts), 1) + " ms" : "–" }), h("span", { text: "hazard report → alert at other vehicles (median, real run)" })),
+    h("div", { class: "stat" }, h("b", { text: `${rejected} of ${attacks.length}` }), h("span", { text: "attacks tested, all rejected" })),
+    h("div", { class: "stat" }, h("b", { text: netCommits.length ? `${netCommits.length} blocks` : "–" }), h("span", { text: "on every validator's ledger; chain re-verified from genesis" })));
+  sec.appendChild(stats);
+
+  // architecture diagram
+  const g = s("svg", { viewBox: "0 0 960 462", class: "diagram", role: "img", "aria-label": "System architecture" });
+  const defs = s("defs", null, s("marker", { id: "arr", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" },
+    s("path", { d: "M0,0 L10,5 L0,10 z", fill: "var(--ink2)" })));
+  g.appendChild(defs);
+  const line = (x1, y1, x2, y2, o = {}) => g.appendChild(s("line", { x1, y1, x2, y2, stroke: o.c || "var(--ink2)", "stroke-width": o.w || 1.6, "stroke-dasharray": o.dash || null, "marker-end": o.arrow ? "url(#arr)" : null }));
+  const txt = (x, y, t, o = {}) => g.appendChild(s("text", { x, y, "font-size": o.size || 12.5, fill: o.c || "var(--ink2)", "text-anchor": o.anchor || "middle", "font-weight": o.bold ? 600 : null, text: t }));
+  // links first
+  line(125, 84, 400, 160, { dash: "4 4" }); txt(40, 122, "certificates + signed CRL", { anchor: "start" });
+  [[110, 297], [270, 297], [430, 297]].forEach(([x, y]) => line(x, y, 455 + (x - 270) * 0.25, 224, { arrow: true }));
+  txt(330, 262, "events up · alerts down", { anchor: "start" });
+  line(570, 194, 636, 205, { arrow: true }); txt(604, 186, "critical");
+  line(530, 160, 790, 86, { arrow: true }); txt(700, 124, "routine → archive", { anchor: "start" });
+  line(133, 320, 247, 320, { dash: "3 3" }); line(293, 320, 407, 320, { dash: "3 3" }); txt(190, 312, "V2V relay");
+  [[70, 110], [150, 110], [240, 270], [330, 270], [420, 430]].forEach(([cx, rx]) => line(cx + 15, 391, rx, 343, { c: "var(--accent)", w: 1.4 }));
+  txt(290, 454, "802.11p · ML-KEM + ML-DSA session · AES-256-GCM records", { c: "var(--accent)" });
+
+  const box = (go, x, y, w, hh, title, sub) => {
+    const grp = s("g", { class: "click", tabindex: 0, role: "link", "aria-label": title, onclick: goto(go), onkeydown: e => { if (e.key === "Enter") show(go); } });
+    grp.appendChild(s("rect", { class: "hit", x, y, width: w, height: hh, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 }));
+    grp.appendChild(s("text", { x: x + w / 2, y: y + 26, "text-anchor": "middle", "font-size": 16, "font-weight": 700, fill: "var(--ink)", "font-family": "var(--display)", text: title }));
+    if (sub) grp.appendChild(s("text", { x: x + w / 2, y: y + 45, "text-anchor": "middle", "font-size": 12, fill: "var(--ink2)", text: sub }));
+    g.appendChild(grp); return grp;
+  };
+  box("pki", 40, 24, 170, 60, "Trusted Authority", "certificates · CRL");
+  box("system", 750, 24, 170, 60, "Cloud archive", "routine events");
+  box("system", 380, 160, 190, 64, "MEC edge server", "routes by criticality");
+  const cg = box("consensus", 640, 130, 290, 170, "Consensus layer", "");
+  cg.querySelector("text:nth-of-type(1)").setAttribute("y", 152);
+  for (let i = 0; i < 8; i++) {
+    const cx = 690 + (i % 4) * 63, cy = 196 + Math.floor(i / 4) * 58;
+    cg.appendChild(s("circle", { cx, cy, r: 17, fill: i < 4 ? "var(--ink)" : "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.4, "stroke-dasharray": i < 4 ? null : "3 2" }));
+    cg.appendChild(s("text", { x: cx, y: cy + 4, "text-anchor": "middle", "font-size": 11, fill: i < 4 ? "var(--panel)" : "var(--ink)", "font-family": "var(--mono)", text: "0" + (i + 1) }));
+  }
+  cg.appendChild(s("text", { x: 785, y: 172, "text-anchor": "middle", "font-size": 11.5, fill: "var(--ink2)", text: "AGS-PBFT: 4 voting, 4 candidates" }));
+  const lg = s("g", { class: "click", tabindex: 0, role: "link", "aria-label": "Ledger", onclick: goto("ledger"), onkeydown: e => { if (e.key === "Enter") show("ledger"); } });
+  lg.appendChild(s("rect", { class: "hit", x: 640, y: 318, width: 290, height: 46, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 }));
+  for (let i = 0; i < 5; i++) {
+    lg.appendChild(s("rect", { x: 656 + i * 36, y: 330, width: 24, height: 22, rx: 2, fill: "var(--block)", stroke: "var(--ink2)" }));
+    if (i) lg.appendChild(s("line", { x1: 644 + i * 36, x2: 656 + i * 36, y1: 341, y2: 341, stroke: "var(--ink2)", "stroke-width": 1.5 }));
+  }
+  lg.appendChild(s("text", { x: 885, y: 346, "text-anchor": "middle", "font-size": 15, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "Ledger" }));
+  g.appendChild(lg);
+  line(785, 300, 785, 318, { arrow: true });
+  const rg = s("g", { class: "click", tabindex: 0, role: "link", "aria-label": "Roadside units and vehicles", onclick: goto("handshake"), onkeydown: e => { if (e.key === "Enter") show("handshake"); } });
+  rg.appendChild(s("rect", { class: "hit", x: 22, y: 290, width: 540, height: 150, rx: 8, fill: "transparent", stroke: "transparent" }));
+  [110, 270, 430].forEach((x, i) => {
+    rg.appendChild(s("rect", { x: x - 23, y: 297, width: 46, height: 46, rx: 4, fill: "var(--ink)" }));
+    rg.appendChild(s("text", { x, y: 325, "text-anchor": "middle", "font-size": 12, "font-weight": 600, fill: "var(--panel)", "font-family": "var(--display)", text: "RSU " + (i + 1) }));
+  });
+  rg.appendChild(s("rect", { x: 30, y: 382, width: 520, height: 34, rx: 3, fill: "var(--road)" }));
+  rg.appendChild(s("line", { x1: 36, x2: 544, y1: 399, y2: 399, stroke: "var(--panel)", "stroke-width": 2, "stroke-dasharray": "12 10" }));
+  [70, 150, 240, 330, 420].forEach((x, i) => {
+    rg.appendChild(s("rect", { x, y: 391, width: 30, height: 15, rx: 4, fill: "var(--blue)" }));
+    rg.appendChild(s("text", { x: x + 15, y: 432, "text-anchor": "middle", "font-size": 11, fill: "var(--ink2)", "font-family": "var(--mono)", text: "CAV " + (i + 1) }));
+  });
+  g.appendChild(rg);
+  sec.appendChild(panel("Architecture · click a box to open its module", h("div", { class: "dwrap" }, g),
+    h("p", { class: "note", text: "Filled circles vote on each block; dashed circles are candidates that validate in the background and can be promoted. Every arrow except registration is a mutually authenticated post-quantum session." })));
+
+  // life of a hazard report
+  const steps = [
+    ["Register", "Each vehicle makes its own key pair and asks the Trusted Authority for a certificate. The private key never leaves the vehicle.", B(PKI.cert_bytes) + " certificate", "pki"],
+    ["Connect", "Vehicle and RSU run a four-message handshake: both prove who they are and agree on fresh AES keys.", `${B(HS.full.total)}, or ${B(HS.cached.total)} cached`, "handshake"],
+    ["Report", "Beacons and hazard reports travel as encrypted, numbered records. A copy or a changed bit is rejected.", B(D.record.record_bytes) + " per beacon", "records"],
+    ["Route", "The RSU forwards the report to the MEC, which decides whether it is critical or routine.", critical.length ? nf(median(critical), 1) + " ms at the MEC" : "", "system"],
+    ["Warn", "Critical events go back down to the RSUs and out to nearby vehicles immediately. Safety never waits for agreement.", netAlerts.length ? nf(median(netAlerts), 1) + " ms end to end" : "", "system"],
+    ["Agree", "In parallel the MEC submits the event to the validators. They run AGS-PBFT and agree even if one of them lies.", committed.length ? nf(median(committed), 0) + " ms to commit" : "", "consensus"],
+    ["Record", "The agreed event becomes a block, hash-linked to the one before and signed by the leader and a quorum.", netCommits.length ? netCommits.length + " blocks, verified" : "", "ledger"],
+  ];
+  sec.appendChild(panel("The life of one hazard report",
+    h("ol", { class: "steps" }, steps.map(([t, d, fig, go], i) => h("li", null,
+      h("span", { class: "k", text: String(i + 1).padStart(2, "0") }),
+      h("div", { class: "w" }, h("b", { text: t }), h("p", { text: d })),
+      h("span", { class: "fig", text: fig }),
+      h("button", { class: "go", type: "button", text: "Open module →", onclick: goto(go) })))),
+    h("p", { class: "note", text: "Figures come from the 19-process run on one machine (TCP over loopback). The radio is modelled separately in ns-3 (module 9)." })));
+});
+
+// =================================================================================
+// 1. SUITES
+// =================================================================================
+page("suites", "1", "Crypto suites", 1, p => {
+  const sec = p.sec;
+  sec.appendChild(pageHead("Module 1 · Track A · crypto foundation", "Five cipher suites, one protocol",
+    "A <b>suite</b> picks one key-exchange algorithm (a KEM) and one signature algorithm. The same handshake code runs with any of them, so the post-quantum suites and today's classical baseline are compared like for like.",
+    ["qrcav/crypto/suites.py", "qrcav/crypto/kdf.py", "qrcav/codec.py", "tests/test_crypto.py"], "python scripts/demo_protocol.py --suite L3"));
+  sec.appendChild(plain("<b>Why change at all?</b> Shor's algorithm on a large quantum computer solves the elliptic-curve problems behind ECDH and ECDSA. Traffic recorded today could be decrypted later, and signatures could be forged. <b>ML-KEM</b> (FIPS 203) and <b>ML-DSA</b> (FIPS 204) rest on lattice problems for which no efficient quantum attack is known. The cost is size: keys and signatures are tens of times larger."));
+  const timing = Object.fromEntries((R.handshake_timing || []).map(r => [r.suite, r]));
+  const rows = (R.sizes || []);
+  sec.appendChild(panel("Sizes in bytes, measured from the encoded messages",
+    table([
+      { label: "Suite", get: r => h("b", { text: r.suite }) },
+      { label: "Key exchange", get: r => r.kem }, { label: "Signature", get: r => r.sig_alg },
+      { label: "KEM key", num: 1, get: r => nf(r.kem_pk) }, { label: "Ciphertext", num: 1, get: r => nf(r.kem_ct) },
+      { label: "Sig key", num: 1, get: r => nf(r.sig_pk) }, { label: "Signature", num: 1, get: r => nf(r.sig) },
+      { label: "Certificate", num: 1, get: r => nf(r.cert) },
+      { label: "Handshake", num: 1, get: r => nf(r.handshake_total) }, { label: "Cached", num: 1, get: r => nf(r.handshake_total_cached) },
+      { label: "Frames", num: 1, get: r => `${r.frames} → ${r.frames_cached}` },
+      { label: "Compute p50", num: 1, get: r => timing[r.suite] ? nf(timing[r.suite].p50_ms, 2) + " ms" : "–" },
+    ], rows, { hl: r => r.suite === SUITE }),
+    h("p", { class: "note", html: "<b>DECK</b> is the pairing on the Review 1 slides (ML-KEM-1024 with ML-DSA-65); overall it is category 3, the strength of its weaker half. <b>L3</b> gives the same security with a smaller KEM. <b>L1</b> takes ML-KEM-512 from the pure-Python <code>kyber-py</code> because the <code>cryptography</code> library does not expose it, which is why its compute time is the highest. Frames are 1,400-byte radio chunks." })));
+
+  const cats = rows.map(r => r.suite);
+  sec.appendChild(h("div", { class: "cols even" },
+    panel("Handshake bytes on the air",
+      barChart({ cats, series: [{ color: "var(--amber)", values: rows.map(r => r.handshake_total) }, { color: "var(--accent)", values: rows.map(r => r.handshake_total_cached) }],
+        yLabel: "bytes, all four flights", yFmt: v => nf(v / 1000) + "k", valueFmt: v => nf(v / 1000, 1) }),
+      legend([["var(--amber)", "certificates sent in full"], ["var(--accent)", "certificates cached (32-byte references)"]])),
+    panel("Handshake compute, both sides together",
+      barChart({ cats: (R.handshake_timing || []).map(r => r.suite), series: [{ color: "var(--blue)", values: (R.handshake_timing || []).map(r => r.p50_ms) }],
+        yLabel: "milliseconds, median", valueFmt: v => nf(v, 1) }),
+      h("p", { class: "note", text: "Compute is small: a post-quantum handshake costs about 5 ms of CPU. The real cost is the bytes, which matter on a shared 6 Mb/s radio channel (module 9)." }))));
+
+  sec.appendChild(panel("Hash and key derivation, the same for every suite",
+    notice([
+      "<b>H</b> = SHAKE-256 over length-prefixed parts, so <code>H(ab, c) ≠ H(a, bc)</code>.",
+      "<b>KDF</b> = HKDF with HMAC-SHA3-256. <code>derive_session_keys(ss, T)</code> hashes the transcript, extracts a key from the shared secret, and expands four values: two AES-256 keys and two IVs, one pair per direction.",
+      "<b>AEAD</b> = AES-256-GCM. Symmetric crypto only needs longer keys against quantum attacks (Grover), so it stays.",
+      "<b>codec.py</b> is a small canonical binary encoding. Signatures are computed over exact bytes, so both sides must encode a message identically.",
+    ])));
+});
+
+// =================================================================================
+// 2. PKI
+// =================================================================================
+page("pki", "2", "Identity (PKI)", 1, p => {
+  const sec = p.sec;
+  sec.appendChild(pageHead("Module 2 · Track A · identity", "Who is allowed on the network",
+    "Before anything talks, the <b>Trusted Authority</b> (TA) issues each vehicle, RSU, MEC and validator a certificate that binds its name and role to its public key. Every later check traces back to the TA's one public key.",
+    ["qrcav/pki.py", "qrcav/nodes/ta.py"], "python -m pytest tests/test_handshake.py -k cert"));
+  const revoked = NE.find(e => e.event === "revoked");
+  const rejectedN = NE.filter(e => e.event === "handshake-rejected").length;
+  const stepsData = [
+    { t: "The TA prepares", who: "ta", arrow: null,
+      body: () => [h("p", { html: `The TA generates its own ${esc(PKI.label.split("+").pop().trim())} key pair in <b>${nf(PKI.ta_keygen_ms, 2)} ms</b> and publishes the public parameters. Its public key is installed in every vehicle and RSU at manufacture; in the running system it is the file <code>run/ta_public.bin</code>.` }),
+        h("div", { class: "kv" }, Object.entries(PKI.params).map(([k, v]) => [h("span", { text: k }), h("span", { text: typeof v === "object" ? JSON.stringify(v) : String(v) })]),
+          h("span", { text: "pk_TA" }), h("span", { text: `${PKI.ta_pk_hex}…  (${B(PKI.ta_pk_bytes)})` }))] },
+    { t: "The vehicle makes its own key pair", who: "cav", arrow: null,
+      body: () => [h("p", { html: `CAV_001 generates an ML-DSA key pair itself in <b>${nf(PKI.entity_keygen_ms, 2)} ms</b>. Public key: ${B(PKI.entity_pk_bytes)}.` }),
+        plain("<b>The TA never sees a private key.</b> In the base paper the TA generated keys for everyone (key escrow, D4): whoever controlled the TA could impersonate any vehicle. Here it cannot.")] },
+    { t: "The vehicle asks for a certificate", who: "cav", arrow: "right", label: `request · ${B(PKI.request_bytes)}`,
+      body: () => [h("p", { html: "The request carries the identity, role, public key and algorithm, plus a <b>proof of possession</b>: a signature over the request made with the new private key." }),
+        fieldsTable(PKI.request_fields),
+        h("p", { class: "note", text: "Without the proof of possession, an attacker could ask the TA to certify somebody else's public key under the attacker's name." })] },
+    { t: "The TA checks and signs", who: "ta", arrow: null,
+      body: () => [notice(["the identity is on the roster (vetted out of band: manufacturer records, the RSU deployment list)", "the algorithm and key length match the suite", "the proof-of-possession signature verifies with the enclosed key"]),
+        h("p", { html: `Then <code>Cert = Sign(sk_TA, {id, role, pk, alg, serial, not_before, not_after})</code>, in <b>${nf(PKI.register_ms, 2)} ms</b>, and a row goes into the registry database.` }),
+        table([{ label: "id", get: r => r[0] }, { label: "role", get: r => r[1] }, { label: "serial", num: 1, get: r => r[2] }, { label: "revoked", get: r => r[3] ? "yes" : "no" }], PKI.registry)] },
+    { t: "The certificate comes back", who: "cav", arrow: "left", label: `certificate · ${B(PKI.cert_bytes)}`,
+      body: () => [h("p", { html: "The vehicle verifies the TA's signature with pk_TA before storing it. The certificate binds the <b>role</b> too, so a registered vehicle cannot present itself as an RSU (the deck's certificate had no role)." }),
+        fieldsTable(PKI.cert_fields)] },
+    { t: "Revocation, later", who: "ta", arrow: "left", label: "signed CRL",
+      body: () => [h("p", { html: "The TA keeps a signed certificate revocation list (CRL). Every node polls it, accepts only a newer, validly signed version, and closes any open session whose peer is now revoked." }),
+        revoked ? plain(`In the real run the TA revoked <b>${esc(revoked.id)}</b> at t = ${nf(revoked.t, 1)} s. Its RSU closed the session, and its ${rejectedN} reconnection attempts were rejected.`) : null] },
+  ];
+  function fieldsTable(fields) {
+    return table([{ label: "field", get: f => h("code", { text: f.k }) }, { label: "bytes", num: 1, get: f => f.bytes !== undefined ? nf(f.bytes) : "" },
+      { label: "value", get: f => h("span", { class: "hex", text: f.hex ? f.hex + "…" : (f.val !== undefined ? String(f.val) : "") }) }], fields);
+  }
+  const g = s("svg", { viewBox: "0 0 900 170", class: "diagram", role: "img", "aria-label": "Registration exchange" });
+  const ta = s("rect", { x: 40, y: 40, width: 220, height: 90, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
+  const cav = s("rect", { x: 640, y: 40, width: 220, height: 90, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
+  g.append(ta, cav,
+    s("text", { x: 150, y: 80, "text-anchor": "middle", "font-size": 18, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "Trusted Authority" }),
+    s("text", { x: 150, y: 102, "text-anchor": "middle", "font-size": 12.5, fill: "var(--ink2)", text: "holds sk_TA · registry DB" }),
+    s("text", { x: 750, y: 80, "text-anchor": "middle", "font-size": 18, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "CAV_001" }),
+    s("text", { x: 750, y: 102, "text-anchor": "middle", "font-size": 12.5, fill: "var(--ink2)", text: "holds its own private key" }));
+  const arrowLine = s("line", { x1: 270, x2: 630, y1: 85, y2: 85, stroke: "var(--amber)", "stroke-width": 2.5 });
+  const arrowHead = s("path", { d: "", fill: "var(--amber)" });
+  const arrowLabel = s("text", { x: 450, y: 72, "text-anchor": "middle", "font-size": 13.5, "font-family": "var(--mono)", fill: "var(--ink)" });
+  const packet = s("rect", { x: 0, y: 77, width: 30, height: 16, rx: 3, fill: "var(--amber)" });
+  g.append(arrowLine, arrowHead, arrowLabel, packet);
+  const detail = h("div", { style: "display:grid;gap:12px" });
+  const title = h("h3");
+  const counter = h("span", { class: "clock" });
+  let k = 0, anim = null;
+  const prev = h("button", { class: "btn ghost", type: "button", text: "← Back", onclick: () => go(k - 1) });
+  const next = h("button", { class: "btn", type: "button", text: "Next step →", onclick: () => go(k + 1) });
+  function go(i) {
+    k = Math.max(0, Math.min(stepsData.length - 1, i));
+    const st = stepsData[k];
+    title.textContent = st.t; counter.textContent = `step ${k + 1} of ${stepsData.length}`;
+    ta.setAttribute("stroke-width", st.who === "ta" ? 3 : 1.5); cav.setAttribute("stroke-width", st.who === "cav" ? 3 : 1.5);
+    ta.setAttribute("stroke", st.who === "ta" ? "var(--accent)" : "var(--ink)"); cav.setAttribute("stroke", st.who === "cav" ? "var(--accent)" : "var(--ink)");
+    const vis = !!st.arrow;
+    [arrowLine, arrowHead, arrowLabel, packet].forEach(e => e.style.display = vis ? "" : "none");
+    if (vis) {
+      arrowLabel.textContent = st.label;
+      arrowHead.setAttribute("d", st.arrow === "right" ? "M270,85 l12,-7 v14 z" : "M630,85 l-12,-7 v14 z");
+      cancelAnimationFrame(anim);
+      const t0 = performance.now();
+      const fromX = st.arrow === "right" ? 600 : 270, toX = st.arrow === "right" ? 270 : 600;
+      const tick = now => { const f = reduced ? 1 : Math.min(1, (now - t0) / 1100); packet.setAttribute("x", fromX + (toX - fromX) * f); if (f < 1) anim = requestAnimationFrame(tick); };
+      anim = requestAnimationFrame(tick);
+    }
+    detail.replaceChildren(...st.body().filter(Boolean));
+    prev.disabled = k === 0; next.disabled = k === stepsData.length - 1;
+  }
+  sec.appendChild(panel(null, h("div", { class: "ctl" }, prev, next, counter), title, h("div", { class: "dwrap" }, g), detail));
+  go(0);
+
+  // certificate anatomy
+  const pkB = PKI.cert_fields.find(f => f.k === "pk").bytes, sigB = PKI.cert_fields.find(f => f.k === "sig").bytes, rest = PKI.cert_bytes - pkB - sigB;
+  sec.appendChild(panel("Anatomy of one certificate · " + B(PKI.cert_bytes),
+    h("div", { class: "bytebar" },
+      h("div", { style: `flex:${pkB};background:var(--blue)`, text: `public key ${nf(pkB)} B` }),
+      h("div", { style: `flex:${sigB};background:var(--violet)`, text: `TA signature ${nf(sigB)} B` }),
+      h("div", { style: `flex:${Math.max(rest, 60)};background:var(--ink2)`, title: "id, role, alg, serial, validity", text: rest > 150 ? `fields ${rest} B` : "" })),
+    h("p", { class: "note", text: `The two ML-DSA components are 99 % of the certificate. A full handshake carries two certificates, which is about half of its ${B(HS.full.total)}. That is what certificate caching (module 3) removes.` })));
+});
+
+// =================================================================================
+// 3. HANDSHAKE
+// =================================================================================
+const FIELD = { cert: ["var(--amber)", "certificate"], cref: ["var(--amber)", "certificate reference"], known: ["var(--amber)", "certificate reference"],
+  pk_kem: ["var(--blue)", "ephemeral ML-KEM key"], ct: ["var(--blue)", "KEM ciphertext"], sig: ["var(--violet)", "signature"],
+  fin: ["var(--accent)", "Finished (AES-GCM)"] };
+const fieldColor = k => (FIELD[k] || ["var(--ink3)", "header fields"])[0];
+page("handshake", "3", "Handshake", 1, p => {
+  const sec = p.sec;
+  sec.appendChild(pageHead("Module 3 · Track A · authenticated key exchange", "Four messages to a secure session",
+    "When a vehicle reaches an RSU they run this handshake. Afterwards <b>both</b> sides know who the other is, and share two fresh AES-256 keys that nobody else can compute, even with a quantum computer.",
+    ["qrcav/handshake.py", "qrcav/certcache.py", "qrcav/net/secure.py", "tests/test_handshake.py", "tests/test_certcache.py"], "python scripts/demo_protocol.py"));
+  const cm = HS.full.client_ms, sm = HS.full.server_ms;
+  const ms = v => v === undefined ? "" : nf(v, 2) + " ms";
+  const STEP = [
+    { sender: ["fresh 32-byte nonce_C and a timestamp", "the suite name (so a downgrade can be detected)", "its certificate Cert_C"],
+      recv: [["suite matches its own exactly (no downgrade)", ""], ["timestamp within 30 s, nonce never seen (no replay)", ""], ["Cert_C: TA signature, CRL, role CAV, expiry", ms(sm.verify_cert)], ["makes a one-time ML-KEM key pair (pk_kem, sk_kem)", ms(sm.kem_keygen)], ["signs H(ClientHello, ServerHello body) → sig_S", ms(sm.sign)]] },
+    { sender: ["its certificate Cert_S", "the one-time public key pk_kem", "nonce_S and sig_S over everything so far"],
+      recv: [["Cert_S: TA signature, CRL, role RSU", ms(cm.verify_cert)], ["sig_S, which covers pk_kem (stops a key swap)", ms(cm.verify_sig)], ["encapsulate: (ss, c) ← ML-KEM.Encaps(pk_kem)", ms(cm.kem_encaps)], ["signs the transcript including c → sig_C", ms(cm.sign)], ["derive k_c2s, iv_c2s, k_s2c, iv_s2c from ss and the transcript", ms(cm.kdf)], ["Finished_C = AES-GCM under k_c2s, counter 0", ms(cm.aead)]] },
+    { sender: ["the KEM ciphertext c", "sig_C, its signature over the transcript", "Finished_C"],
+      recv: [["sig_C with the key in Cert_C (proves the vehicle holds the private key)", ms(sm.verify_sig)], ["decapsulate: ss ← ML-KEM.Decaps(sk_kem, c), then erase sk_kem", ms(sm.kem_decaps)], ["derive the same four keys", ms(sm.kdf)], ["open Finished_C: same keys, same transcript", ms(sm.aead)]] },
+    { sender: ["Finished_S under k_s2c, counter 0"],
+      recv: [["open Finished_S; the session is up", ""], ["application data starts at counter 1", ""]] },
+  ];
+  let mode = "full", k = 0, anim = null;
+  const g = s("svg", { viewBox: "0 0 900 330", class: "diagram", role: "img", "aria-label": "Handshake sequence" });
+  g.append(s("text", { x: 150, y: 28, "text-anchor": "middle", "font-size": 18, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "CAV (client)" }),
+    s("text", { x: 750, y: 28, "text-anchor": "middle", "font-size": 18, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "RSU (server)" }),
+    s("line", { x1: 150, x2: 150, y1: 40, y2: 320, stroke: "var(--ink3)", "stroke-width": 2 }),
+    s("line", { x1: 750, x2: 750, y1: 40, y2: 320, stroke: "var(--ink3)", "stroke-width": 2 }));
+  const arrows = [0, 1, 2, 3].map(i => {
+    const y = 75 + i * 68, right = i % 2 === 0;
+    const grp = s("g", { class: "click", onclick: () => go(i), tabindex: 0, role: "button", onkeydown: e => { if (e.key === "Enter") go(i); } });
+    const ln = s("line", { x1: right ? 155 : 745, x2: right ? 735 : 165, y1: y, y2: y, stroke: "var(--ink2)", "stroke-width": 2 });
+    const hd = s("path", { d: right ? `M745,${y} l-12,-7 v14 z` : `M155,${y} l12,-7 v14 z`, fill: "var(--ink2)" });
+    const lb = s("text", { x: 450, y: y - 10, "text-anchor": "middle", "font-size": 14, "font-weight": 600, "font-family": "var(--display)", fill: "var(--ink)" });
+    const sz = s("text", { x: 450, y: y + 20, "text-anchor": "middle", "font-size": 12, "font-family": "var(--mono)", fill: "var(--ink2)" });
+    grp.append(s("rect", { x: 160, y: y - 30, width: 580, height: 58, fill: "transparent" }), ln, hd, lb, sz);
+    g.appendChild(grp);
+    return { ln, hd, lb, sz, y, right };
+  });
+  const dots = s("g"); g.appendChild(dots);
+  const title = h("h3"), info = h("div", { style: "display:grid;gap:10px" });
+  const sendL = h("ul", { class: "notice" }), recvT = h("div");
+  const prev = h("button", { class: "btn ghost", type: "button", text: "← Back", onclick: () => go(k - 1) });
+  const next = h("button", { class: "btn", type: "button", text: "Next message →", onclick: () => go(k + 1) });
+  const totalEl = h("span", { class: "clock" });
+  const cacheNote = h("p", { class: "note" });
+  function flights() { return HS[mode].flights; }
+  function draw() {
+    const fl = flights();
+    arrows.forEach((a, i) => {
+      a.lb.textContent = `${i + 1}. ${fl[i].name}`;
+      a.sz.textContent = `${B(fl[i].bytes)} · ${fl[i].frames} frame${fl[i].frames > 1 ? "s" : ""}`;
+      const on = i === k;
+      a.ln.setAttribute("stroke", on ? "var(--amber)" : "var(--ink3)"); a.hd.setAttribute("fill", on ? "var(--amber)" : "var(--ink3)");
+      a.ln.setAttribute("stroke-width", on ? 3 : 1.6); a.lb.setAttribute("fill", on ? "var(--ink)" : "var(--ink2)");
+    });
+    totalEl.textContent = `whole handshake ${B(HS[mode].total)} · ${fl.reduce((a, f) => a + f.frames, 0)} frames`;
+  }
+  function go(i) {
+    k = Math.max(0, Math.min(3, i));
+    draw();
+    const f = flights()[k], st = STEP[k];
+    title.textContent = `${k + 1}. ${f.name} · ${f.from === "C" ? "CAV → RSU" : "RSU → CAV"}`;
+    const total = f.bytes;
+    info.replaceChildren(
+      h("div", { class: "bytebar", role: "img", "aria-label": "bytes by field" }, f.fields.map(x => h("div", { style: `flex:${Math.max(x.bytes, total * 0.012)};background:${fieldColor(x.k)}`, title: `${x.k}: ${x.bytes} B`, text: x.bytes / total > 0.12 ? `${x.k} ${nf(x.bytes)}` : "" }))),
+      h("div", { class: "frames" + (f.frames <= 1 ? " small" : ""), title: "1,400-byte radio frames" }, Array.from({ length: f.frames }, () => h("span"))),
+      table([{ label: "field", get: x => h("code", { text: x.k }) }, { label: "what it is", get: x => (FIELD[x.k] || [0, ""])[1] }, { label: "bytes", num: 1, get: x => nf(x.bytes) },
+        { label: "value", get: x => h("span", { class: "hex", text: x.hex ? x.hex + "…" : (x.val || "") }) }], f.fields));
+    sendL.replaceChildren(...st.sender.map(t => h("li", { text: t })));
+    recvT.replaceChildren(table([{ label: (f.from === "C" ? "RSU" : "CAV") + " does", get: r => r[0] }, { label: "time", num: 1, get: r => r[1] }], st.recv));
+    prev.disabled = k === 0; next.disabled = k === 3;
+    cacheNote.innerHTML = mode === "cached"
+      ? `With caching, certificates travel as 32-byte hashes <code>H("qrcav-cert", Cert)</code>. The RSU's certificate was pre-distributed; the vehicle's was held at the edge directory. Both are still verified in full (TA signature, CRL, role) on every handshake, and the references sit inside both signatures. Vehicle reference here: <code>${HS.cached.cref.slice(0, 16)}…</code>`
+      : "Certificates are sent in full. Switch to <b>Cached</b> to see the same handshake with certificate references.";
+    // packets travelling
+    cancelAnimationFrame(anim); dots.replaceChildren();
+    const a = arrows[k], n = Math.min(f.frames, 12), els = Array.from({ length: n }, () => dots.appendChild(s("rect", { width: 16, height: 10, rx: 2, y: a.y - 5, fill: "var(--amber)" })));
+    const t0 = performance.now();
+    const tick = now => {
+      const el = (now - t0) / 1000;
+      els.forEach((r, j) => { const f2 = reduced ? 1 : Math.max(0, Math.min(1, (el - j * 0.09) / 0.9)); const x = a.right ? 160 + 560 * f2 : 724 - 560 * f2; r.setAttribute("x", x); r.setAttribute("opacity", f2 >= 1 ? 0 : 1); });
+      if (!reduced && el < 0.9 + n * 0.09) anim = requestAnimationFrame(tick);
+    };
+    anim = requestAnimationFrame(tick);
+  }
+  const modeSeg = seg([["full", "Certificates in full"], ["cached", "Cached"]], "full", v => { mode = v; go(k); });
+  sec.appendChild(panel(null, h("div", { class: "ctl" }, prev, next, modeSeg, totalEl), h("div", { class: "dwrap" }, g),
+    legend([["var(--amber)", "certificate"], ["var(--blue)", "key exchange"], ["var(--violet)", "signature"], ["var(--accent)", "Finished"], ["var(--ink3)", "other fields"]])));
+  sec.appendChild(h("div", { class: "cols" },
+    panel(null, title, info, cacheNote),
+    h("div", { style: "display:grid;gap:18px;align-content:start" },
+      panel("Sender puts in", sendL), panel("Receiver checks, with measured time", recvT))));
+  go(0);
+
+  // key schedule
+  const ks = s("svg", { viewBox: "0 0 900 190", class: "diagram", role: "img", "aria-label": "Key derivation" });
+  const kb = (x, y, w, t, sub, c) => { ks.append(s("rect", { x, y, width: w, height: 46, rx: 5, fill: "var(--panel)", stroke: c || "var(--ink)", "stroke-width": 1.5 }), s("text", { x: x + w / 2, y: y + 20, "text-anchor": "middle", "font-size": 14, "font-weight": 600, "font-family": "var(--display)", fill: "var(--ink)", text: t }), s("text", { x: x + w / 2, y: y + 37, "text-anchor": "middle", "font-size": 11, "font-family": "var(--mono)", fill: "var(--ink2)", text: sub })); };
+  kb(20, 20, 200, "shared secret ss", "from ML-KEM, 32 B", "var(--blue)");
+  kb(20, 120, 200, "transcript T", "all four flights so far");
+  kb(280, 20, 200, "HKDF-Extract", "salt 0, ikm ss → PRK");
+  kb(280, 120, 200, "T_hash = H(T)", HS.full.t_hash.slice(0, 20) + "…");
+  ks.append(s("line", { x1: 220, y1: 43, x2: 278, y2: 43, stroke: "var(--ink2)", "stroke-width": 1.5 }), s("line", { x1: 220, y1: 143, x2: 278, y2: 143, stroke: "var(--ink2)", "stroke-width": 1.5 }));
+  ["key_c2s", "iv_c2s", "key_s2c", "iv_s2c"].forEach((lab, i) => {
+    const y = 8 + i * 45;
+    ks.append(s("rect", { x: 560, y, width: 320, height: 36, rx: 4, fill: "var(--block)", stroke: "var(--line)" }),
+      s("text", { x: 572, y: y + 23, "font-size": 13, "font-family": "var(--mono)", fill: "var(--ink)", text: `Expand(PRK, "${lab}" ‖ T_hash)` }),
+      s("line", { x1: 480, y1: i < 2 ? 43 : 143, x2: 558, y2: y + 18, stroke: "var(--ink3)", "stroke-width": 1.2 }));
+  });
+  sec.appendChild(panel("DERIVE_SESSION_KEYS · slide 14, line for line", h("div", { class: "dwrap" }, ks),
+    h("div", { class: "kv" }, h("span", { text: "k_c2s (this run)" }), h("span", { text: HS.full.k_c2s.slice(0, 32) + "…" }), h("span", { text: "k_s2c (this run)" }), h("span", { text: HS.full.k_s2c.slice(0, 32) + "…" }),
+      h("span", { text: "both sides agree" }), h("span", null, h("b", { class: "pill " + (HS.full.same_keys ? "ok" : "bad"), text: HS.full.same_keys ? "same keys" : "mismatch" }))),
+    h("p", { class: "note", text: "Because every key is bound to the transcript hash, changing any byte of any handshake message makes the two sides derive different keys, and the Finished check fails." })));
+
+  sec.appendChild(panel("What changed from the Review 1 design, and why",
+    table([{ label: "", get: r => h("b", { text: r[0] }) }, { label: "Deck", get: r => r[1] }, { label: "Now", get: r => r[2] }, { label: "Why", get: r => r[3] }], [
+      ["F1", "Server signs an uninitialised transcript", "ClientHello opens it with a fresh nonce and timestamp", "otherwise a recorded server flight can be replayed"],
+      ["F2", "Only the server signs", "The client signs the transcript too (sig_C)", "otherwise a copied certificate is enough to impersonate a vehicle"],
+      ["F3", "Finished uses counter 0, data start unspecified", "Data starts at counter 1", "prevents AES-GCM nonce reuse"],
+      ["F5", "Cert = Sign(ID ‖ pk)", "role, serial and validity bound too", "stops role confusion; enables expiry and revocation"],
+      ["F6", "No downgrade protection", "suite in ClientHello, must match, inside both signatures", "a downgrade to classical crypto is rejected"],
+      ["F7", "Abort reasons unspecified", "one HandshakeError with no detail", "a probing attacker learns nothing about which check failed"],
+    ])));
+});
+
+// =================================================================================
+// 4. RECORD LAYER
+// =================================================================================
+page("records", "4", "Record layer", 1, p => {
+  const sec = p.sec, RC = D.record;
+  sec.appendChild(pageHead("Module 4 · Track A · secure messages", "Every beacon is an encrypted, numbered record",
+    "After the handshake, each message is sealed with <b>AES-256-GCM</b>. The tag detects any change; the counter detects copies. Both are checked before the message is used.",
+    ["qrcav/crypto/records.py", "qrcav/handshake.py (Session.seal / open)"], "python -m pytest tests/test_crypto.py -k record"));
+  const hex = RC.record_hex, ctrHex = hex.slice(0, 16), tagHex = hex.slice(-32), ctHex = hex.slice(16, -32);
+  const ctr = parseInt(ctrHex, 16);
+  const pad = "00000000" + ctrHex;
+  const nonce = RC.iv_hex.match(/../g).map((b, i) => (parseInt(b, 16) ^ parseInt(pad.slice(i * 2, i * 2 + 2), 16)).toString(16).padStart(2, "0")).join("");
+  sec.appendChild(panel(`One real record, sealed by the Python code · ${B(RC.record_bytes)}`,
+    h("div", { class: "bytebar" },
+      h("div", { style: "flex:8;background:var(--ink2)", text: "ctr 8" }),
+      h("div", { style: `flex:${ctHex.length / 2};background:var(--blue)`, text: `ciphertext ${ctHex.length / 2} B` }),
+      h("div", { style: "flex:16;background:var(--violet)", text: "tag 16" })),
+    h("div", { class: "kv" },
+      h("span", { text: "plaintext" }), h("span", { text: JSON.stringify(RC.plaintext) }),
+      h("span", { text: "counter" }), h("span", { text: `${ctrHex}  = ${ctr}  (0 is reserved for Finished, data starts at 1)` }),
+      h("span", { text: "base IV" }), h("span", { text: RC.iv_hex }),
+      h("span", { text: "nonce = IV ⊕ (0⁴ ‖ be64(ctr))" }), h("span", { text: nonce }),
+      h("span", { text: "associated data" }), h("span", { text: `"c2s" ‖ ctr  (direction label + counter are authenticated, not encrypted)` }),
+      h("span", { text: "ciphertext" }), h("span", { text: ctHex }),
+      h("span", { text: "tag" }), h("span", { text: tagHex }))));
+
+  // WebCrypto: open the Python-sealed record in this browser
+  const out = h("div", { class: "log" });
+  const hexToBytes = x => new Uint8Array(x.match(/../g).map(b => parseInt(b, 16)));
+  async function openRecord(flip) {
+    const row = h("div");
+    try {
+      if (!window.crypto || !crypto.subtle) throw new Error("nosubtle");
+      const key = await crypto.subtle.importKey("raw", hexToBytes(RC.key_hex), "AES-GCM", false, ["decrypt"]);
+      const body = hexToBytes(hex.slice(16));
+      if (flip) body[4] ^= 1;
+      const aad = new Uint8Array([...new TextEncoder().encode("c2s"), ...hexToBytes(ctrHex)]);
+      const pt = new Uint8Array(await crypto.subtle.decrypt({ name: "AES-GCM", iv: hexToBytes(nonce), additionalData: aad, tagLength: 128 }, key, body));
+      const ptHex = [...pt].map(b => b.toString(16).padStart(2, "0")).join("");
+      row.className = "ok";
+      row.textContent = `opened: ${pt.length} bytes, identical to what Python sealed: ${ptHex === RC.plaintext_hex ? "yes" : "no"} → ${JSON.stringify(RC.plaintext)}`;
+    } catch (e) {
+      if (e.message === "nosubtle") { row.textContent = "This browser does not offer WebCrypto here. Open the page from a local file or https."; }
+      else { row.className = "bad"; row.textContent = `rejected: the authentication tag does not match (${flip ? "one bit of the ciphertext was flipped" : "unexpected"}). Nothing is decrypted.`; }
+    }
+    out.prepend(row);
+  }
+  sec.appendChild(panel("Open it here, in your browser",
+    h("p", { text: "Your browser's own AES-GCM implementation (WebCrypto) opens the record the Python code sealed, using the same key, nonce and associated data. The key is a throw-away one from a session that existed only while this page was generated." }),
+    h("div", { class: "ctl" }, h("button", { class: "btn", type: "button", text: "Decrypt the record", onclick: () => openRecord(false) }),
+      h("button", { class: "btn ghost", type: "button", text: "Flip one bit, then decrypt", onclick: () => openRecord(true) })),
+    out));
+
+  // replay window
+  const W = 64;
+  let top = 0, bits = new Array(W).fill(false), nextCtr = 1, held = [], lastAccepted = null;
+  const cells = h("div", { class: "window", "aria-label": "replay window" });
+  for (let i = 0; i < W; i++) cells.appendChild(h("span"));
+  const log = h("div", { class: "log" });
+  const status = h("div", { class: "clock" });
+  function seen(c) { if (c > top) return false; const d = top - c; if (d >= W) return true; return bits[d]; }
+  function mark(c) {
+    if (c > top) { const sh = c - top, nb = new Array(W).fill(false); nb[0] = true; bits.forEach((b, i) => { if (b && i + sh < W) nb[i + sh] = true; }); bits = nb; top = c; }
+    else bits[top - c] = true;
+  }
+  function deliver(c, why) {
+    let ok, reason;
+    if (c < 1) { ok = false; reason = "counter 0 is only for Finished"; }
+    else if (seen(c)) { ok = false; reason = top - c >= W ? "older than the 64-record window: cannot tell, treated as a replay" : "already received: replay"; }
+    else { ok = true; reason = c < top ? "late but not seen before: accepted once" : "new"; mark(c); lastAccepted = c; }
+    log.prepend(h("div", { class: ok ? "ok" : "bad", text: `ctr ${String(c).padStart(4)}  ${ok ? "accepted" : "REJECTED"}  ${why}: ${reason}` }));
+    render();
+  }
+  function render() {
+    [...cells.children].forEach((c, i) => { const ctrAt = top - (W - 1 - i); c.className = (ctrAt >= 1 && bits[W - 1 - i] ? "on" : "") + (i === W - 1 ? " top" : ""); c.title = ctrAt >= 1 ? "ctr " + ctrAt : ""; });
+    status.textContent = `highest accepted ${top} · window covers ${Math.max(1, top - W + 1)}–${top} · next to send ${nextCtr} · held back ${held.length ? held.join(", ") : "none"}`;
+  }
+  const btns = h("div", { class: "ctl" },
+    h("button", { class: "btn", type: "button", text: "Send next record", onclick: () => deliver(nextCtr++, "sent") }),
+    h("button", { class: "btn ghost", type: "button", text: "Delay the next one", onclick: () => { held.push(nextCtr++); render(); } }),
+    h("button", { class: "btn ghost", type: "button", text: "Deliver a delayed one", onclick: () => { if (held.length) deliver(held.shift(), "arrived late"); } }),
+    h("button", { class: "btn ghost", type: "button", text: "Replay the last record", onclick: () => { if (lastAccepted) deliver(lastAccepted, "attacker re-sent"); } }),
+    h("button", { class: "btn ghost", type: "button", text: "Jump 70 ahead", onclick: () => { nextCtr += 69; deliver(nextCtr++, "sent"); } }));
+  for (let i = 0; i < 5; i++) deliver(nextCtr++, "sent");
+  held.push(nextCtr++); deliver(nextCtr++, "sent"); deliver(nextCtr++, "sent");
+  sec.appendChild(panel("The 64-record replay window · try it",
+    h("p", { text: "Radio delivers records out of order, so the receiver cannot simply demand the next number. It remembers which of the last 64 counters it has accepted (as in IPsec). This check runs before decryption, so a flood of replays costs a lookup, not an AES operation." }),
+    btns, cells, status, log,
+    h("p", { class: "note", text: "Each square is one counter; the outlined one is the highest accepted, older ones to its left. Same algorithm as RecordReceiver._seen and _mark." })));
+
+  sec.appendChild(panel("Rules the record layer enforces",
+    notice(["<b>Counter 0 is reserved for Finished.</b> If data also started at 0, the first data record would reuse a (key, nonce) pair. Under GCM one reuse leaks the authentication key and lets an attacker forge records.",
+      "<b>Separate keys per direction</b> (k_c2s, k_s2c), and the direction label is authenticated, so a record cannot be reflected back to its sender.",
+      "<b>Rekey limit:</b> a session refuses to send after 2³² records; a new handshake is needed.",
+      "<b>Uniform errors:</b> a bad tag, a replay and a malformed record all raise the same RecordError."])));
+});
+
+// =================================================================================
+// 5. ATTACKS
+// =================================================================================
+page("attacks", "5", "Attacks", 1, p => {
+  const sec = p.sec;
+  sec.appendChild(pageHead("Module 5 · Track A · security testing", "What an attacker tries, and what stops it",
+    "The attack harness runs each attack against the real code and records whether it was rejected and by which check. The panel's question <b>“what if someone …?”</b> has an answer here.",
+    ["qrcav/eval/attacks.py", "results/attacks.csv"], "python scripts/run_evaluation.py"));
+  const cat = a => /record|nonce reuse|^GCM/i.test(a) ? "Record layer" : /^cache/i.test(a) ? "Certificate cache" : /consensus|block|ledger/i.test(a) ? "Consensus and ledger" : /rogue|revoked|posing/i.test(a) ? "Identity (PKI)" : "Handshake";
+  const CATS = ["Handshake", "Record layer", "Identity (PKI)", "Certificate cache", "Consensus and ledger"];
+  const MOD = { "Handshake": "handshake", "Record layer": "records", "Identity (PKI)": "pki", "Certificate cache": "handshake", "Consensus and ledger": "consensus" };
+  let filter = "All";
+  const listBox = h("div", { style: "display:grid;gap:18px" });
+  function render() {
+    listBox.replaceChildren(...CATS.filter(c => filter === "All" || c === filter).map(c => {
+      const rows = attacks.filter(a => cat(a.attack) === c);
+      return panel(`${c} · ${rows.length} attack${rows.length > 1 ? "s" : ""}`,
+        table([{ label: "Attack", get: a => a.attack }, { label: "Stopped by", get: a => a.mechanism }, { label: "Result", get: a => h("span", { class: "pill " + (a.rejected ? "ok" : "bad"), text: a.rejected ? "rejected" : "accepted" }) }], rows),
+        h("button", { class: "go btn ghost", type: "button", style: "justify-self:start", text: "Open the module →", onclick: goto(MOD[c]) }));
+    }));
+  }
+  sec.appendChild(h("div", { class: "ctl" }, seg([["All", "All"], ...CATS.map(c => [c, c])], "All", v => { filter = v; render(); })));
+  const live = D.live_attacks || [];
+  sec.appendChild(panel(`Re-run live while this page was generated · ${live.filter(a => a.rejected).length} of ${live.length} rejected`,
+    table([{ label: "Attack", get: a => a.attack }, { label: "Check that fired", get: a => a.check }, { label: "Result", get: a => h("span", { class: "pill " + (a.rejected ? "ok" : "bad"), text: a.rejected ? "rejected" : "ACCEPTED" }) }], live)));
+  sec.appendChild(listBox);
+  render();
+});
+
+// =================================================================================
+// 6. CONSENSUS
+// =================================================================================
+const MSGC = { "REQUEST": "var(--ink2)", "PRE-PREPARE": "var(--blue)", "PREPARE": "var(--amber)", "RESPONSE": "var(--accent)",
+  "SHADOW-RESPONSE": "var(--ink3)", "COMMIT": "var(--accent)", "REPLY": "var(--violet)", "VIEW-CHANGE": "var(--red)", "NEW-VIEW": "var(--red)" };
+const PHASE = {
+  "REQUEST": "The MEC signs the event and sends it to the leader.",
+  "PRE-PREPARE": "The leader gives the request a sequence number and signs a proposal. It goes to the voting nodes, and to the candidates, which check it in the background.",
+  "PREPARE": "Each voting node tells every other voting node that it saw the same proposal. With 2f+1 matching PREPAREs a node is prepared. (The leader sends one too: design decision D9.)",
+  "RESPONSE": "Each voting node runs the check itself (fields present, reporter's certificate valid, not a duplicate) and sends its result to the leader.",
+  "SHADOW-RESPONSE": "Candidates send their result as well. It counts for their score, not for the quorum (D7), so they can earn promotion.",
+  "COMMIT": "With 2f+1 matching results the leader builds the block. The signed RESPONSEs are its commit certificate. Every node re-verifies the block before appending it.",
+  "REPLY": "The MEC receives the certified block. The event is on the ledger.",
+  "VIEW-CHANGE": "A node saw a request but no commit before its timeout. It votes to move to the next view, attaching what it had already prepared.",
+  "NEW-VIEW": "With 2f+1 votes, the next leader in turn (view mod |R|) announces the new view. Nodes recompute it, check it, and resume.",
+};
+page("consensus", "6", "Consensus", 2, p => {
+  const sec = p.sec, CN = D.consensus.normal, CV = D.consensus.viewchange;
+  sec.appendChild(pageHead("Module 6 · Track B · agreement", "AGS-PBFT: validators agree even when one lies",
+    "Critical events must be recorded identically everywhere, even if some validators are faulty or malicious. <b>PBFT</b> tolerates f faulty nodes out of 3f+1. <b>AGS</b> (adaptive grouping by score) keeps only a small, well-behaved group voting, and swaps nodes in and out by score.",
+    ["qrcav/consensus/agspbft.py", "qrcav/consensus/messages.py", "qrcav/consensus/client.py", "qrcav/consensus/sim.py", "tests/test_consensus.py"], "python -m pytest tests/test_consensus.py"));
+  sec.appendChild(plain(`What you are watching: <b>8 real replicas</b> exchanging ML-DSA-signed messages in the project's discrete-event harness. Four vote (f = 1, quorum 3); four are candidates. <b>NODE_03 is configured to return a wrong result</b> on every request. Times are simulated, but each step's processing time is the measured time of the real Python code.`));
+
+  const nodes = CN.nodes;
+  const CX = 610, CY = 250, RAD = 170;
+  const P = {};
+  nodes.forEach((n, i) => { const a = (-90 + i * 45) * Math.PI / 180; P[n] = [CX + RAD * Math.cos(a), CY + RAD * Math.sin(a)]; });
+  P.MEC_01 = [120, 250];
+  const g = s("svg", { viewBox: "0 0 900 500", class: "diagram", role: "img", "aria-label": "Consensus message flow" });
+  const linkL = s("g"), dotL = s("g"), nodeL = s("g");
+  g.append(linkL, nodeL, dotL);
+  const mecBox = s("rect", { x: 60, y: 220, width: 120, height: 60, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
+  g.append(mecBox, s("text", { x: 120, y: 247, "text-anchor": "middle", "font-size": 16, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "MEC_01" }),
+    s("text", { x: 120, y: 266, "text-anchor": "middle", "font-size": 11.5, fill: "var(--ink2)", text: "client" }));
+  const N = {};
+  nodes.forEach(n => {
+    const [x, y] = P[n];
+    const ring = s("circle", { cx: x, cy: y, r: 34, fill: "none", stroke: "var(--accent)", "stroke-width": 3 });
+    const c = s("circle", { cx: x, cy: y, r: 27, "stroke-width": 1.6 });
+    const t = s("text", { x, y: y + 5, "text-anchor": "middle", "font-size": 14, "font-weight": 600, "font-family": "var(--mono)", text: n.slice(-2) });
+    const tag = s("text", { x, y: y + (y > CY ? 52 : -42), "text-anchor": "middle", "font-size": 11.5, "font-weight": 600, "font-family": "var(--display)" });
+    const x2 = s("text", { x, y: y + 9, "text-anchor": "middle", "font-size": 28, fill: "var(--red)", text: "✕" });
+    nodeL.append(ring, c, t, tag, x2);
+    N[n] = { ring, c, t, tag, x2 };
+  });
+  const phaseT = s("text", { x: CX, y: CY - 6, "text-anchor": "middle", "font-size": 17, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)" });
+  const phaseS = s("text", { x: CX, y: CY + 16, "text-anchor": "middle", "font-size": 12, "font-family": "var(--mono)", fill: "var(--ink2)" });
+  g.append(phaseT, phaseS);
+
+  function paintNodes(members, leader, byz, crashed) {
+    nodes.forEach(n => {
+      const e = N[n], inC = members.includes(n), isCr = crashed && crashed.includes(n);
+      e.c.setAttribute("fill", isCr ? "var(--block)" : inC ? "var(--ink)" : "var(--panel)");
+      e.c.setAttribute("stroke", byz.includes(n) ? "var(--red)" : "var(--ink)");
+      e.c.setAttribute("stroke-dasharray", inC ? "" : "4 3");
+      e.c.setAttribute("stroke-width", byz.includes(n) ? 3 : 1.6);
+      e.t.setAttribute("fill", isCr ? "var(--ink3)" : inC ? "var(--panel)" : "var(--ink)");
+      e.ring.style.display = n === leader && !isCr ? "" : "none";
+      e.x2.style.display = isCr ? "" : "none";
+      const lab = isCr ? "crashed" : n === leader ? "leader" : byz.includes(n) ? "faulty: wrong result" : inC ? "voting" : "candidate";
+      e.tag.textContent = lab;
+      e.tag.setAttribute("fill", isCr || byz.includes(n) ? "var(--red)" : n === leader ? "var(--accent)" : "var(--ink2)");
+    });
+  }
+  function drawMsgs(msgs, tm, byz) {
+    linkL.replaceChildren(); dotL.replaceChildren();
+    let n = 0;
+    for (const m of msgs) {
+      const [ts, ta, src, dst, typ] = m;
+      const end = ta + 0.6;
+      if (ts > tm || tm > end) continue;
+      const a = P[src], b = P[dst]; if (!a || !b) continue;
+      const f = Math.min(1, (tm - ts) / Math.max(0.3, ta - ts));
+      const col = typ === "RESPONSE" && byz.includes(src) ? "var(--red)" : MSGC[typ] || "var(--ink2)";
+      linkL.appendChild(s("line", { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: col, "stroke-width": 1.2, opacity: 0.35 }));
+      if (f < 1) dotL.appendChild(s("circle", { cx: a[0] + (b[0] - a[0]) * f, cy: a[1] + (b[1] - a[1]) * f, r: typ === "COMMIT" || typ === "REPLY" ? 7 : 5, fill: col }));
+      n++;
+    }
+    return n;
+  }
+  function lastType(msgs, tm) { let t = null; for (const m of msgs) if (m[0] <= tm) t = m[4]; return t; }
+
+  // ---- shared player ----
+  let playerCount = 0;
+  function player(getRange, onFrame) {
+    let tm = 0, playing = false, last = null, raf = null;
+    const pid = "pl" + (++playerCount);
+    const speedSel = h("select", { id: pid + "-speed", "aria-label": "Playback speed" },
+      h("option", { value: "600", text: "very slow" }), h("option", { value: "250", selected: true, text: "slow" }), h("option", { value: "90", text: "fast" }));
+    const playBtn = h("button", { class: "btn", type: "button", text: "Play", onclick: () => toggle() });
+    const clock = h("span", { class: "clock" });
+    const scrub = h("input", { type: "range", min: 0, max: 1000, value: 0, "aria-label": "Simulated time", id: pid + "-scrub" });
+    scrub.addEventListener("input", () => { const [a, b] = getRange(); tm = a + (b - a) * scrub.value / 1000; stop(); frame(); });
+    function frame() { const [a, b] = getRange(); scrub.value = Math.round((tm - a) / Math.max(1e-9, b - a) * 1000); const extra = onFrame(tm); clock.textContent = `t = ${nf(tm, 1)} ms simulated${extra ? " · " + extra : ""}`; }
+    function stop() { playing = false; playBtn.textContent = "Play"; cancelAnimationFrame(raf); last = null; }
+    function toggle() { if (playing) { stop(); return; } const [a, b] = getRange(); if (tm >= b - 0.01) tm = a; playing = true; playBtn.textContent = "Pause"; raf = requestAnimationFrame(step); }
+    function step(ts) {
+      if (!playing) return;
+      const [a, b] = getRange();
+      if (last !== null) tm += (ts - last) / parseFloat(speedSel.value);
+      last = ts;
+      const skip = onFrame.nextBusy ? onFrame.nextBusy(tm) : null;
+      if (skip !== null && skip > tm) tm = skip;
+      if (tm >= b) { tm = b; stop(); }
+      frame();
+      if (playing) raf = requestAnimationFrame(step);
+    }
+    return { ui: h("div", { style: "display:grid;gap:8px" }, h("div", { class: "ctl" }, playBtn, speedSel, clock), scrub),
+      set(v) { stop(); tm = v; frame(); }, stop, frame, get tm() { return tm; } };
+  }
+  function idleSkipper(msgs) {
+    return tm => {
+      for (const m of msgs) if (m[0] <= tm && tm <= m[1] + 0.6) return null;
+      const nxt = msgs.find(m => m[0] > tm);
+      if (!nxt) return null;
+      return nxt[0] - tm > 2.5 ? nxt[0] - 0.4 : null;
+    };
+  }
+
+  // ---- scenario A: normal operation ----
+  const reqs = CN.requests, blocks = CN.blocks;
+  let ri = 0;
+  const range = i => [reqs[i].at_ms - 0.5, (i + 1 < reqs.length ? reqs[i + 1].at_ms : CN.msgs[CN.msgs.length - 1][1] + 2) - 0.5];
+  const winMsgs = i => { const [a, b] = range(i); return CN.msgs.filter(m => m[0] >= a && m[0] < b); };
+  let cur = winMsgs(0), lastEnd = 0;
+  const explain = h("p", { style: "min-height:72px" });
+  const tally = h("div");
+  const scores = h("div", { style: "display:grid;gap:5px" });
+  const regroupNote = h("p", { class: "note" });
+  const membersBefore = i => i === 0 ? CN.initial_consensus : blocks[i - 1].consensus;
+  function renderScores(i, after) {
+    const b = blocks[i], prevS = i === 0 ? Object.fromEntries(nodes.map(n => [n, 100])) : blocks[i - 1].scores;
+    const S = after ? b.scores : prevS, mem = after ? b.consensus : membersBefore(i);
+    const max = Math.max(...Object.values(S), 110);
+    scores.replaceChildren(...nodes.map(n => {
+      const d = b.scores[n] - prevS[n];
+      return h("div", { class: "scoreRow" }, h("span", { class: "mono", text: n + (mem.includes(n) ? "" : " ·c") }),
+        h("div", { class: "bar" }, h("i", { class: CN.byzantine.includes(n) ? "bz" : mem.includes(n) ? "cn" : "", style: `width:${S[n] / max * 100}%` })),
+        h("span", { class: "v", text: S[n] }),
+        h("span", { class: "d", style: `color:${d > 0 ? "var(--accent)" : d < 0 ? "var(--red)" : "var(--ink3)"}`, text: after ? (d > 0 ? "+" + d : d < 0 ? String(d) : "0") : "" }));
+    }));
+    const changed = after && JSON.stringify(b.consensus) !== JSON.stringify(membersBefore(i));
+    regroupNote.innerHTML = changed
+      ? `<b>Regroup after block ${b.b_id}.</b> μ − σ cut-off: ${membersBefore(i).filter(n => !b.consensus.includes(n)).join(", ")} demoted; ${b.consensus.filter(n => !membersBefore(i).includes(n)).join(", ")} promoted. New voting set: ${b.consensus.join(", ")}.`
+      : `Matching result +1, different result −5, no response 0. Every ${CN.regroup_interval} blocks: nodes below μ − σ are demoted, candidates above μ + σ promoted. (·c = candidate)`;
+  }
+  function frameA(tm) {
+    const i = ri, mem = membersBefore(i), b = blocks[i];
+    paintNodes(mem, b.leader, CN.byzantine, []);
+    drawMsgs(cur, tm, CN.byzantine);
+    const lt = lastType(cur, tm);
+    phaseT.textContent = lt || "waiting for a request";
+    phaseS.textContent = `request ${reqs[i].txn} · block ${b.b_id}`;
+    explain.textContent = lt ? PHASE[lt] : "Press Play. The MEC is about to submit a critical event.";
+    const commitT = (cur.find(m => m[4] === "COMMIT") || [Infinity])[0];
+    const after = tm >= commitT;
+    if (after !== lastEnd) { renderScores(i, after); lastEnd = after; }
+    return lt ? lt.toLowerCase() : "";
+  }
+  frameA.nextBusy = tm => idleSkipper(cur)(tm);
+  const plA = player(() => range(ri), frameA);
+  function pick(i) {
+    ri = i; cur = winMsgs(i); lastEnd = null;
+    const counts = {};
+    let bytes = 0;
+    cur.forEach(m => { counts[m[4]] = (counts[m[4]] || 0) + 1; bytes += m[5]; });
+    const b = blocks[i];
+    tally.replaceChildren(
+      table([{ label: "message", get: r => h("span", null, h("i", { style: `display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;background:${MSGC[r[0]]}` }), r[0]) }, { label: "count", num: 1, get: r => r[1] }],
+        Object.entries(counts)),
+      h("p", { class: "note", text: `${cur.length} signed messages, ${nf(bytes / 1000, 1)} KB for this request. Block ${b.b_id}: result ${b.result}, commit certificate of ${b.cert_n} signed responses, ${nf(b.bytes / 1000, 1)} KB.` }));
+    [...chips.children].forEach((c, j) => c.setAttribute("aria-pressed", String(j === i)));
+    plA.set(range(i)[0]);
+  }
+  const chips = h("div", { class: "seg", role: "group", "aria-label": "Request" }, reqs.map((r, i) => h("button", { type: "button", text: String(i + 1), title: r.txn, onclick: () => pick(i) })));
+  const boxA = h("div", { style: "display:grid;gap:18px" },
+    panel(null, h("div", { class: "ctl" }, h("span", { class: "label", text: "Request" }), chips), plA.ui, h("div", { class: "dwrap" }, g),
+      legend(Object.entries(MSGC).slice(0, 7).map(([k, c]) => [c, k]).concat([["var(--red)", "wrong result (NODE_03)"]]))),
+    h("div", { class: "cols even" },
+      panel("What is happening", explain, tally),
+      panel("Scores", scores, regroupNote)));
+
+  // ---- scenario B: leader crash and view change ----
+  const vcEnd = CV.msgs[CV.msgs.length - 1][1] + 3;
+  const vcExplain = h("p", { style: "min-height:72px" });
+  const vcBlocks = h("div");
+  function frameB(tm) {
+    const crashed = tm >= CV.crash_ms ? [CV.crashed] : [];
+    const nv = CV.msgs.find(m => m[4] === "NEW-VIEW");
+    const leader = nv && tm >= nv[0] ? CV.new_leader : CV.crashed;
+    paintNodes(CV.initial_consensus, leader, [], crashed);
+    const inflight = drawMsgs(CV.msgs, tm, []);
+    const lt = lastType(CV.msgs, tm);
+    const firstVC = (CV.msgs.find(m => m[4] === "VIEW-CHANGE") || [Infinity])[0];
+    let txt, label;
+    if (tm < CV.crash_ms) { txt = PHASE[lt] || "Normal operation: the first request is committed by NODE_01."; label = lt || "normal operation"; }
+    else if (tm < firstVC) {
+      label = inflight ? (lt || "") : "waiting for the timeout";
+      txt = inflight ? `${CV.crashed} has crashed. ${PHASE[lt] || ""}` : `${CV.crashed}, the leader, has crashed. Requests reach the nodes but nothing is committed. Each voting node waits for its ${CV.timeout_ms} ms view-change timeout (idle time is skipped here). The MEC also times out and re-sends its request to every node.`;
+    } else { txt = PHASE[lt] || ""; label = lt || ""; }
+    phaseT.textContent = label; phaseS.textContent = `view ${nv && tm >= nv[0] ? 1 : 0} · leader ${leader}`;
+    vcExplain.textContent = txt;
+    const done = CV.msgs.filter(m => m[4] === "REPLY" && m[1] <= tm).length;
+    vcBlocks.replaceChildren(table([{ label: "block", num: 1, get: b => b.b_id }, { label: "request", get: b => b.txn }, { label: "view", num: 1, get: b => b.view }, { label: "leader", get: b => b.leader }],
+      CV.blocks.slice(0, done)));
+    return tm >= CV.crash_ms && tm < firstVC && !inflight ? "skipping idle time" : "";
+  }
+  frameB.nextBusy = tm => idleSkipper(CV.msgs)(tm);
+  const plB = player(() => [0, vcEnd], frameB);
+  const boxB = h("div", { style: "display:grid;gap:18px" },
+    panel(null, plB.ui, h("p", { class: "note", text: `Voting set ${CV.initial_consensus.join(", ")}. ${CV.crashed} crashes at ${CV.crash_ms} ms, right after committing the first request. View-change timeout ${CV.timeout_ms} ms.` }),
+      h("div", { class: "dwrap" }, g)),
+    h("div", { class: "cols even" }, panel("What is happening", vcExplain), panel("Committed so far", vcBlocks,
+      h("p", { class: "note", text: `Result: ${CV.new_leader} leads view ${CV.view}; no request was lost and every honest ledger is ${CV.consistent ? "identical" : "NOT identical"}.` }))));
+
+  let scen = "A";
+  const holder = h("div");
+  function setScen(v) {
+    scen = v; plA.stop(); plB.stop();
+    if (v === "A") { holder.replaceChildren(boxA); boxA.querySelector(".dwrap").appendChild(g); lastEnd = null; pick(ri); }
+    else { holder.replaceChildren(boxB); boxB.querySelector(".dwrap").appendChild(g); plB.set(0); }
+  }
+  sec.appendChild(seg([["A", "Normal operation, one faulty node"], ["B", "Leader crash and view change"]], "A", setScen));
+  sec.appendChild(holder);
+  setScen("A");
+  p.onHide = () => { plA.stop(); plB.stop(); };
+
+  // comparison with PBFT
+  const sc = (R.consensus_scaling || []);
+  const ns = [...new Set(sc.map(r => r.nodes))];
+  const ser = (mode, col, dash) => ({ name: mode, color: col, dash, values: ns.map(n => (sc.find(r => r.nodes === n && r.mode === mode) || {}).msgs_per_req ?? null) });
+  sec.appendChild(panel("Why bother: messages per request against plain PBFT",
+    lineChart({ xs: ns, series: [ser("pbft", "var(--red)"), ser("ags", "var(--accent)"), ser("ags-noshadow", "var(--accent)", "5 4")], xLabel: "validators in the network", yLabel: "signed messages per request" }),
+    legend([["var(--red)", "PBFT: everyone votes, all-to-all"], ["var(--accent)", "AGS-PBFT (with candidate shadow responses)"], ["var(--accent)", "AGS-PBFT without shadows (dashed)"]]),
+    h("p", { class: "note", text: "PBFT grows with the square of the network size. AGS-PBFT keeps a small voting group, so traffic grows far more slowly. The price is that fewer nodes vote, so the set must be kept honest by scoring." })));
+});
+
+// =================================================================================
+// 7. LEDGER
+// =================================================================================
+page("ledger", "7", "Ledger", 2, p => {
+  const sec = p.sec, blocks = D.consensus.normal.blocks;
+  sec.appendChild(pageHead("Module 7 · Track B · tamper-evident record", "A chain anyone can re-check",
+    "Each committed event becomes a block holding the deck's three header fields <b>(B_ID, Pr_B_Hash, T_Block)</b> plus everything needed to verify it alone: the signed request, the agreed result, the commit certificate, the scores and the voting set.",
+    ["qrcav/ledger.py", "qrcav/consensus/agspbft.py (verify_block, verify_chain)"], "python scripts/run_network.py   →   run/ledger/NODE_xx.jsonl"));
+  let sel = 0, tampered = null;
+  const chain = h("div", { class: "chain" });
+  const detail = h("div", { style: "display:grid;gap:10px" });
+  const tamperBtn = h("button", { class: "btn ghost", type: "button" });
+  const verdict = h("p", { class: "plain" });
+  function render() {
+    chain.replaceChildren();
+    blocks.forEach((b, i) => {
+      if (i) chain.appendChild(h("div", { class: "link" + (tampered !== null && i === tampered + 1 ? " broken" : ""), title: "Pr_B_Hash link" }));
+      const broken = tampered !== null && i === tampered;
+      chain.appendChild(h("button", { class: "blk" + (broken ? " broken" : ""), type: "button", "aria-pressed": String(i === sel), onclick: () => { sel = i; render(); } },
+        h("b", { text: "Block " + b.b_id }),
+        h("span", { class: "h", text: "hash " + (broken ? "????????????????" : b.hash) }),
+        h("span", { class: "h", text: "prev " + b.prev }),
+        h("span", { text: `${b.txn} · ${broken ? "REJECT (edited)" : b.result}` }),
+        h("span", { class: "h", text: `view ${b.view} · ${b.leader}` })));
+    });
+    const b = blocks[sel];
+    detail.replaceChildren(
+      h("h3", { text: `Block ${b.b_id}` }),
+      h("div", { class: "kv" },
+        h("span", { text: "B_ID" }), h("span", { text: b.b_id }),
+        h("span", { text: "Pr_B_Hash" }), h("span", { text: b.prev + "…" }),
+        h("span", { text: "hash" }), h("span", { text: b.hash + "…" }),
+        h("span", { text: "T_Block" }), h("span", { text: b.t }),
+        h("span", { text: "view, seq" }), h("span", { text: `${b.view}, ${b.seq}` }),
+        h("span", { text: "request" }), h("span", { text: `${b.txn} from ${b.entity}` }),
+        h("span", { text: "agreed result" }), h("span", { text: b.result }),
+        h("span", { text: "commit certificate" }), h("span", { text: `${b.cert_n} signed RESPONSEs (${nf(b.cert_bytes)} B)` }),
+        h("span", { text: "leader signature" }), h("span", { text: `${b.leader}, ${nf(b.sig_bytes)} B ML-DSA` }),
+        h("span", { text: "voting set after" }), h("span", { text: b.consensus.join(", ") }),
+        h("span", { text: "whole block" }), h("span", { text: B(b.bytes) })),
+      table([{ label: "node", get: r => r[0] }, { label: "score after this block", num: 1, get: r => r[1] }], Object.entries(b.scores)));
+    tamperBtn.textContent = tampered === null ? `Try to rewrite block ${b.b_id}'s result` : "Undo the edit";
+    verdict.innerHTML = tampered === null
+      ? "<b>Untouched.</b> verify_chain() replays from genesis with only the TA's public key: every hash link, leader signature and commit certificate checks out, and the recomputed scores and voting sets match."
+      : `<b>Detected.</b> Changing block ${blocks[tampered].b_id} changes its content, so the leader's signature and the ${blocks[tampered].cert_n} signed responses no longer match it. Its hash changes too, so block ${blocks[tampered].b_id + 1 <= blocks.length ? blocks[tampered].b_id + 1 : "(next)"}'s Pr_B_Hash no longer points at it. To hide the edit an attacker would need the leader's and a quorum's private keys, and would have to rewrite every later block on every honest node. (The edit is shown in this page; the real check is verify_chain in agspbft.py.)`;
+  }
+  tamperBtn.addEventListener("click", () => { tampered = tampered === null ? sel : null; render(); });
+  sec.appendChild(panel(`The chain from the consensus run in module 6 · ${blocks.length} blocks · chain valid: ${D.consensus.normal.chain_valid ? "yes" : "no"}`, chain,
+    h("div", { class: "cols" }, detail, h("div", { style: "display:grid;gap:12px;align-content:start" }, tamperBtn, verdict))));
+  render();
+  if (netCommits.length) {
+    sec.appendChild(panel(`The chain from the 19-process run · ${netCommits.length} blocks, identical on every honest node`,
+      table([{ label: "B_ID", num: 1, get: e => e.B_ID }, { label: "Pr_B_Hash", get: e => h("span", { class: "hex", text: e.Pr_B_Hash }) }, { label: "hash", get: e => h("span", { class: "hex", text: e.hash }) },
+        { label: "view", num: 1, get: e => e.view }, { label: "leader", get: e => e.leader }, { label: "event", get: e => e.txn_id }], netCommits, { hl: e => e.view > 0 }),
+      h("p", { class: "note", text: "The highlighted block was committed in view 1, after the original leader crashed (module 8 replays that moment). Each node persists its chain as JSON lines in run/ledger/." })));
+  }
+});
+
+// =================================================================================
+// 8. WHOLE SYSTEM REPLAY (real multi-process run)
+// =================================================================================
+page("system", "8", "Whole system", 2, p => {
+  const sec = p.sec;
+  sec.appendChild(pageHead("Module 8 · Track B · the distributed system", "Replay of a real run: 19 processes, 50 seconds",
+    "<code>scripts/run_network.py</code> starts every entity as its own operating-system process talking TCP: a TA, a cloud, an MEC, 8 validators, 3 RSUs and 5 vehicles. Each process writes a structured log. This page replays those logs on one timeline.",
+    ["scripts/run_network.py", "config/demo.json", "qrcav/nodes/*.py", "qrcav/net/secure.py", "qrcav/nodes/report.py", "tests/test_network.py"], "python scripts/run_network.py"));
+  if (!NET) { sec.appendChild(h("div", { class: "empty", text: "No run logs were found. Run python scripts/make_explorer.py --network." })); return; }
+  const cfg = NET.config;
+  const END = Math.ceil(Math.max(...NE.map(e => e.t)) + 1);
+
+  // ---- layout ----
+  const VW = 1000, VH = 600;
+  const mx = m => 70 + (Math.max(-60, Math.min(1300, m)) + 60) * (860 / 1360);
+  const P = { TA: [110, 62], CLOUD_01: [890, 62], MEC_01: [470, 215] };
+  const nodeIds = cfg.consensus.nodes.map(n => n.id);
+  nodeIds.forEach((n, i) => { P[n] = [735 + (i % 4) * 68, 205 + Math.floor(i / 4) * 78]; });
+  cfg.rsus.forEach(r => { P[r.id] = [mx(r.pos[0]), 410]; });
+  const cavs = cfg.cavs.map(c => c.id);
+  const ready = {}; NE.forEach(e => { if (e.event === "ready" && !(e.node in ready)) ready[e.node] = e.t; });
+  const cavPos = (id, t) => { const c = cfg.cavs.find(x => x.id === id); const t0 = ready[id] ?? 1; const m = c.start[0] + c.speed * Math.max(0, t - t0); return [mx(m), c.start[1] > 1 ? 528 : 508]; };
+  const pos = (id, t) => cavs.includes(id) ? cavPos(id, t) : P[id];
+
+  // event kinds from the scripted config: CAV_04-E3 -> traffic_jam
+  const kindOf = {};
+  cfg.cavs.forEach(c => { let k = 0; (c.script || []).forEach(st => { if (st.action === "event") { const n = st.repeat || 1; for (let i = 0; i < n; i++) kindOf[`${c.id}-E${++k}`] = st.kind.replace(/_/g, " "); } }); });
+  const byId = (ev, id) => NE.filter(e => e.event === ev && e.event_id === id);
+
+  // ---- derive flows (things that move) and captions ----
+  const HOP = 0.32;
+  const flows = [];   // {t, path:[ids], color, w}
+  const caps = [];    // {t, html}
+  const sessionRsu = (cav, t) => { let r = null; for (const e of NE) { if (e.t > t) break; if (e.node === cav && e.event === "handshake" && e.side === "initiator" && e.peer.startsWith("RSU")) r = e.peer; if (e.node === cav && e.event === "handover" && e.ok) r = e.new; } return r; };
+  NE.forEach(e => {
+    if (e.event === "certified") flows.push({ t: e.t, path: ["TA", e.id], color: "var(--amber)", dash: true });
+    if (e.event === "handshake" && e.side === "initiator") flows.push({ t: e.t, path: [e.node, e.peer], color: "var(--amber)", hs: true });
+    if (e.event === "event-sent") {
+      const rsu = sessionRsu(e.node, e.t), crit = NE.find(x => x.node === "MEC_01" && (x.event === "critical" || x.event === "non-critical") && x.event_id === e.event_id);
+      const isCrit = crit && crit.event === "critical";
+      if (rsu) flows.push({ t: e.t, path: [e.node, rsu, "MEC_01"], color: "var(--blue)" });
+      const t1 = e.t + 2 * HOP;
+      if (isCrit) {
+        const acts = byId("actuate", e.event_id);
+        acts.forEach(a => flows.push({ t: t1, path: ["MEC_01", a.node], color: "var(--violet)" }));
+        acts.forEach(a => a.to.forEach(v => flows.push({ t: t1 + HOP, path: [a.node, v], color: "var(--violet)" })));
+        const cm = byId("committed", e.event_id)[0];
+        const leader = cm ? (NE.find(x => x.event === "commit" && x.B_ID === cm.b_id) || {}).leader : null;
+        if (leader) {
+          flows.push({ t: t1, path: ["MEC_01", leader], color: "var(--ink2)" });
+          nodeIds.filter(n => n !== leader).forEach(n => flows.push({ t: t1 + HOP, path: [leader, n], color: "var(--accent)" }));
+        }
+        const al = byId("alert", e.event_id), own = al.filter(x => !x.own).map(x => x.latency_ms);
+        caps.push({ t: e.t, dur: 3.2, html: `<b>${e.node}</b> reports <b>${kindOf[e.event_id] || "an event"}</b> (critical). The MEC alerts ${al.length} vehicle${al.length === 1 ? "" : "s"} through their RSUs` +
+          (al.length ? ` in a median <b>${nf(median(al.map(x => x.latency_ms)), 1)} ms</b>` : "") +
+          (cm ? `, then the validators commit it as <b>block ${cm.b_id}</b> in ${nf(cm.latency_ms, 0)} ms.` : ". It is not yet committed.") + ` <span class="note">(motion slowed; times are real)</span>` });
+      } else {
+        flows.push({ t: t1, path: ["MEC_01", "CLOUD_01"], color: "var(--blue)" });
+        caps.push({ t: e.t, dur: 3, html: `<b>${e.node}</b> reports <b>${kindOf[e.event_id] || "an event"}</b> (routine). The MEC skips consensus and sends it to the <b>cloud archive</b>.` });
+      }
+    }
+    if (e.event === "v2v-sent") {
+      const rx = NE.find(x => x.event === "v2v-recv" && x.msg_id === e.msg_id);
+      const hops = NE.filter(x => x.event === "v2v" && x.msg_id === e.msg_id).sort((a, b) => a.t - b.t).map(x => x.node);
+      const path = [e.node, ...hops, ...(rx ? [rx.node] : [])];
+      flows.push({ t: e.t, path, color: "var(--blue)" });
+      caps.push({ t: e.t, dur: 3, html: `<b>${e.node}</b> sends a direct message to <b>${rx ? rx.node : "another vehicle"}</b>. It travels through ${hops.join(" and ")} over secure sessions${rx ? `, arriving in <b>${nf(rx.latency_ms, 1)} ms</b>` : ""}.` });
+    }
+    if (e.event === "handover") { flows.push({ t: e.t, path: [e.node, e.new], color: "var(--amber)", hs: true }); caps.push({ t: e.t, dur: 3, html: `<b>${e.node}</b> hands over from ${e.old} to ${e.new}: a new handshake with the new RSU, ${e.ok ? "successful" : "failed"}.` }); }
+    if (e.event === "regroup" && e.node === "NODE_02") caps.push({ t: e.t, dur: 3.5, html: `<b>Regroup at block ${e.b_id}.</b> ${e.demoted.join(", ")} (configured to return wrong results) loses score and is demoted; ${e.promoted.join(", ")} is promoted. Voting set: ${e.consensus.join(", ")}.` });
+    if (e.event === "crash") caps.push({ t: e.t, dur: 4, html: `<b>${e.node} crashes</b> (scripted). It was the leader. Safety alerts keep flowing because they never wait for consensus.` });
+    if (e.event === "new-view") caps.push({ t: e.t, dur: 4, html: `<b>View change.</b> Nodes timed out waiting for a commit and voted; <b>${e.leader}</b> is the new leader (view ${e.view}). The pending event is committed in the new view.` });
+    if (e.event === "revoked") { nodeIds.concat(cfg.rsus.map(r => r.id), ["MEC_01", "CLOUD_01"]).forEach(n => flows.push({ t: e.t, path: ["TA", n], color: "var(--red)", dash: true })); caps.push({ t: e.t, dur: 4, html: `<b>The TA revokes ${e.id}</b> and signs a new CRL. Nodes fetch it; ${e.id}'s RSU closes its session.` }); }
+    if (e.event === "handshake-rejected") flows.push({ t: e.t, path: ["CAV_05", e.node], color: "var(--red)", hs: true });
+  });
+  const firstRej = NE.find(e => e.event === "handshake-rejected");
+  if (firstRej) caps.push({ t: firstRej.t, dur: 4, html: `<b>CAV_05 tries to reconnect.</b> Its certificate serial is on the CRL, so ${firstRej.node} rejects every attempt (${NE.filter(e => e.event === "handshake-rejected").length} in total).` });
+  const firstHs = NE.find(e => e.event === "handshake");
+  if (firstHs) caps.push({ t: firstHs.t - 0.05, dur: 2.6, html: `<b>Start-up.</b> Every process registers with the TA, then opens post-quantum sessions: vehicles to RSUs, RSUs to the MEC, the MEC to the cloud and validators, and validators to each other (${NE.filter(e => e.event === "handshake" && e.side === "initiator").length} handshakes).` });
+  const firstCert = NE.find(e => e.event === "certified");
+  if (firstCert) caps.push({ t: firstCert.t - 0.05, dur: 1.2, html: `<b>Registration.</b> Each process sends its public key and proof of possession; the TA returns a signed certificate.` });
+  caps.sort((a, b) => a.t - b.t);
+
+  // ---- svg ----
+  const g = s("svg", { viewBox: `0 0 ${VW} ${VH}`, class: "diagram", role: "img", "aria-label": "Replay of the distributed system" });
+  const bg = s("g"), links = s("g"), flowL = s("g"), fg = s("g");
+  g.append(bg, links, flowL, fg);
+  const boxAt = (id, w, hh, t1, t2) => {
+    const [x, y] = P[id];
+    const r = s("rect", { x: x - w / 2, y: y - hh / 2, width: w, height: hh, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
+    bg.append(r, s("text", { x, y: y - 2, "text-anchor": "middle", "font-size": 15, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: t1 }),
+      s("text", { x, y: y + 15, "text-anchor": "middle", "font-size": 11, fill: "var(--ink2)", text: t2 }));
+    return r;
+  };
+  boxAt("TA", 160, 56, "Trusted Authority", "registration · CRL");
+  boxAt("CLOUD_01", 160, 56, "Cloud archive", "SQLite");
+  boxAt("MEC_01", 170, 58, "MEC_01", "edge server");
+  bg.appendChild(s("rect", { x: 693, y: 140, width: 288, height: 210, rx: 8, fill: "var(--block)", stroke: "var(--line)" }));
+  bg.appendChild(s("text", { x: 837, y: 162, "text-anchor": "middle", "font-size": 13, "font-weight": 600, "font-family": "var(--display)", fill: "var(--ink2)", text: "VALIDATORS · AGS-PBFT" }));
+  const blockCount = s("text", { x: 837, y: 340, "text-anchor": "middle", "font-size": 12.5, "font-family": "var(--mono)", fill: "var(--ink)" });
+  bg.appendChild(blockCount);
+  bg.appendChild(s("rect", { x: 40, y: 490, width: 920, height: 56, rx: 4, fill: "var(--road)" }));
+  bg.appendChild(s("line", { x1: 46, x2: 954, y1: 518, y2: 518, stroke: "var(--panel)", "stroke-width": 2, "stroke-dasharray": "14 12" }));
+  bg.appendChild(s("text", { x: 48, y: 566, "font-size": 11, "font-family": "var(--mono)", fill: "var(--ink2)", text: "road · positions from each vehicle's beacons" }));
+  const NN = {};
+  nodeIds.forEach(n => {
+    const [x, y] = P[n];
+    const ring = s("circle", { cx: x, cy: y, r: 27, fill: "none", stroke: "var(--accent)", "stroke-width": 3 });
+    const c = s("circle", { cx: x, cy: y, r: 21, "stroke-width": 1.5 });
+    const t = s("text", { x, y: y + 4, "text-anchor": "middle", "font-size": 12, "font-weight": 600, "font-family": "var(--mono)", text: n.slice(-2) });
+    const x2 = s("text", { x, y: y + 9, "text-anchor": "middle", "font-size": 26, fill: "var(--red)", text: "✕" });
+    fg.append(ring, c, t, x2); NN[n] = { ring, c, t, x2 };
+  });
+  cfg.rsus.forEach(r => {
+    const [x, y] = P[r.id];
+    fg.append(s("rect", { x: x - 24, y: y - 24, width: 48, height: 48, rx: 4, fill: "var(--ink)" }),
+      s("text", { x, y: y + 5, "text-anchor": "middle", "font-size": 13, "font-weight": 700, "font-family": "var(--display)", fill: "var(--panel)", text: r.id.replace("_0", " ") }));
+  });
+  const CV = {};
+  cavs.forEach(id => {
+    const grp = s("g");
+    const body = s("rect", { x: -17, y: -8, width: 34, height: 16, rx: 4 });
+    const lane2 = (cfg.cavs.find(c => c.id === id).start[1] || 0) > 1;
+    const lab = s("text", { x: 0, y: lane2 ? 23 : -13, "text-anchor": "middle", "font-size": 11, "font-family": "var(--mono)", fill: "var(--ink)", text: id.replace("CAV_0", "CAV ") });
+    grp.append(body, lab); fg.appendChild(grp); CV[id] = { grp, body };
+  });
+  const regDot = {};
+
+  // ---- state at time t ----
+  function stateAt(t) {
+    const st = { cert: new Set(), sess: {}, crashed: new Set(), members: cfg.consensus.initial_consensus.slice(), leader: "NODE_01", blocks: 0, alerts: 0, hs: 0, cloud: 0, revoked: new Set(), disc: new Set(), lastCrl: null };
+    for (const e of NE) {
+      if (e.t > t) break;
+      if (e.event === "certified") st.cert.add(e.id);
+      if (e.event === "handshake") { if (e.side === "initiator") st.hs++; if (cavs.includes(e.node) && e.peer.startsWith("RSU")) st.sess[e.node] = e.peer; }
+      if (e.event === "handover" && e.ok) st.sess[e.node] = e.new;
+      if (e.event === "crash") st.crashed.add(e.node);
+      if (e.event === "regroup") st.members = e.consensus;
+      if (e.event === "new-view") st.leader = e.leader;
+      if (e.event === "commit") st.blocks = Math.max(st.blocks, e.B_ID);
+      if (e.event === "alert") st.alerts++;
+      if (e.event === "stored") st.cloud++;
+      if (e.event === "revoked") st.revoked.add(e.id);
+      if (e.event === "disconnected") { st.disc.add(e.node); delete st.sess[e.node]; }
+    }
+    return st;
+  }
+
+  // ---- controls, captions, stats, feed ----
+  let t = 0, playing = false, last = null, raf = null;
+  const playBtn = h("button", { class: "btn", type: "button", text: "Play", onclick: () => toggle() });
+  const speed = h("select", { id: "sys-speed", "aria-label": "Playback speed" }, ["0.5", "1", "2", "4"].map(v => h("option", { value: v, selected: v === "1", text: v + "×" })));
+  const clock = h("span", { class: "clock" });
+  const scrub = h("input", { type: "range", id: "sys-scrub", min: 0, max: 1000, value: 0, "aria-label": "Run time" });
+  scrub.addEventListener("input", () => { t = scrub.value / 1000 * END; draw(); });
+  const caption = h("div", { class: "caption" });
+  const statBox = h("div", { class: "kv" });
+  const feed = h("div", { class: "feed" });
+  function toggle() { playing = !playing; playBtn.textContent = playing ? "Pause" : "Play"; last = null; if (playing) { if (t >= END - 0.05) t = 0; raf = requestAnimationFrame(step); } }
+  function stop() { playing = false; playBtn.textContent = "Play"; cancelAnimationFrame(raf); }
+  function step(ts) { if (!playing) return; if (last !== null) t += (ts - last) / 1000 * parseFloat(speed.value); last = ts; if (t >= END) { t = END; stop(); } draw(); if (playing) raf = requestAnimationFrame(step); }
+
+  const chapters = [];
+  const addCh = (label, ev, pred) => { const e = NE.find(x => x.event === ev && (!pred || pred(x))); if (e) chapters.push([label, Math.max(0, e.t - 0.15)]); };
+  addCh("Start-up", "certified"); addCh("First hazard", "event-sent");
+  addCh("Routine report", "non-critical"); addCh("Vehicle to vehicle", "v2v-sent"); addCh("Handover", "handover");
+  addCh("Regroup", "regroup"); addCh("Leader crash", "crash"); addCh("View change", "new-view"); addCh("Revocation", "revoked");
+  const chapBox = h("div", { class: "chapters" }, chapters.map(([l, tt]) => h("button", { type: "button", text: l, onclick: () => { t = tt; draw(); if (!playing) toggle(); } })));
+
+  const FEED = [];
+  const say = (e) => {
+    switch (e.event) {
+      case "certified": return ["warn", `TA certified ${e.id} (${e.role}, serial ${e.serial})`];
+      case "handshake": return e.side === "initiator" ? ["", `${e.node} ⇄ ${e.peer}: handshake ${nf(e.bytes)} B, ${nf(e.ms, 1)} ms${e.cert_cache && (e.cert_cache.client_ref || e.cert_cache.server_ref) ? " (cert cached)" : ""}`] : null;
+      case "event-sent": return ["info", `${e.node} reports ${kindOf[e.event_id] || "an event"} (${e.event_id})`];
+      case "critical": return ["vio", `MEC: ${e.event_id} is critical → alert + consensus`];
+      case "non-critical": return ["info", `MEC: ${e.event_id} is routine → cloud`];
+      case "alert": return e.own ? null : ["vio", `${e.node} got alert ${e.event_id} after ${nf(e.latency_ms, 1)} ms`];
+      case "committed": return ["ok", `${e.event_id} committed as block ${e.b_id} (view ${e.view}) in ${nf(e.latency_ms, 0)} ms`];
+      case "stored": return ["info", `cloud stored ${e.event_id}`];
+      case "v2v-recv": return ["info", `${e.node} received ${e.msg_id} after ${nf(e.latency_ms, 1)} ms`];
+      case "handover": return ["warn", `${e.node} handover ${e.old} → ${e.new}`];
+      case "regroup": return e.node === "NODE_02" ? ["ok", `regroup: −${e.demoted.join(",")} +${e.promoted.join(",")}`] : null;
+      case "crash": return ["bad", `${e.node} crashed`];
+      case "view-change-sent": return ["bad", `${e.node} votes for view ${e.new_view}`];
+      case "new-view": return ["ok", `${e.leader} leads view ${e.view}`];
+      case "revoked": return ["bad", `TA revoked ${e.id} (CRL v${e.version})`];
+      case "revoked-peer": return ["bad", `${e.node} closed its session with revoked ${e.peer}`];
+      case "handshake-rejected": return ["bad", `${e.node} rejected a handshake`];
+      case "disconnected": return ["bad", `${e.node} disconnected`];
+      default: return null;
+    }
+  };
+  NE.forEach(e => { const r = say(e); if (r) FEED.push({ t: e.t, cls: r[0], text: r[1] }); });
+  const feedBtns = FEED.map(f => { const b = h("button", { type: "button", onclick: () => { t = f.t - 0.01; stop(); draw(); } }, h("span", { class: "tt", text: nf(f.t, 2) + " s" }), h("span", { class: f.cls, text: f.text })); feed.appendChild(b); return b; });
+  let lastFeedIdx = -1;
+
+  function draw() {
+    scrub.value = Math.round(t / END * 1000);
+    clock.textContent = `t = ${nf(t, 1)} s of ${END} s`;
+    const st = stateAt(t);
+    // nodes
+    nodeIds.forEach(n => {
+      const e = NN[n], inC = st.members.includes(n), cr = st.crashed.has(n);
+      e.c.setAttribute("fill", cr ? "var(--block)" : inC ? "var(--ink)" : "var(--panel)");
+      e.c.setAttribute("stroke", n === "NODE_03" ? "var(--red)" : "var(--ink)");
+      e.c.setAttribute("stroke-dasharray", inC ? "" : "4 3");
+      e.t.setAttribute("fill", cr ? "var(--ink3)" : inC ? "var(--panel)" : "var(--ink)");
+      e.ring.style.display = n === st.leader && !cr ? "" : "none";
+      e.x2.style.display = cr ? "" : "none";
+    });
+    blockCount.textContent = `ledger height ${st.blocks} · leader ${st.leader.replace("NODE_", "N")}`;
+    // vehicles and sessions
+    links.replaceChildren();
+    cavs.forEach(id => {
+      const [x, y] = cavPos(id, t);
+      CV[id].grp.setAttribute("transform", `translate(${x},${y})`);
+      const rev = st.revoked.has(id) || st.disc.has(id);
+      CV[id].body.setAttribute("fill", rev ? "var(--red)" : st.sess[id] ? "var(--blue)" : "var(--ink3)");
+      if (st.sess[id]) { const [rx, ry] = P[st.sess[id]]; links.appendChild(s("line", { x1: x, y1: y - 8, x2: rx, y2: ry + 24, stroke: "var(--accent)", "stroke-width": 1.4, opacity: 0.55 })); }
+    });
+    if (st.hs > 0) {
+      cfg.rsus.forEach(r => links.appendChild(s("line", { x1: P[r.id][0], y1: P[r.id][1] - 24, x2: P.MEC_01[0], y2: P.MEC_01[1] + 29, stroke: "var(--accent)", "stroke-width": 1.2, opacity: 0.4 })));
+      links.appendChild(s("line", { x1: P.MEC_01[0] + 85, y1: P.MEC_01[1], x2: 693, y2: P.MEC_01[1], stroke: "var(--accent)", "stroke-width": 1.2, opacity: 0.4 }));
+      links.appendChild(s("line", { x1: P.MEC_01[0] + 40, y1: P.MEC_01[1] - 29, x2: P.CLOUD_01[0] - 60, y2: P.CLOUD_01[1] + 28, stroke: "var(--accent)", "stroke-width": 1.2, opacity: 0.4 }));
+      for (let i = 0; i + 1 < cfg.rsus.length; i++) links.appendChild(s("line", { x1: P[cfg.rsus[i].id][0] + 24, y1: 410, x2: P[cfg.rsus[i + 1].id][0] - 24, y2: 410, stroke: "var(--accent)", "stroke-width": 1.2, "stroke-dasharray": "3 3", opacity: 0.5 }));
+    }
+    // flows
+    flowL.replaceChildren();
+    for (const f of flows) {
+      const total = (f.path.length - 1) * HOP, el = t - f.t;
+      if (el < 0 || el > total + 0.25) continue;
+      const hop = Math.min(f.path.length - 2, Math.floor(el / HOP)), fr = Math.min(1, (el - hop * HOP) / HOP);
+      const a = pos(f.path[hop], t), b = pos(f.path[hop + 1], t);
+      if (!a || !b) continue;
+      flowL.appendChild(s("line", { x1: a[0], y1: a[1], x2: b[0], y2: b[1], stroke: f.color, "stroke-width": f.hs ? 2.4 : 1.8, "stroke-dasharray": f.dash ? "5 4" : null, opacity: el > total ? 0.25 : 0.75 }));
+      if (el <= total) flowL.appendChild(s("circle", { cx: a[0] + (b[0] - a[0]) * fr, cy: a[1] + (b[1] - a[1]) * fr, r: f.hs ? 4 : 6, fill: f.color }));
+    }
+    // caption
+    let cap = null; for (const c of caps) { if (c.t <= t && t <= c.t + c.dur) cap = c; }
+    if (!cap) { let lastC = null; for (const c of caps) if (c.t <= t) lastC = c; cap = lastC && t - lastC.t < 6 ? lastC : null; }
+    caption.innerHTML = cap ? cap.html : (t < 1 ? "Processes are starting. Press <b>Play</b>, or pick a moment below." : "Vehicles send 10 encrypted beacons a second to their RSU (green lines). Pick a moment below, or keep watching.");
+    statBox.replaceChildren(
+      h("span", { text: "certificates issued" }), h("span", { text: st.cert.size }),
+      h("span", { text: "handshakes completed" }), h("span", { text: st.hs }),
+      h("span", { text: "alerts delivered" }), h("span", { text: st.alerts }),
+      h("span", { text: "blocks on the ledger" }), h("span", { text: st.blocks }),
+      h("span", { text: "routine events in the cloud" }), h("span", { text: st.cloud }),
+      h("span", { text: "voting set" }), h("span", { text: st.members.map(n => n.slice(-2)).join(" ") }),
+      h("span", { text: "leader" }), h("span", { text: st.leader + (st.crashed.size ? ` (crashed: ${[...st.crashed].join(", ")})` : "") }),
+      h("span", { text: "revoked" }), h("span", { text: st.revoked.size ? [...st.revoked].join(", ") : "none" }));
+    // feed highlight
+    let idx = -1; for (let i = 0; i < FEED.length; i++) { if (FEED[i].t <= t) idx = i; else break; }
+    if (idx !== lastFeedIdx) {
+      if (lastFeedIdx >= 0) feedBtns[lastFeedIdx].classList.remove("now");
+      if (idx >= 0) { feedBtns[idx].classList.add("now"); const fb = feedBtns[idx]; feed.scrollTop = fb.offsetTop - feed.offsetTop - feed.clientHeight / 2; }
+      lastFeedIdx = idx;
+    }
+  }
+  sec.appendChild(panel(null, h("div", { class: "ctl" }, playBtn, speed, clock), scrub, chapBox, caption,
+    h("div", { class: "dwrap" }, g),
+    legend([["var(--amber)", "registration, handshakes"], ["var(--blue)", "reports and V2V messages"], ["var(--violet)", "alerts"], ["var(--accent)", "secure sessions, commits"], ["var(--red)", "faulty node, revocation, rejection"]])));
+  sec.appendChild(h("div", { class: "cols" },
+    panel("Event log · click a line to jump there", feed),
+    panel("At this moment", statBox)));
+  const sm = NET.summary;
+  if (sm) sec.appendChild(panel("End-of-run check (qrcav/nodes/report.py)", notice([
+    `${sm.handshakes} handshakes completed, ${sm.handshake_rejected} rejected (the revoked vehicle).`,
+    `Event → alert at vehicles: median <b>${nf(median(sm.alert_latency_ms || []), 1)} ms</b> over ${(sm.alert_latency_ms || []).length} alerts. Safety alerts never wait for consensus.`,
+    `Ledger heights ${Object.values(sm.ledger_heights || {}).join(", ")} (the crashed node stopped early); ledgers consistent: <b>${sm.ledgers_consistent}</b>; chain verifies from genesis: <b>${sm.ledger_verifies}</b>.`,
+  ])));
+  p.onHide = stop;
+  const fh = chapters.find(c => c[0] === "First hazard");
+  t = fh ? fh[1] + 0.5 : 2; draw();
+});
+
+// =================================================================================
+// 9. RADIO SIMULATION (ns-3)
+// =================================================================================
+page("radio", "9", "Radio (ns-3)", 2, p => {
+  const sec = p.sec, DATA = D.ns3;
+  sec.appendChild(pageHead("Module 9 · Track B · network simulation", "What happens on a real radio channel",
+    "The localhost run cannot show radio effects. <b>ns-3</b> simulates IEEE 802.11p (the vehicle safety radio, 6 Mb/s) on a 1.5 km city grid with 9 RSUs. Message sizes and processing times come from the real code; the simulator adds the air.",
+    ["qrcav/sim/profile.py", "qrcav/sim/ns3_runner.py", "qrcav/sim/ns3_scenario.cc", "qrcav/eval/ns3_sweeps.py", "scripts/make_viewer.py"], "python scripts/make_viewer.py   (Linux / WSL2)"));
+  if (!DATA || !DATA.scenarios) { sec.appendChild(h("div", { class: "empty", text: "No ns-3 trace found (results/viewer_data.json)." })); return; }
+  const scen = DATA.scenarios.map(sc => {
+    const tr = sc.trace, nV = tr.waypoints.length, per = Array.from({ length: nV }, () => []);
+    const alerts = [], fails = [];
+    for (const e of tr.events) { if (e[1] === 6) alerts.push(e); if (e[1] === 3) fails.push(e[0]); if (e[2] >= 0 && e[2] < nV) per[e[2]].push(e); }
+    return { ...sc, nV, per, alerts, fails, alertRx: tr.events.filter(e => e[1] === 7).map(e => e[0]) };
+  });
+  const posAt = (w, tt) => { if (tt <= w[0][0]) return [w[0][1], w[0][2]]; let lo = 0, hi = w.length - 1; if (tt >= w[hi][0]) return [w[hi][1], w[hi][2]]; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (w[m][0] <= tt) lo = m; else hi = m; } const a = w[lo], b = w[hi], f = (tt - a[0]) / Math.max(1e-9, b[0] - a[0]); return [a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]; };
+  const stAt = (evs, tt) => { let st = { s: "idle", rsu: -1, since: 0 }; for (const [et, kind, , x] of evs) { if (et > tt) break; if (kind === 1 || kind === 5) st = { s: "hs", rsu: x, since: et }; else if (kind === 2) st = { s: "up", rsu: x, since: et }; else if (kind === 3) st = { s: "fail", rsu: -1, since: et }; else if (kind === 4) st = { s: "idle", rsu: -1, since: et }; } if (st.s === "fail" && tt - st.since > 0.6) st.s = "idle"; return st; };
+  const cnt = (arr, tt) => { let lo = 0, hi = arr.length; while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] <= tt) lo = m + 1; else hi = m; } return lo; };
+  let idx = 1, t = 8, playing = false, last = null, raf = null;
+  const map = h("canvas", { class: "map", "aria-label": "City grid with vehicles and roadside units" });
+  const air = h("canvas", { class: "air", "aria-label": "Channel airtime over time" });
+  const playBtn = h("button", { class: "btn", type: "button", text: "Play", onclick: () => { playing = !playing; playBtn.textContent = playing ? "Pause" : "Play"; last = null; if (playing) { if (t >= T() - 0.01) t = 0; raf = requestAnimationFrame(tick); } } });
+  const speed = h("select", { id: "ns3-speed", "aria-label": "Playback speed" }, ["0.5", "1", "2", "4"].map(v => h("option", { value: v, selected: v === "1", text: v + "×" })));
+  const clock = h("span", { class: "clock" });
+  const scrub = h("input", { type: "range", id: "ns3-scrub", min: 0, max: 1000, value: 0, "aria-label": "Simulation time" });
+  scrub.addEventListener("input", () => { t = scrub.value / 1000 * T(); draw(); });
+  const T = () => scen[idx].trace.sim_time;
+  const live = h("div", { class: "kv" }), runBox = h("div", { class: "kv" }), suiteLab = h("p", { class: "note" });
+  function tick(ts) { if (!playing) return; if (last !== null) t += (ts - last) / 1000 * parseFloat(speed.value); last = ts; if (t >= T()) { t = T(); playing = false; playBtn.textContent = "Play"; } draw(); if (playing) raf = requestAnimationFrame(tick); }
+  function fit(cv) { const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1; const w = Math.max(10, Math.round(r.width * d)), hh = Math.max(10, Math.round(r.height * d)); if (cv.width !== w || cv.height !== hh) { cv.width = w; cv.height = hh; } return [w, hh, d]; }
+  function draw() {
+    const C = {}; ["panel", "ink", "ink2", "line", "road", "block", "accent", "amber", "red", "violet", "ink3"].forEach(k => C[k] = css("--" + k));
+    if (map.getBoundingClientRect().width < 60) return;
+    const sc = scen[idx], tr = sc.trace;
+    scrub.value = Math.round(t / T() * 1000); clock.textContent = `t = ${nf(t, 1)} s simulated`;
+    const [W, H, dpr] = fit(map), ctx = map.getContext("2d");
+    const pad = 16 * dpr, k = Math.min((W - 2 * pad) / tr.width, (H - 2 * pad) / tr.height);
+    const X = x => pad + x * k, Y = y => H - pad - y * k;
+    ctx.fillStyle = C.block; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = C.road; ctx.lineWidth = Math.max(3, 14 * k);
+    for (let x = 0; x <= tr.width + 1; x += tr.block) { ctx.beginPath(); ctx.moveTo(X(x), Y(0)); ctx.lineTo(X(x), Y(tr.height)); ctx.stroke(); }
+    for (let y = 0; y <= tr.height + 1; y += tr.block) { ctx.beginPath(); ctx.moveTo(X(0), Y(y)); ctx.lineTo(X(tr.width), Y(y)); ctx.stroke(); }
+    tr.rsus.forEach(([rx, ry]) => { ctx.strokeStyle = C.line; ctx.lineWidth = dpr; ctx.beginPath(); ctx.arc(X(rx), Y(ry), 250 * k, 0, 7); ctx.stroke(); });
+    let nUp = 0, nHs = 0; const lv = [];
+    for (let v = 0; v < sc.nV; v++) {
+      const [x, y] = posAt(tr.waypoints[v], t), st = stAt(sc.per[v], t);
+      if (st.s === "up") nUp++; else if (st.s === "hs") nHs++;
+      lv.push([x, y, st]);
+      if ((st.s === "up" || st.s === "hs") && tr.rsus[st.rsu]) {
+        const [rx, ry] = tr.rsus[st.rsu];
+        ctx.strokeStyle = st.s === "up" ? C.accent : C.amber; ctx.globalAlpha = st.s === "up" ? 0.35 : 0.9; ctx.lineWidth = (st.s === "up" ? 1 : 1.6) * dpr;
+        ctx.setLineDash(st.s === "hs" ? [4 * dpr, 3 * dpr] : []); ctx.beginPath(); ctx.moveTo(X(x), Y(y)); ctx.lineTo(X(rx), Y(ry)); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      }
+    }
+    for (const [et, , v] of sc.alerts) { if (et > t || t - et > 1) continue; const [x, y] = posAt(tr.waypoints[v], t), f = t - et; ctx.strokeStyle = C.violet; ctx.globalAlpha = 1 - f; ctx.lineWidth = 2.2 * dpr; ctx.beginPath(); ctx.arc(X(x), Y(y), (6 + 46 * f) * dpr, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; }
+    for (const [x, y, st] of lv) { ctx.fillStyle = st.s === "up" ? C.accent : st.s === "hs" ? C.amber : st.s === "fail" ? C.red : C.ink3; ctx.beginPath(); ctx.arc(X(x), Y(y), 3.6 * dpr, 0, 7); ctx.fill(); }
+    tr.rsus.forEach(([rx, ry], i) => { const r = 6 * dpr; ctx.fillStyle = C.ink; ctx.fillRect(X(rx) - r, Y(ry) - r, 2 * r, 2 * r); ctx.fillStyle = C.panel; ctx.font = `600 ${8.5 * dpr}px sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(String(i + 1), X(rx), Y(ry) + 0.5 * dpr); ctx.textAlign = "start"; ctx.textBaseline = "alphabetic"; });
+    ctx.fillStyle = C.ink2; ctx.font = `${11 * dpr}px monospace`; ctx.fillText(`one block = ${tr.block} m`, pad, H - 4 * dpr);
+    live.replaceChildren(h("span", { text: "vehicles with a session" }), h("span", { text: nUp }), h("span", { text: "handshakes in progress" }), h("span", { text: nHs }),
+      h("span", { text: "failed handshakes so far" }), h("span", { text: cnt(sc.fails, t) }), h("span", { text: "alerts received so far" }), h("span", { text: cnt(sc.alertRx, t) }));
+    // airtime
+    const [aw, ah] = fit(air), a2 = air.getContext("2d"); a2.clearRect(0, 0, aw, ah);
+    const max = Math.max(...scen.map(z => Math.max(0.01, ...z.trace.airtime))) / tr.air_bucket_s, n = Math.ceil(tr.sim_time / tr.air_bucket_s), bw = aw / n, bottom = ah - 12 * dpr;
+    tr.airtime.forEach((a, i) => { const hh = (a / tr.air_bucket_s) / max * (bottom - 4 * dpr); a2.fillStyle = (i + 1) * tr.air_bucket_s <= t ? C.ink2 : C.line; a2.fillRect(i * bw + 0.5, bottom - hh, Math.max(1, bw - 1.5), hh); });
+    a2.strokeStyle = C.amber; a2.lineWidth = 1.5 * dpr; const xt = t / tr.sim_time * aw; a2.beginPath(); a2.moveTo(xt, 0); a2.lineTo(xt, bottom); a2.stroke();
+    a2.fillStyle = C.ink2; a2.font = `${10 * dpr}px monospace`; a2.fillText("0 s", 0, ah - dpr); const lab = `${tr.sim_time} s`; a2.fillText(lab, aw - a2.measureText(lab).width, ah - dpr);
+  }
+  function select(i) {
+    idx = i; const sc = scen[i], r = sc.summary;
+    suiteLab.textContent = sc.label;
+    runBox.replaceChildren(...[["handshake size", B(sc.handshake_bytes)], ["handshakes completed", nf(r.handshake_success_pct, 1) + " %"], ["handshake time, median", nf(r.hs_p50_ms, 0) + " ms"], ["handshake time, p95", nf(r.hs_p95_ms, 0) + " ms"],
+      ["beacon slots with a session", nf(r.beacon_coverage_pct, 1) + " %"], ["event → alert, median", nf(r.alert_p50_ms, 1) + " ms"], ["channel airtime, summed over the 9 cells", nf(r.airtime_pct, 0) + " %"]].flatMap(([a, b]) => [h("span", { text: a }), h("span", { text: b })]));
+    draw();
+  }
+  const sg = seg(scen.map((sc, i) => [i, sc.short]), 1, select);
+  sec.appendChild(h("div", { class: "cols" },
+    panel(null, map, h("div", { class: "ctl" }, playBtn, speed, clock), scrub),
+    h("div", { style: "display:grid;gap:18px;align-content:start" },
+      panel("Scenario · same vehicles, same seed", sg, suiteLab),
+      panel("At this moment", live, h("div", { class: "label", text: "Channel airtime, every 0.5 s" }), air),
+      panel("Whole run, after a 5 s warm-up", runBox),
+      panel("Key", legend([["var(--accent)", "session up"], ["var(--amber)", "handshake in progress"], ["var(--ink3)", "no session"], ["var(--red)", "handshake just failed"], ["var(--violet)", "critical event (ring)"]])))));
+  window.addEventListener("resize", () => { if (current === p) draw(); });
+  p.onHide = () => { playing = false; playBtn.textContent = "Play"; cancelAnimationFrame(raf); };
+  p.onShow = () => draw();
+  select(1);
+
+  // density sweep
+  const dens = R.ns3_density || [];
+  const vs = [...new Set(dens.map(r => r.vehicles))].sort((a, b) => a - b);
+  const line = (suite, cache, col, dash, key) => ({ color: col, dash, values: vs.map(v => (dens.find(r => r.suite === suite && r.cert_cache === cache && r.vehicles === v) || {})[key] ?? null) });
+  const series = key => [line("CLASSIC", 0, "var(--ink2)", null, key), line("L3", 0, "var(--blue)", null, key), line("DECK", 0, "var(--amber)", null, key), line("L5", 0, "var(--red)", null, key), line("DECK", 1, "var(--accent)", null, key)];
+  const lg = legend([["var(--ink2)", "Classical"], ["var(--blue)", "L3"], ["var(--amber)", "DECK"], ["var(--red)", "L5"], ["var(--accent)", "DECK + certificate caching"]]);
+  sec.appendChild(h("div", { class: "cols even" },
+    panel("Handshakes that complete, as traffic grows", lineChart({ xs: vs, series: series("handshake_success_pct"), xLabel: "vehicles on the grid", yLabel: "% completed", yMax: 100 }), lg),
+    panel("Event → alert, median", lineChart({ xs: vs, series: series("alert_p50_ms"), xLabel: "vehicles on the grid", yLabel: "milliseconds" }), lg.cloneNode(true))));
+  sec.appendChild(panel("What this shows", notice([
+    "Up to about 50 vehicles per 2.25 km², every suite completes its handshakes and alerts arrive in about 5 ms.",
+    "Beyond that, the 20 KB post-quantum handshakes compete for one 6 Mb/s channel; completion drops and alerts slow down. Certificate caching halves the bytes and keeps DECK at 100 % at 100 vehicles.",
+    "Alerts and beacons go out at the highest MAC priority (EDCA), and failed handshakes back off exponentially. Without those two measures alerts took about 400 ms instead of about 5 ms (ablation in results/ns3_variants.csv).",
+    "Five simulator traps were found and fixed (ARP queue, preamble threshold, unicast beacons, whole-flight retransmission, first-contact association); docs/05-SYSTEM-DESIGN.md section 8 lists them.",
+  ])));
+});
+
+// =================================================================================
+// 10. RESULTS
+// =================================================================================
+page("results", "10", "Results", 3, p => {
+  const sec = p.sec;
+  sec.appendChild(pageHead("Module 10 · evaluation", "The evidence in four charts",
+    "Every number comes from <code>results/*.csv</code>, written by the evaluation scripts. The report's tables are generated from the same files.",
+    ["scripts/run_evaluation.py", "qrcav/eval/crypto_bench.py", "qrcav/eval/consensus_eval.py", "qrcav/eval/plots.py", "scripts/make_tables.py"], "python scripts/run_evaluation.py"));
+  const bb = R.beacon_budget || [], suites = [...new Set(bb.map(r => r.suite))];
+  const ft = R.fault_tolerance || [];
+  const vc = R.view_change || [], tos = [...new Set(vc.map(r => r.vc_timeout_s))];
+  sec.appendChild(h("div", { class: "cols even" },
+    panel("Beacons fit the 100 ms safety budget",
+      barChart({ cats: suites, series: [{ color: "var(--accent)", values: suites.map(s2 => (bb.find(r => r.suite === s2 && r.mode.startsWith("AEAD")) || {}).total_p99_ms || 0) }, { color: "var(--violet)", values: suites.map(s2 => (bb.find(r => r.suite === s2 && r.mode.startsWith("signed")) || {}).total_p99_ms || 0) }],
+        yLabel: "ms, crypto + airtime, p99", valueFmt: v => nf(v, 1), yMax: 16 }),
+      legend([["var(--accent)", "AES-GCM record inside a session (135 B)"], ["var(--violet)", "individually signed broadcast"]]),
+      h("p", { class: "note", text: "Vehicles send 10 beacons a second, so each must be ready within 100 ms. Inside a session a beacon costs under 0.5 ms whatever the suite; signing every beacon with ML-DSA is possible but up to 30 times slower and bigger." })),
+    panel("Safety and liveness with faulty validators",
+      barChart({ cats: ft.map(r => String(r.byzantine)), series: [{ color: "var(--accent)", values: ft.map(r => r.commit_pct) }], yLabel: "% of requests committed", yMax: 100, valueFmt: v => nf(v, 0),
+        refLine: null }),
+      h("p", { class: "note", html: `Voting set of ${ft[0] ? ft[0].consensus_set : 7} (f = ${ft[0] ? ft[0].f : 2}). With up to f faulty nodes every request commits. With more, progress stops, but <b>nothing wrong is ever committed</b> (safety held in all ${ft.length} runs). x-axis: number of faulty nodes.` }))));
+  sec.appendChild(h("div", { class: "cols even" },
+    panel("Recovery after the leader crashes",
+      barChart({ cats: tos.map(x => x + " s"), series: ["ags", "pbft"].map((m, j) => ({ color: j ? "var(--red)" : "var(--accent)", values: tos.map(x => ((vc.find(r => r.mode === m && r.vc_timeout_s === x) || {}).recovery_first_commit_ms || 0) / 1000) })),
+        yLabel: "s until first commit after crash", valueFmt: v => nf(v, 1) }),
+      legend([["var(--accent)", "AGS-PBFT"], ["var(--red)", "PBFT"]]),
+      h("p", { class: "note", text: "x-axis: view-change timeout. Recovery is dominated by the timeout (it doubles on each failed view); both protocols recover the same way." })),
+    panel("Score dynamics: a faulty node is pushed out",
+      scoreChart(R.score_dynamics),
+      h("p", { class: "note", text: "Scores of every validator over successive blocks in the evaluation run. The wrong-result node loses 5 per block and drops below μ − σ at the next regroup; a silent node stops gaining, so it falls behind the honest nodes." }))));
+  sec.appendChild(panel("Where to find the rest",
+    notice(["Figures fig1–fig11: <code>results/*.png</code> (also in the report, chapter 6).",
+      "Report tables: <code>report/generated/*.tex</code>, built by <code>scripts/make_tables.py</code>.",
+      "Unit and integration tests: <code>pytest</code> (55 tests, including a real multi-process run)."])));
+});
+function scoreChart(sd) {
+  if (!sd || !Array.isArray(sd.trace) || !sd.trace.length) return h("div", { class: "empty", text: "No score data." });
+  const byBlock = new Map();
+  for (const r of sd.trace) { if (!byBlock.has(r.block)) byBlock.set(r.block, { mu: r.mu, sigma: r.sigma, s: {} }); byBlock.get(r.block).s[r.node] = r.score; }
+  const blocks = [...byBlock.keys()].sort((x, y) => x - y);
+  const nodes = [...new Set(sd.trace.map(r => r.node))].sort();
+  const step = Math.max(1, Math.ceil(blocks.length / 12));
+  const xs = blocks.map((b, i) => i % step === 0 ? b : "");
+  const series = nodes.map(n => ({ color: n === sd.wrong ? "var(--red)" : n === sd.silent ? "var(--amber)" : "var(--ink3)", width: n === sd.wrong || n === sd.silent ? 2.4 : 1, values: blocks.map(b => byBlock.get(b).s[n] ?? null) }))
+    .sort((x, y) => (x.width - y.width));
+  series.push({ color: "var(--blue)", dash: "5 4", width: 1.6, values: blocks.map(b => byBlock.get(b).mu - byBlock.get(b).sigma) });
+  const all = series.flatMap(x => x.values).filter(v => v !== null);
+  const lo = Math.floor(Math.min(...all) / 10) * 10, hi = Math.max(...all);
+  const shifted = series.map(se => ({ ...se, values: se.values.map(v => v === null ? null : v - lo) }));
+  const c = lineChart({ xs, series: shifted, xLabel: "block", yLabel: "score", yMax: niceMax(hi - lo), yFmt: v => nf(v + lo) });
+  c.querySelectorAll("circle").forEach(x => x.remove());
+  return h("div", null, c, legend([["var(--red)", `${sd.wrong} (wrong results)`], ["var(--amber)", `${sd.silent} (silent)`], ["var(--ink3)", "honest nodes"], ["var(--blue)", "μ − σ cut-off"]]));
+}
+
+// ---------- nav ---------------------------------------------------------------------
+const navBox = document.getElementById("nav");
+groups.forEach(([label, ps]) => {
+  const grp = h("div", { class: "navgroup" }, h("span", { text: label }));
+  ps.forEach(pg => grp.appendChild(h("button", { class: "nav", type: "button", "data-id": pg.id, onclick: () => show(pg.id) },
+    h("span", { class: "n", text: pg.num }), h("span", { class: "t", text: pg.title }))));
+  navBox.appendChild(grp);
+});
+document.getElementById("railnote").textContent = `Generated ${D.generated} from branch review2-complete by scripts/make_explorer.py. Track A: modules 1–5. Track B: 6–9.`;
+show(location.hash.slice(1) || "overview");
+window.addEventListener("hashchange", () => { const id = location.hash.slice(1); if (id && (!current || id !== current.id) && PAGES.some(x => x.id === id)) show(id); });
+})();
+</script>

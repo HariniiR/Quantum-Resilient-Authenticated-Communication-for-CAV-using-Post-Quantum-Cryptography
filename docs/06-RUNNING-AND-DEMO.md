@@ -57,6 +57,7 @@ python scripts/run_ns3_sweeps.py --quick       # ~3 min; checks the setup
 | Evaluation + figures | `python scripts/run_evaluation.py` (`--quick` for ~2 min) | ~4 min |
 | ns-3 sweeps (WSL2) | `python scripts/run_ns3_sweeps.py`, then `--seeds 2 3` | ~40 + ~70 min on 2 cores |
 | Replay viewer (WSL2) | `python scripts/make_viewer.py` → open `results/viewer.html` | ~10 min |
+| Project explorer (every module, any OS) | `python scripts/make_explorer.py` → open `results/explorer.html` (`--network` re-runs the 19-process system first) | 2 s, or ~60 s with `--network` |
 | Redraw figures only | `python scripts/run_evaluation.py --plots` | 5 s |
 | Report and slide numbers | `python scripts/make_tables.py` | 1 s |
 | Report PDF | `cd report && latexmk -pdf main.tex` | 30 s |
@@ -119,6 +120,18 @@ What happens, by time:
 | 40 | **TA revokes CAV_05** | RSU_03 drops its session |
 | 43 | CAV_05 tries to reconnect → **rejected** | "Revocation works within a CRL refresh, even though RSU_03 still has CAV_05's certificate in its cache: cached certificates are re-checked against the CRL every time." |
 | 50 | stop → **summary** | ledger heights, *ledgers consistent: True*, *ledger verifies: True*, the block table |
+
+### Project explorer: the whole project in one page
+
+`results/explorer.html` walks a viewer through every module in the order data
+travels: suites, PKI, handshake (flight by flight, full and cached), record
+layer (the browser re-opens a record the Python code sealed, and the replay
+window can be driven by hand), attacks, AGS-PBFT (message by message, with a
+faulty node, then a leader crash and view change), the ledger, a replay of the
+19-process run, the ns-3 replay, and the result charts. All of it comes from
+the real code: `scripts/make_explorer.py` runs the handshake and consensus
+here and reads `run/logs/` and `results/`. Use it for panel members who want
+to see how a part works, or to answer "what happens if ...?".
 
 ### Part C: the simulation, visually (2 min)
 

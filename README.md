@@ -44,7 +44,7 @@ python scripts\run_evaluation.py  # benchmarks + figures into results\ (~4 min)
 
 ns-3 runs in WSL2 / Linux: `pip install -r requirements-ns3.txt`, then
 `python scripts/run_ns3_sweeps.py` and `python scripts/make_viewer.py`.
-Open `results/viewer.html` in any browser to watch the simulation. Full instructions and the Review 2 demo
+Open `results/viewer.html` in any browser to watch the simulation. For a guided tour of every module, open `results/explorer.html` (rebuild it with `python scripts/make_explorer.py`). Full instructions and the Review 2 demo
 script are in [`docs/06-RUNNING-AND-DEMO.md`](docs/06-RUNNING-AND-DEMO.md).
 
 ---
@@ -67,13 +67,13 @@ qrcav/                         the system (v2)
   nodes/                       one process per entity: ta, cloud, mec, consensus_node, rsu, cav
   sim/                         ns-3 802.11p scenario (C++ via cppyy) + measurement profiles
   eval/                        benchmarks, attacks, consensus experiments, ns-3 sweeps, plots, replay viewer
-scripts/                       demo_protocol, demo_parts, run_network, run_evaluation, run_ns3_sweeps, make_viewer, make_tables
+scripts/                       demo_protocol, demo_parts, run_network, run_evaluation, run_ns3_sweeps, make_viewer, make_explorer, make_tables
 config/demo.json               the Review 2 scenario (faults, revocation, handover, V2V)
 tests/                         pytest suite, including a real multi-process run
 docs/                          00 start here; 05 design; 06 running + demo; 07 results; review1/ archived
 report/                        final report (LaTeX); numbers and tables generated from results/
 slides/                        Review 2 deck (Beamer)
-results/                       CSVs, figures, viewer.html (results/review1/ holds the Review 1 outputs)
+results/                       CSVs, figures, viewer.html, explorer.html (results/review1/ holds the Review 1 outputs)
 
 cavpqc/, demo.py, handshake.py, run_evaluation.py, why_composition_matters.py
                                the Review 1 prototype, kept unchanged for reference
