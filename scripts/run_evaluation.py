@@ -1,7 +1,7 @@
 """
 Run the evaluation (everything except ns-3) and draw every figure.
 
-    python scripts/run_evaluation.py            # full (~5-10 min, pure-Python backend is the slow part)
+    python scripts/run_evaluation.py            # full (~4 min)
     python scripts/run_evaluation.py --quick    # fewer samples, smaller sweeps (~2 min)
     python scripts/run_evaluation.py --plots    # only redraw figures from existing CSVs
 
@@ -32,7 +32,7 @@ def write(path: Path, rows: list[dict]) -> None:
         w = csv.DictWriter(f, fieldnames=keys)
         w.writeheader()
         w.writerows(rows)
-    print(f"  wrote {path.resolve().relative_to(ROOT)} ({len(rows)} rows)", flush=True)
+    print(f"  wrote {path} ({len(rows)} rows)", flush=True)
 
 
 def main() -> None:
@@ -48,11 +48,11 @@ def main() -> None:
 
     if not args.plots:
         print("[1/8] primitives", flush=True)
-        write(out / "primitives.csv", crypto_bench.primitives(n=60 if q else 200, pure_n=10 if q else 40))
+        write(out / "primitives.csv", crypto_bench.primitives(n=60 if q else 200))
         print("[2/8] sizes", flush=True)
         write(out / "sizes.csv", crypto_bench.sizes())
         print("[3/8] handshakes", flush=True)
-        write(out / "handshake_timing.csv", crypto_bench.handshakes(n=30 if q else 100, pure_n=5 if q else 15))
+        write(out / "handshake_timing.csv", crypto_bench.handshakes(n=30 if q else 100))
         print("[4/8] beacon budget", flush=True)
         write(out / "beacon_budget.csv", crypto_bench.beacon_budget(n=100 if q else 300))
         print("[5/8] attacks", flush=True)
