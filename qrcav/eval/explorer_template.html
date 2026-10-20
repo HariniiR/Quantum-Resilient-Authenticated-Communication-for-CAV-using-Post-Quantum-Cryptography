@@ -2,123 +2,134 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Overpass:wght@600;700;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Overpass+Mono:wght@400;500;700&display=swap">
 <style>
-/* Layout: a module rail on the left (the order data travels through the system),
-   one module page at a time on the right; the rail becomes a scrolling strip on phones.
-   Same visual language as results/viewer.html: road-signage type, asphalt neutrals,
-   state colours borrowed from traffic signals. */
+/* Layout: an engineering datasheet. Contents list on the left, one numbered section at a time
+   on the right; sections are divided by printed rules, not cards. Type: Overpass (from the
+   Highway Gothic road-sign lettering) for headings, Atkinson Hyperlegible for text, Overpass
+   Mono for every figure. Colour is ink on paper; amber (road-works) marks the current item and
+   the selected step; green / red / violet / blue keep fixed meanings in every diagram. */
 :root {
-  --bg: #eef0ec; --panel: #f8f9f6; --ink: #1b211f; --ink2: #56605b; --ink3: #8b948f;
-  --line: #d3d8d1; --road: #dde1da; --block: #e7eae4;
-  --accent: #0f7a63;   /* session up, accepted, verified */
-  --amber: #c27100;    /* in progress, certificates */
-  --red: #c0392b;      /* rejected, faulty, crashed */
-  --violet: #6d4bd1;   /* alerts, signatures */
-  --blue: #2a6db0;     /* key exchange, proposals */
-  --display: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
-  --body: "Barlow", "Helvetica Neue", Arial, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --bg: #f6f5f1; --panel: #f6f5f1; --ink: #151513; --ink2: #575650; --ink3: #8f8d85;
+  --line: #d6d4cc; --road: #e2e0d8; --block: #ecebe5;
+  --amber: #b46a00;    /* selection, certificates, handshakes in flight */
+  --accent: #2e7a3a;   /* accepted, session up, committed */
+  --red: #b0281d;      /* rejected, faulty, crashed */
+  --violet: #5d4aa8;   /* alerts, signatures */
+  --blue: #1d5a9e;     /* key exchange, reports */
+  --display: "Overpass", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "Atkinson Hyperlegible", "Helvetica Neue", Arial, sans-serif;
+  --mono: "Overpass Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #111513; --panel: #171c1a; --ink: #e6ebe7; --ink2: #9aa59f; --ink3: #6d7672;
-    --line: #2c3430; --road: #262d2a; --block: #1a201d;
-    --accent: #2fbf98; --amber: #f0a330; --red: #ef6a5b; --violet: #a48bf2; --blue: #6ba6e8; color-scheme: dark;
+    --bg: #131312; --panel: #131312; --ink: #ecebe6; --ink2: #a3a198; --ink3: #6f6d66;
+    --line: #2f2e2a; --road: #272622; --block: #1c1b19;
+    --amber: #e39a2c; --accent: #5cb86a; --red: #e8695c; --violet: #a493e8; --blue: #6aa2e0; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #111513; --panel: #171c1a; --ink: #e6ebe7; --ink2: #9aa59f; --ink3: #6d7672;
-  --line: #2c3430; --road: #262d2a; --block: #1a201d;
-  --accent: #2fbf98; --amber: #f0a330; --red: #ef6a5b; --violet: #a48bf2; --blue: #6ba6e8; color-scheme: dark;
+  --bg: #131312; --panel: #131312; --ink: #ecebe6; --ink2: #a3a198; --ink3: #6f6d66;
+  --line: #2f2e2a; --road: #272622; --block: #1c1b19;
+  --amber: #e39a2c; --accent: #5cb86a; --red: #e8695c; --violet: #a493e8; --blue: #6aa2e0; color-scheme: dark;
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html, body { background: var(--bg); color: var(--ink); }
-body { font-family: var(--body); font-size: 15.5px; line-height: 1.5; }
-h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: 0.005em; line-height: 1.12; margin: 0; text-wrap: balance; }
-h1 { font-size: clamp(30px, 4.2vw, 46px); }
-h2 { font-size: clamp(26px, 3vw, 34px); }
-h3 { font-size: 19px; font-weight: 600; }
+body { font-family: var(--body); font-size: 15.5px; line-height: 1.55; }
+h1, h2, h3 { font-family: var(--display); font-weight: 800; line-height: 1.1; margin: 0; text-wrap: balance; letter-spacing: -0.005em; }
+h1 { font-size: clamp(30px, 4vw, 44px); max-width: 22ch; }
+h2 { font-size: clamp(28px, 3.2vw, 38px); }
+h3 { font-size: 19px; font-weight: 700; }
 p { margin: 0; }
 code, .mono { font-family: var(--mono); font-size: 0.86em; }
-a { color: var(--accent); }
+a { color: var(--ink); }
 button { font: inherit; color: inherit; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
 
-.app { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
+.app { display: grid; grid-template-columns: 236px minmax(0, 1fr); min-height: 100vh; }
 .rail { position: sticky; top: env(safe-area-inset-top, 0px); align-self: start; height: 100vh; overflow-y: auto;
-  border-right: 1px solid var(--line); background: var(--panel); padding-block: 22px 28px; padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: 14px;
-  display: grid; align-content: start; gap: 18px; }
-.brand { display: grid; gap: 4px; }
-.brand .tag { font-family: var(--mono); font-size: 12px; color: var(--ink2); }
-.brand b { font-family: var(--display); font-size: 21px; font-weight: 700; line-height: 1.1; }
-.navgroup { display: grid; gap: 2px; }
-.navgroup > span { font-family: var(--display); font-weight: 600; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); padding: 0 8px 4px; }
-.nav { display: grid; grid-template-columns: 26px 1fr; align-items: baseline; gap: 4px; padding: 6px 8px; border-radius: 5px; border: 0; background: transparent; text-align: left; cursor: pointer; color: var(--ink2); }
-.nav .n { font-family: var(--mono); font-size: 12px; color: var(--ink3); }
+  border-right: 1px solid var(--ink); padding-block: 24px 28px; padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: 16px;
+  display: grid; align-content: start; gap: 20px; }
+.brand { display: grid; gap: 2px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.brand b { font-family: var(--display); font-size: 26px; font-weight: 800; letter-spacing: -0.01em; }
+.brand .tag { font-family: var(--mono); font-size: 11.5px; color: var(--ink2); }
+.navgroup { display: grid; gap: 0; }
+.navgroup > span { font-family: var(--display); font-weight: 600; font-size: 13px; color: var(--ink3); padding: 8px 0 3px; }
+.nav { display: grid; grid-template-columns: 28px 1fr; align-items: baseline; padding: 4px 0; border: 0; background: transparent; text-align: left; cursor: pointer; color: var(--ink2); }
+.nav .n { font-family: var(--mono); font-size: 12.5px; color: var(--ink3); }
 .nav .t { font-family: var(--display); font-weight: 600; font-size: 16px; }
-.nav:hover { background: var(--block); color: var(--ink); }
-.nav[aria-current="page"] { background: var(--ink); color: var(--panel); }
-.nav[aria-current="page"] .n { color: var(--panel); opacity: 0.7; }
+.nav:hover .t { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.nav[aria-current="page"] { color: var(--ink); }
+.nav[aria-current="page"] .t { font-weight: 800; }
+.nav[aria-current="page"] .n { color: var(--amber); font-weight: 700; }
+.nav[aria-current="page"] .n::before { content: "▸"; margin-right: 2px; }
 .railnote { font-size: 12.5px; color: var(--ink3); line-height: 1.45; }
 
-main { min-width: 0; padding-block: 28px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.page { max-width: 1120px; margin: 0 auto; display: grid; gap: 22px; }
-.phead { display: grid; gap: 10px; }
-.eyebrow { font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); }
-.lead { font-size: 17px; color: var(--ink2); max-width: 70ch; }
-.lead b { color: var(--ink); font-weight: 600; }
-.files { display: flex; flex-wrap: wrap; gap: 6px; }
-.file { font-family: var(--mono); font-size: 12px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 4px; color: var(--ink2); background: var(--panel); }
-.run { font-family: var(--mono); font-size: 12.5px; color: var(--ink2); }
-.run b { color: var(--ink); font-weight: 500; }
+main { min-width: 0; padding-block: 30px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.page { max-width: 1100px; margin: 0 auto; display: grid; gap: 30px; }
+@media (min-width: 901px) { main { padding-left: 40px; padding-right: max(32px, env(safe-area-inset-right, 0px)); } }
+.phead { display: grid; gap: 10px; padding-bottom: 18px; border-bottom: 2px solid var(--ink); }
+.hrow { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.secno { font-family: var(--mono); font-size: clamp(28px, 3.2vw, 38px); font-weight: 500; color: var(--amber); line-height: 1; }
+.meta { font-family: var(--display); font-weight: 600; font-size: 14px; color: var(--ink2); }
+.lead { font-size: 17px; color: var(--ink); max-width: 68ch; }
+.lead b { font-weight: 700; }
+.src { font-family: var(--mono); font-size: 12.5px; color: var(--ink2); display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 8px; }
+.src span:first-child { color: var(--ink3); }
+.src b { color: var(--ink); font-weight: 500; }
+.titleblock { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.titleblock div { padding: 8px 12px 9px 0; display: grid; gap: 1px; }
+.titleblock span { font-size: 12px; color: var(--ink3); font-family: var(--display); font-weight: 600; }
+.titleblock b { font-weight: 400; font-size: 14.5px; }
 
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
-.label { font-family: var(--display); font-weight: 600; font-size: 12.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink2); }
-.cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.panel { display: grid; gap: 12px; min-width: 0; padding-top: 12px; border-top: 1px solid var(--line); }
+.panel > .label:first-child { font-family: var(--display); font-weight: 700; font-size: 18px; color: var(--ink); }
+.label { font-family: var(--display); font-weight: 700; font-size: 14px; color: var(--ink2); }
+.cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px 32px; align-items: start; }
 .cols.even { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 @media (max-width: 1000px) { .cols, .cols.even { grid-template-columns: minmax(0, 1fr); } }
-.note { font-size: 13.5px; color: var(--ink2); max-width: 78ch; }
-.plain { border-left: 3px solid var(--accent); padding: 2px 0 2px 12px; font-size: 15px; max-width: 75ch; }
-.plain b { font-weight: 600; }
-ul.notice { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14.5px; max-width: 75ch; }
+.note { font-size: 14px; color: var(--ink2); max-width: 76ch; }
+.plain { font-size: 15.5px; max-width: 72ch; }
+.plain b { font-weight: 700; }
+ul.notice { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 15px; max-width: 76ch; }
+ul.notice li::marker { color: var(--ink3); }
 
-.btn { font: 600 14.5px var(--display); letter-spacing: 0.02em; padding: 7px 14px; border-radius: 5px; border: 1px solid var(--ink); background: var(--ink); color: var(--panel); cursor: pointer; }
-.btn.ghost { background: transparent; color: var(--ink); border-color: var(--line); }
-.btn.ghost:hover { border-color: var(--ink2); }
-.btn:disabled { opacity: 0.4; cursor: default; }
+.btn { font: 700 14.5px var(--display); padding: 6px 14px 5px; border-radius: 0; border: 1.5px solid var(--ink); background: var(--ink); color: var(--bg); cursor: pointer; }
+.btn.ghost { background: transparent; color: var(--ink); }
+.btn.ghost:hover { background: var(--block); }
+.btn:disabled { opacity: 0.35; cursor: default; }
 .ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.ctl select { font: 14px var(--body); padding: 6px 8px; border-radius: 5px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
-.clock { font-family: var(--mono); font-size: 13.5px; font-variant-numeric: tabular-nums; color: var(--ink2); }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; flex-wrap: wrap; }
-.seg button { font: 600 14px var(--display); padding: 7px 12px; background: transparent; color: var(--ink2); border: 0; border-left: 1px solid var(--line); cursor: pointer; }
+.ctl select { font: 14px var(--body); padding: 5px 8px; border-radius: 0; border: 1.5px solid var(--ink); background: var(--bg); color: var(--ink); }
+.clock { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; color: var(--ink2); }
+.seg { display: inline-flex; border: 1.5px solid var(--ink); flex-wrap: wrap; }
+.seg button { font: 600 14px var(--display); padding: 5px 11px 4px; background: transparent; color: var(--ink); border: 0; border-left: 1px solid var(--ink); cursor: pointer; }
 .seg button:first-child { border-left: 0; }
-.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
-input[type=range] { width: 100%; accent-color: var(--accent); }
+.seg button:hover { background: var(--block); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+input[type=range] { width: 100%; accent-color: var(--amber); }
 
-.pill { display: inline-block; font: 600 12px var(--display); letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
-.pill.ok { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
-.pill.bad { background: color-mix(in srgb, var(--red) 16%, transparent); color: var(--red); }
-.pill.warn { background: color-mix(in srgb, var(--amber) 18%, transparent); color: var(--amber); }
-.pill.info { background: color-mix(in srgb, var(--blue) 15%, transparent); color: var(--blue); }
-.pill.vio { background: color-mix(in srgb, var(--violet) 15%, transparent); color: var(--violet); }
+.pill { font: 600 12.5px var(--mono); white-space: nowrap; }
+.pill.ok { color: var(--accent); } .pill.ok::before { content: "✓ "; }
+.pill.bad { color: var(--red); } .pill.bad::before { content: "✗ "; }
+.pill.warn { color: var(--amber); } .pill.info { color: var(--blue); } .pill.vio { color: var(--violet); }
 
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 7px; background: var(--panel); overflow: hidden; }
-.stat { padding: 14px 16px; border-left: 1px solid var(--line); display: grid; gap: 2px; align-content: start; }
-.stat:first-child { border-left: 0; }
-.stat b { font-family: var(--mono); font-weight: 500; font-size: 22px; font-variant-numeric: tabular-nums; }
-.stat span { font-size: 13px; color: var(--ink2); }
-@media (max-width: 640px) { .stat { border-left: 0; border-top: 1px solid var(--line); } .stat:first-child { border-top: 0; } }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.stat { padding: 10px 14px 12px 0; display: grid; gap: 3px; align-content: start; }
+.stat + .stat { padding-left: 14px; border-left: 1px solid var(--line); }
+.stat b { font-family: var(--mono); font-weight: 500; font-size: 21px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 13.5px; color: var(--ink2); }
+@media (max-width: 640px) { .stat + .stat { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); } }
 
 .tbl { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
-th { font-family: var(--display); font-weight: 600; font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink2); text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-td { padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); }
+th { font-family: var(--display); font-weight: 700; font-size: 13px; color: var(--ink); text-align: left; padding: 6px 10px 5px 0; border-bottom: 1px solid var(--ink); white-space: nowrap; }
+td { padding: 5px 10px 5px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
 td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
-tr.hl td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+tr.hl td { background: var(--block); }
 
-.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px 14px; font-size: 14px; }
+.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; font-size: 14.5px; }
 .kv > span:nth-child(odd) { color: var(--ink2); }
 .kv > span:nth-child(even) { font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
 @media (max-width: 640px) { .kv { grid-template-columns: minmax(0, 1fr); gap: 1px; } .kv > span:nth-child(odd) { margin-top: 6px; font-size: 12.5px; } }
@@ -129,86 +140,88 @@ svg text { font-family: var(--body); }
 .dwrap { overflow-x: auto; }
 .dwrap svg { min-width: 620px; }
 .click { cursor: pointer; }
-.click:hover .hit, .click:focus-visible .hit { stroke: var(--accent); stroke-width: 2.5; }
+.click:hover .hit, .click:focus-visible .hit { stroke: var(--amber); stroke-width: 2.5; }
 .click:focus { outline: none; }
 
-.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
-.steps li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 4px; border-top: 1px solid var(--line); align-items: baseline; }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); }
+.steps li { display: grid; grid-template-columns: 34px minmax(0, 1fr) 210px; gap: 2px 14px; padding: 11px 0; border-top: 1px solid var(--line); align-items: baseline; }
 .steps li:first-child { border-top: 0; }
-.steps .k { font-family: var(--mono); font-size: 13px; color: var(--ink3); }
-.steps .w b { font-family: var(--display); font-weight: 600; font-size: 17px; }
+.steps .k { font-family: var(--mono); font-size: 14px; color: var(--amber); }
+.steps .w b { font-family: var(--display); font-weight: 700; font-size: 17px; }
 .steps .w p { font-size: 14.5px; color: var(--ink2); }
 .steps .fig { font-family: var(--mono); font-size: 13px; text-align: right; }
-.steps .go { grid-column: 2 / -1; justify-self: start; font: 600 13.5px var(--display); background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; }
-@media (max-width: 640px) { .steps li { grid-template-columns: 28px minmax(0, 1fr); } .steps .fig { grid-column: 2; text-align: left; } }
+.steps .go { grid-column: 3; justify-self: end; font: 600 13px var(--mono); background: none; border: 0; padding: 0; color: var(--ink2); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.steps .go:hover { color: var(--ink); }
+@media (max-width: 640px) { .steps li { grid-template-columns: 28px minmax(0, 1fr); } .steps .fig, .steps .go { grid-column: 2; text-align: left; justify-self: start; } }
 
-.bytebar { display: flex; height: 28px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
+.bytebar { display: flex; height: 26px; overflow: hidden; border: 1px solid var(--ink); }
 .bytebar > div { min-width: 2px; display: flex; align-items: center; justify-content: center; font: 500 11.5px var(--mono); color: #fff; white-space: nowrap; overflow: hidden; }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--ink2); }
-.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
-.frames { display: flex; flex-wrap: wrap; gap: 4px; }
-.frames span { width: 18px; height: 12px; border-radius: 2px; background: var(--amber); }
+.bytebar > div + div { border-left: 1px solid var(--bg); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13.5px; color: var(--ink2); }
+.legend i { display: inline-block; width: 12px; height: 12px; margin-right: 6px; vertical-align: -1px; }
+.frames { display: flex; flex-wrap: wrap; gap: 3px; }
+.frames span { width: 18px; height: 11px; background: var(--amber); }
 .frames.small span { background: var(--accent); }
 
-.feed { font-family: var(--mono); font-size: 12.5px; display: grid; gap: 1px; max-height: 300px; overflow-y: auto; border-top: 1px solid var(--line); padding-top: 6px; }
-.feed button { all: unset; display: grid; grid-template-columns: 58px minmax(0, 1fr); gap: 8px; padding: 3px 4px; border-radius: 3px; cursor: pointer; color: var(--ink2); }
+.feed { font-family: var(--mono); font-size: 12.5px; display: grid; gap: 0; max-height: 320px; overflow-y: auto; border-top: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink); }
+.feed button { all: unset; display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 10px; padding: 3px 4px; cursor: pointer; color: var(--ink2); border-bottom: 1px solid var(--line); }
 .feed button:hover { background: var(--block); }
-.feed button.now { background: var(--block); color: var(--ink); }
+.feed button.now { background: var(--block); color: var(--ink); box-shadow: inset 3px 0 0 var(--amber); }
 .feed .tt { color: var(--ink3); text-align: right; font-variant-numeric: tabular-nums; }
 .feed .ok { color: var(--accent); } .feed .bad { color: var(--red); } .feed .vio { color: var(--violet); } .feed .warn { color: var(--amber); } .feed .info { color: var(--blue); }
-.chapters { display: flex; flex-wrap: wrap; gap: 6px; }
-.chapters button { font: 600 13.5px var(--display); padding: 5px 10px; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); cursor: pointer; }
-.chapters button:hover { border-color: var(--ink2); }
-.caption { min-height: 46px; font-size: 15px; border-left: 3px solid var(--violet); padding: 4px 0 4px 12px; }
-.caption b { font-weight: 600; }
+.chapters { display: flex; flex-wrap: wrap; gap: 0; border: 1.5px solid var(--ink); width: fit-content; max-width: 100%; }
+.chapters button { font: 600 13.5px var(--display); padding: 5px 10px 4px; border: 0; border-right: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; }
+.chapters button:last-child { border-right: 0; }
+.chapters button:hover { background: var(--block); }
+.caption { min-height: 50px; font-size: 15.5px; max-width: 80ch; }
+.caption b { font-weight: 700; }
 
 .window { display: grid; grid-template-columns: repeat(32, 1fr); gap: 2px; }
-.window span { aspect-ratio: 1; border-radius: 2px; background: var(--block); border: 1px solid var(--line); }
+.window span { aspect-ratio: 1; background: var(--block); border: 1px solid var(--line); }
 .window span.on { background: var(--accent); border-color: var(--accent); }
-.window span.top { outline: 2px solid var(--ink); outline-offset: 0; }
+.window span.top { outline: 2px solid var(--amber); outline-offset: 0; }
 .log { font-family: var(--mono); font-size: 12.5px; display: grid; gap: 2px; max-height: 190px; overflow-y: auto; }
 .log .ok { color: var(--accent); } .log .bad { color: var(--red); } .log div { color: var(--ink2); }
 
 .chain { display: flex; gap: 0; overflow-x: auto; padding-bottom: 8px; align-items: stretch; }
-.blk { flex: none; width: 168px; border: 1px solid var(--line); border-radius: 6px; padding: 10px 11px; background: var(--panel); display: grid; gap: 3px; cursor: pointer; text-align: left; font-size: 12.5px; }
-.blk b { font-family: var(--display); font-size: 17px; font-weight: 700; }
+.blk { flex: none; width: 170px; border: 1.5px solid var(--ink); padding: 9px 10px; background: var(--bg); display: grid; gap: 2px; cursor: pointer; text-align: left; font-size: 12.5px; }
+.blk b { font-family: var(--display); font-size: 17px; font-weight: 800; }
 .blk .h { font-family: var(--mono); font-size: 11.5px; color: var(--ink2); }
-.blk[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
-.blk.broken { border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red); }
-.link { flex: none; width: 26px; align-self: center; height: 2px; background: var(--ink3); position: relative; }
+.blk[aria-pressed="true"] { background: var(--block); box-shadow: inset 0 -4px 0 var(--amber); }
+.blk.broken { border-color: var(--red); color: var(--red); }
+.link { flex: none; width: 24px; align-self: center; height: 1.5px; background: var(--ink); position: relative; }
 .link.broken { background: var(--red); }
-.link.broken::after { content: "✕"; position: absolute; left: 7px; top: -10px; color: var(--red); font-size: 13px; font-weight: 700; }
+.link.broken::after { content: "✗"; position: absolute; left: 7px; top: -11px; color: var(--red); font-size: 14px; font-weight: 700; }
 
-.scoreRow { display: grid; grid-template-columns: 74px minmax(0, 1fr) 46px 40px; gap: 8px; align-items: center; font-size: 13px; }
-.scoreRow .bar { height: 10px; background: var(--block); border-radius: 2px; overflow: hidden; }
-.scoreRow .bar i { display: block; height: 100%; background: var(--ink2); }
-.scoreRow .bar i.cn { background: var(--accent); }
+.scoreRow { display: grid; grid-template-columns: 78px minmax(0, 1fr) 46px 40px; gap: 8px; align-items: center; font-size: 13px; }
+.scoreRow .bar { height: 9px; background: var(--block); overflow: hidden; }
+.scoreRow .bar i { display: block; height: 100%; background: var(--ink3); }
+.scoreRow .bar i.cn { background: var(--ink); }
 .scoreRow .bar i.bz { background: var(--red); }
 .scoreRow .v { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
 .scoreRow .d { font-family: var(--mono); font-size: 12px; }
 
 .chart { width: 100%; height: auto; display: block; max-width: 780px; }
-.chartbox { display: grid; gap: 8px; }
-canvas.map { width: 100%; aspect-ratio: 1 / 1; display: block; max-width: 100%; }
+canvas.map { width: 100%; aspect-ratio: 1 / 1; display: block; max-width: 100%; border: 1px solid var(--ink); }
 canvas.air { width: 100%; height: 70px; display: block; }
-.empty { padding: 30px; text-align: center; color: var(--ink2); border: 1px dashed var(--line); border-radius: 7px; }
+.empty { padding: 30px; text-align: center; color: var(--ink2); border: 1px dashed var(--ink3); }
 
 @media (max-width: 900px) {
   .app { grid-template-columns: minmax(0, 1fr); }
-  .rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; height: auto; border-right: 0; border-bottom: 1px solid var(--line);
-    padding-block: 10px; padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px));
-    grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; overflow-y: hidden; gap: 12px; align-items: center; }
-  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--panel); }
+  .rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; height: auto; border-right: 0; border-bottom: 1.5px solid var(--ink); background: var(--bg);
+    padding-block: 8px; padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px));
+    grid-auto-flow: column; grid-auto-columns: max-content; overflow-x: auto; overflow-y: hidden; gap: 14px; align-items: center; }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
   .brand, .railnote, .navgroup > span { display: none; }
-  .navgroup { grid-auto-flow: column; }
-  .nav { grid-template-columns: auto auto; white-space: nowrap; }
+  .navgroup { grid-auto-flow: column; gap: 14px; }
+  .nav { grid-template-columns: auto auto; gap: 4px; white-space: nowrap; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
 </style>
 
 <div class="app">
   <nav class="rail" aria-label="Modules">
-    <div class="brand"><span class="tag">qrcav · review2-complete</span><b>Quantum-resilient V2X, module by module</b></div>
+    <div class="brand"><b>qrcav</b><span class="tag">project explorer · review2-complete</span></div>
     <div class="navgroup" id="nav"></div>
     <p class="railnote" id="railnote"></p>
   </nav>
@@ -258,13 +271,14 @@ const R = D.results || {};
 const NET = D.network;
 const NE = NET ? NET.events : [];
 
-function pageHead(eyebrow, title, lead, files, run) {
+let BUILDING = null;
+function pageHead(meta, title, lead, files, run) {
   return h("div", { class: "phead" },
-    h("div", { class: "eyebrow", text: eyebrow }),
-    h("h2", { text: title }),
+    h("div", { class: "hrow" }, BUILDING && BUILDING.num ? h("span", { class: "secno", text: BUILDING.num }) : null, h("h2", { text: title })),
+    h("p", { class: "meta", text: meta.replace(/^Module \d+ · /, "") }),
     h("p", { class: "lead", html: lead }),
-    files && files.length ? h("div", { class: "files" }, files.map(f => h("span", { class: "file", text: f }))) : null,
-    run ? h("div", { class: "run", html: "Run it yourself: <b>" + esc(run) + "</b>" }) : null);
+    files && files.length ? h("p", { class: "src" }, h("span", { text: "Code" }), h("span", { text: files.join("  ·  ") })) : null,
+    run ? h("p", { class: "src" }, h("span", { text: "Run" }), h("b", { text: run })) : null);
 }
 function panel(label, ...kids) { return h("div", { class: "panel" }, label ? h("div", { class: "label", text: label }) : null, ...kids); }
 function plain(html) { return h("p", { class: "plain", html }); }
@@ -356,7 +370,7 @@ let current = null;
 function show(id) {
   const p = PAGES.find(x => x.id === id) || PAGES[0];
   if (current && current !== p) { current.sec.hidden = true; current.onHide && current.onHide(); }
-  if (!p.built) { p.built = true; p.build(p); }
+  if (!p.built) { p.built = true; BUILDING = p; p.build(p); BUILDING = null; }
   p.sec.hidden = false;
   current = p;
   document.querySelectorAll(".nav").forEach(n => n.setAttribute("aria-current", n.dataset.id === p.id ? "page" : "false"));
@@ -386,14 +400,18 @@ page("overview", "", "Overview", 0, p => {
   const rejected = attacks.filter(a => a.rejected).length;
 
   sec.appendChild(h("div", { class: "phead" },
-    h("div", { class: "eyebrow", text: "Final-year project · post-quantum V2X" }),
-    h("h1", { text: "Vehicles warn each other in milliseconds, over links a quantum computer cannot break" }),
+    h("h1", { text: "Quantum-resilient authenticated communication for connected vehicles" }),
     h("p", { class: "lead", html:
-      "Connected vehicles (CAVs) report hazards to roadside units (RSUs). An edge server (MEC) warns nearby vehicles at once, " +
-      "then a group of validators agrees on the event and writes it to a tamper-evident ledger. Every link is protected with " +
-      "<b>ML-KEM</b> (key exchange) and <b>ML-DSA</b> (signatures), the NIST post-quantum standards, instead of the elliptic-curve " +
-      "cryptography that a large quantum computer would break." }),
-    h("p", { class: "note", html: `Everything on these pages was produced by the project's own code when this page was generated (${esc(D.generated)}, suite <b>${esc(D.suite_label)}</b>): real handshakes, real signatures, a real 19-process run, and the ns-3 radio simulation. Pick a module on the left, or click a box in the diagram.` })));
+      "Vehicles (CAVs) report hazards to roadside units (RSUs). An edge server (MEC) alerts nearby vehicles straight away, " +
+      "then a group of validators agrees on the event and adds it to a hash-linked ledger. Every link uses " +
+      "<b>ML-KEM</b> for key exchange and <b>ML-DSA</b> for signatures (NIST FIPS 203 and 204) in place of the elliptic-curve " +
+      "algorithms a large quantum computer could break." }),
+    h("div", { class: "titleblock" },
+      h("div", null, h("span", { text: "Team" }), h("b", { text: "Harini R, Ananyalakshmi V K, Adhithya K, Ratish S A" })),
+      h("div", null, h("span", { text: "Guide" }), h("b", { text: "Dr. Vijayalakshmi M" })),
+      h("div", null, h("span", { text: "Code" }), h("b", { text: "branch review2-complete, package qrcav" })),
+      h("div", null, h("span", { text: "Data on these pages" }), h("b", { text: `generated ${D.generated}, suite ${D.suite}` }))),
+    h("p", { class: "note", text: "Each section replays output from the project's own code: real handshakes and signatures, a 19-process run, and the ns-3 radio simulation. Choose a section on the left or click a box in the diagram." })));
 
   const stats = h("div", { class: "stats" },
     h("div", { class: "stat" }, h("b", { text: `${nf(HS.full.total / 1000, 1)} → ${nf(HS.cached.total / 1000, 1)} KB` }), h("span", { text: "post-quantum handshake, full → with certificate caching" })),
@@ -421,7 +439,7 @@ page("overview", "", "Overview", 0, p => {
 
   const box = (go, x, y, w, hh, title, sub) => {
     const grp = s("g", { class: "click", tabindex: 0, role: "link", "aria-label": title, onclick: goto(go), onkeydown: e => { if (e.key === "Enter") show(go); } });
-    grp.appendChild(s("rect", { class: "hit", x, y, width: w, height: hh, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 }));
+    grp.appendChild(s("rect", { class: "hit", x, y, width: w, height: hh, rx: 1.5, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 }));
     grp.appendChild(s("text", { x: x + w / 2, y: y + 26, "text-anchor": "middle", "font-size": 16, "font-weight": 700, fill: "var(--ink)", "font-family": "var(--display)", text: title }));
     if (sub) grp.appendChild(s("text", { x: x + w / 2, y: y + 45, "text-anchor": "middle", "font-size": 12, fill: "var(--ink2)", text: sub }));
     g.appendChild(grp); return grp;
@@ -438,28 +456,28 @@ page("overview", "", "Overview", 0, p => {
   }
   cg.appendChild(s("text", { x: 785, y: 172, "text-anchor": "middle", "font-size": 11.5, fill: "var(--ink2)", text: "AGS-PBFT: 4 voting, 4 candidates" }));
   const lg = s("g", { class: "click", tabindex: 0, role: "link", "aria-label": "Ledger", onclick: goto("ledger"), onkeydown: e => { if (e.key === "Enter") show("ledger"); } });
-  lg.appendChild(s("rect", { class: "hit", x: 640, y: 318, width: 290, height: 46, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 }));
+  lg.appendChild(s("rect", { class: "hit", x: 640, y: 318, width: 290, height: 46, rx: 1.5, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 }));
   for (let i = 0; i < 5; i++) {
     lg.appendChild(s("rect", { x: 656 + i * 36, y: 330, width: 24, height: 22, rx: 2, fill: "var(--block)", stroke: "var(--ink2)" }));
     if (i) lg.appendChild(s("line", { x1: 644 + i * 36, x2: 656 + i * 36, y1: 341, y2: 341, stroke: "var(--ink2)", "stroke-width": 1.5 }));
   }
-  lg.appendChild(s("text", { x: 885, y: 346, "text-anchor": "middle", "font-size": 15, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "Ledger" }));
+  lg.appendChild(s("text", { x: 885, y: 346, "text-anchor": "middle", "font-size": 15, "font-weight": 800, "font-family": "var(--display)", fill: "var(--ink)", text: "Ledger" }));
   g.appendChild(lg);
   line(785, 300, 785, 318, { arrow: true });
   const rg = s("g", { class: "click", tabindex: 0, role: "link", "aria-label": "Roadside units and vehicles", onclick: goto("handshake"), onkeydown: e => { if (e.key === "Enter") show("handshake"); } });
-  rg.appendChild(s("rect", { class: "hit", x: 22, y: 290, width: 540, height: 150, rx: 8, fill: "transparent", stroke: "transparent" }));
+  rg.appendChild(s("rect", { class: "hit", x: 22, y: 290, width: 540, height: 150, rx: 1.5, fill: "transparent", stroke: "transparent" }));
   [110, 270, 430].forEach((x, i) => {
-    rg.appendChild(s("rect", { x: x - 23, y: 297, width: 46, height: 46, rx: 4, fill: "var(--ink)" }));
+    rg.appendChild(s("rect", { x: x - 23, y: 297, width: 46, height: 46, rx: 1.5, fill: "var(--ink)" }));
     rg.appendChild(s("text", { x, y: 325, "text-anchor": "middle", "font-size": 12, "font-weight": 600, fill: "var(--panel)", "font-family": "var(--display)", text: "RSU " + (i + 1) }));
   });
   rg.appendChild(s("rect", { x: 30, y: 382, width: 520, height: 34, rx: 3, fill: "var(--road)" }));
   rg.appendChild(s("line", { x1: 36, x2: 544, y1: 399, y2: 399, stroke: "var(--panel)", "stroke-width": 2, "stroke-dasharray": "12 10" }));
   [70, 150, 240, 330, 420].forEach((x, i) => {
-    rg.appendChild(s("rect", { x, y: 391, width: 30, height: 15, rx: 4, fill: "var(--blue)" }));
+    rg.appendChild(s("rect", { x, y: 391, width: 30, height: 15, rx: 1.5, fill: "var(--blue)" }));
     rg.appendChild(s("text", { x: x + 15, y: 432, "text-anchor": "middle", "font-size": 11, fill: "var(--ink2)", "font-family": "var(--mono)", text: "CAV " + (i + 1) }));
   });
   g.appendChild(rg);
-  sec.appendChild(panel("Architecture · click a box to open its module", h("div", { class: "dwrap" }, g),
+  sec.appendChild(panel("System architecture", h("div", { class: "dwrap" }, g),
     h("p", { class: "note", text: "Filled circles vote on each block; dashed circles are candidates that validate in the background and can be promoted. Every arrow except registration is a mutually authenticated post-quantum session." })));
 
   // life of a hazard report
@@ -472,13 +490,13 @@ page("overview", "", "Overview", 0, p => {
     ["Agree", "In parallel the MEC submits the event to the validators. They run AGS-PBFT and agree even if one of them lies.", committed.length ? nf(median(committed), 0) + " ms to commit" : "", "consensus"],
     ["Record", "The agreed event becomes a block, hash-linked to the one before and signed by the leader and a quorum.", netCommits.length ? netCommits.length + " blocks, verified" : "", "ledger"],
   ];
-  sec.appendChild(panel("The life of one hazard report",
+  sec.appendChild(panel("Path of one hazard report",
     h("ol", { class: "steps" }, steps.map(([t, d, fig, go], i) => h("li", null,
       h("span", { class: "k", text: String(i + 1).padStart(2, "0") }),
       h("div", { class: "w" }, h("b", { text: t }), h("p", { text: d })),
       h("span", { class: "fig", text: fig }),
-      h("button", { class: "go", type: "button", text: "Open module →", onclick: goto(go) })))),
-    h("p", { class: "note", text: "Figures come from the 19-process run on one machine (TCP over loopback). The radio is modelled separately in ns-3 (module 9)." })));
+      h("button", { class: "go", type: "button", text: "→ " + (PAGES.find(x => x.id === go) || {}).num + " " + (PAGES.find(x => x.id === go) || {}).title, onclick: goto(go) })))),
+    h("p", { class: "note", text: "Figures come from the 19-process run on one machine (TCP over loopback). The radio is modelled separately in ns-3 (section 9)." })));
 });
 
 // =================================================================================
@@ -486,13 +504,13 @@ page("overview", "", "Overview", 0, p => {
 // =================================================================================
 page("suites", "1", "Crypto suites", 1, p => {
   const sec = p.sec;
-  sec.appendChild(pageHead("Module 1 · Track A · crypto foundation", "Five cipher suites, one protocol",
+  sec.appendChild(pageHead("Module 1 · Track A · crypto foundation", "Cipher suites",
     "A <b>suite</b> picks one key-exchange algorithm (a KEM) and one signature algorithm. The same handshake code runs with any of them, so the post-quantum suites and today's classical baseline are compared like for like.",
     ["qrcav/crypto/suites.py", "qrcav/crypto/kdf.py", "qrcav/codec.py", "tests/test_crypto.py"], "python scripts/demo_protocol.py --suite L3"));
-  sec.appendChild(plain("<b>Why change at all?</b> Shor's algorithm on a large quantum computer solves the elliptic-curve problems behind ECDH and ECDSA. Traffic recorded today could be decrypted later, and signatures could be forged. <b>ML-KEM</b> (FIPS 203) and <b>ML-DSA</b> (FIPS 204) rest on lattice problems for which no efficient quantum attack is known. The cost is size: keys and signatures are tens of times larger."));
+  sec.appendChild(plain("<b>Why the change.</b> Shor's algorithm on a large quantum computer solves the elliptic-curve problems behind ECDH and ECDSA. Traffic recorded today could be decrypted later, and signatures could be forged. <b>ML-KEM</b> (FIPS 203) and <b>ML-DSA</b> (FIPS 204) rest on lattice problems for which no efficient quantum attack is known. The cost is size: keys and signatures are tens of times larger."));
   const timing = Object.fromEntries((R.handshake_timing || []).map(r => [r.suite, r]));
   const rows = (R.sizes || []);
-  sec.appendChild(panel("Sizes in bytes, measured from the encoded messages",
+  sec.appendChild(panel("Sizes in bytes, measured on the encoded messages",
     table([
       { label: "Suite", get: r => h("b", { text: r.suite }) },
       { label: "Key exchange", get: r => r.kem }, { label: "Signature", get: r => r.sig_alg },
@@ -507,16 +525,16 @@ page("suites", "1", "Crypto suites", 1, p => {
 
   const cats = rows.map(r => r.suite);
   sec.appendChild(h("div", { class: "cols even" },
-    panel("Handshake bytes on the air",
+    panel("Handshake size by suite",
       barChart({ cats, series: [{ color: "var(--amber)", values: rows.map(r => r.handshake_total) }, { color: "var(--accent)", values: rows.map(r => r.handshake_total_cached) }],
         yLabel: "bytes, all four flights", yFmt: v => nf(v / 1000) + "k", valueFmt: v => nf(v / 1000, 1) }),
       legend([["var(--amber)", "certificates sent in full"], ["var(--accent)", "certificates cached (32-byte references)"]])),
-    panel("Handshake compute, both sides together",
+    panel("Handshake compute time, both sides",
       barChart({ cats: (R.handshake_timing || []).map(r => r.suite), series: [{ color: "var(--blue)", values: (R.handshake_timing || []).map(r => r.p50_ms) }],
         yLabel: "milliseconds, median", valueFmt: v => nf(v, 1) }),
-      h("p", { class: "note", text: "Compute is small: a post-quantum handshake costs about 5 ms of CPU. The real cost is the bytes, which matter on a shared 6 Mb/s radio channel (module 9)." }))));
+      h("p", { class: "note", text: "Compute is small: a post-quantum handshake costs about 5 ms of CPU. The real cost is the bytes, which matter on a shared 6 Mb/s radio channel (section 9)." }))));
 
-  sec.appendChild(panel("Hash and key derivation, the same for every suite",
+  sec.appendChild(panel("Hash, KDF and AEAD (shared by all suites)",
     notice([
       "<b>H</b> = SHAKE-256 over length-prefixed parts, so <code>H(ab, c) ≠ H(a, bc)</code>.",
       "<b>KDF</b> = HKDF with HMAC-SHA3-256. <code>derive_session_keys(ss, T)</code> hashes the transcript, extracts a key from the shared secret, and expands four values: two AES-256 keys and two IVs, one pair per direction.",
@@ -530,7 +548,7 @@ page("suites", "1", "Crypto suites", 1, p => {
 // =================================================================================
 page("pki", "2", "Identity (PKI)", 1, p => {
   const sec = p.sec;
-  sec.appendChild(pageHead("Module 2 · Track A · identity", "Who is allowed on the network",
+  sec.appendChild(pageHead("Module 2 · Track A · identity", "Registration and certificates",
     "Before anything talks, the <b>Trusted Authority</b> (TA) issues each vehicle, RSU, MEC and validator a certificate that binds its name and role to its public key. Every later check traces back to the TA's one public key.",
     ["qrcav/pki.py", "qrcav/nodes/ta.py"], "python -m pytest tests/test_handshake.py -k cert"));
   const revoked = NE.find(e => e.event === "revoked");
@@ -563,12 +581,12 @@ page("pki", "2", "Identity (PKI)", 1, p => {
       { label: "value", get: f => h("span", { class: "hex", text: f.hex ? f.hex + "…" : (f.val !== undefined ? String(f.val) : "") }) }], fields);
   }
   const g = s("svg", { viewBox: "0 0 900 170", class: "diagram", role: "img", "aria-label": "Registration exchange" });
-  const ta = s("rect", { x: 40, y: 40, width: 220, height: 90, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
-  const cav = s("rect", { x: 640, y: 40, width: 220, height: 90, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
+  const ta = s("rect", { x: 40, y: 40, width: 220, height: 90, rx: 1.5, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
+  const cav = s("rect", { x: 640, y: 40, width: 220, height: 90, rx: 1.5, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
   g.append(ta, cav,
-    s("text", { x: 150, y: 80, "text-anchor": "middle", "font-size": 18, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "Trusted Authority" }),
+    s("text", { x: 150, y: 80, "text-anchor": "middle", "font-size": 18, "font-weight": 800, "font-family": "var(--display)", fill: "var(--ink)", text: "Trusted Authority" }),
     s("text", { x: 150, y: 102, "text-anchor": "middle", "font-size": 12.5, fill: "var(--ink2)", text: "holds sk_TA · registry DB" }),
-    s("text", { x: 750, y: 80, "text-anchor": "middle", "font-size": 18, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "CAV_001" }),
+    s("text", { x: 750, y: 80, "text-anchor": "middle", "font-size": 18, "font-weight": 800, "font-family": "var(--display)", fill: "var(--ink)", text: "CAV_001" }),
     s("text", { x: 750, y: 102, "text-anchor": "middle", "font-size": 12.5, fill: "var(--ink2)", text: "holds its own private key" }));
   const arrowLine = s("line", { x1: 270, x2: 630, y1: 85, y2: 85, stroke: "var(--amber)", "stroke-width": 2.5 });
   const arrowHead = s("path", { d: "", fill: "var(--amber)" });
@@ -606,12 +624,12 @@ page("pki", "2", "Identity (PKI)", 1, p => {
 
   // certificate anatomy
   const pkB = PKI.cert_fields.find(f => f.k === "pk").bytes, sigB = PKI.cert_fields.find(f => f.k === "sig").bytes, rest = PKI.cert_bytes - pkB - sigB;
-  sec.appendChild(panel("Anatomy of one certificate · " + B(PKI.cert_bytes),
+  sec.appendChild(panel("Certificate layout, " + B(PKI.cert_bytes),
     h("div", { class: "bytebar" },
       h("div", { style: `flex:${pkB};background:var(--blue)`, text: `public key ${nf(pkB)} B` }),
       h("div", { style: `flex:${sigB};background:var(--violet)`, text: `TA signature ${nf(sigB)} B` }),
       h("div", { style: `flex:${Math.max(rest, 60)};background:var(--ink2)`, title: "id, role, alg, serial, validity", text: rest > 150 ? `fields ${rest} B` : "" })),
-    h("p", { class: "note", text: `The two ML-DSA components are 99 % of the certificate. A full handshake carries two certificates, which is about half of its ${B(HS.full.total)}. That is what certificate caching (module 3) removes.` })));
+    h("p", { class: "note", text: `The two ML-DSA components are 99 % of the certificate. A full handshake carries two certificates, which is about half of its ${B(HS.full.total)}. That is what certificate caching (section 3) removes.` })));
 });
 
 // =================================================================================
@@ -623,7 +641,7 @@ const FIELD = { cert: ["var(--amber)", "certificate"], cref: ["var(--amber)", "c
 const fieldColor = k => (FIELD[k] || ["var(--ink3)", "header fields"])[0];
 page("handshake", "3", "Handshake", 1, p => {
   const sec = p.sec;
-  sec.appendChild(pageHead("Module 3 · Track A · authenticated key exchange", "Four messages to a secure session",
+  sec.appendChild(pageHead("Module 3 · Track A · authenticated key exchange", "Handshake",
     "When a vehicle reaches an RSU they run this handshake. Afterwards <b>both</b> sides know who the other is, and share two fresh AES-256 keys that nobody else can compute, even with a quantum computer.",
     ["qrcav/handshake.py", "qrcav/certcache.py", "qrcav/net/secure.py", "tests/test_handshake.py", "tests/test_certcache.py"], "python scripts/demo_protocol.py"));
   const cm = HS.full.client_ms, sm = HS.full.server_ms;
@@ -640,8 +658,8 @@ page("handshake", "3", "Handshake", 1, p => {
   ];
   let mode = "full", k = 0, anim = null;
   const g = s("svg", { viewBox: "0 0 900 330", class: "diagram", role: "img", "aria-label": "Handshake sequence" });
-  g.append(s("text", { x: 150, y: 28, "text-anchor": "middle", "font-size": 18, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "CAV (client)" }),
-    s("text", { x: 750, y: 28, "text-anchor": "middle", "font-size": 18, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "RSU (server)" }),
+  g.append(s("text", { x: 150, y: 28, "text-anchor": "middle", "font-size": 18, "font-weight": 800, "font-family": "var(--display)", fill: "var(--ink)", text: "CAV (client)" }),
+    s("text", { x: 750, y: 28, "text-anchor": "middle", "font-size": 18, "font-weight": 800, "font-family": "var(--display)", fill: "var(--ink)", text: "RSU (server)" }),
     s("line", { x1: 150, x2: 150, y1: 40, y2: 320, stroke: "var(--ink3)", "stroke-width": 2 }),
     s("line", { x1: 750, x2: 750, y1: 40, y2: 320, stroke: "var(--ink3)", "stroke-width": 2 }));
   const arrows = [0, 1, 2, 3].map(i => {
@@ -708,12 +726,12 @@ page("handshake", "3", "Handshake", 1, p => {
   sec.appendChild(h("div", { class: "cols" },
     panel(null, title, info, cacheNote),
     h("div", { style: "display:grid;gap:18px;align-content:start" },
-      panel("Sender puts in", sendL), panel("Receiver checks, with measured time", recvT))));
+      panel("Sender includes", sendL), panel("Receiver checks (measured time)", recvT))));
   go(0);
 
   // key schedule
   const ks = s("svg", { viewBox: "0 0 900 190", class: "diagram", role: "img", "aria-label": "Key derivation" });
-  const kb = (x, y, w, t, sub, c) => { ks.append(s("rect", { x, y, width: w, height: 46, rx: 5, fill: "var(--panel)", stroke: c || "var(--ink)", "stroke-width": 1.5 }), s("text", { x: x + w / 2, y: y + 20, "text-anchor": "middle", "font-size": 14, "font-weight": 600, "font-family": "var(--display)", fill: "var(--ink)", text: t }), s("text", { x: x + w / 2, y: y + 37, "text-anchor": "middle", "font-size": 11, "font-family": "var(--mono)", fill: "var(--ink2)", text: sub })); };
+  const kb = (x, y, w, t, sub, c) => { ks.append(s("rect", { x, y, width: w, height: 46, rx: 1.5, fill: "var(--panel)", stroke: c || "var(--ink)", "stroke-width": 1.5 }), s("text", { x: x + w / 2, y: y + 20, "text-anchor": "middle", "font-size": 14, "font-weight": 600, "font-family": "var(--display)", fill: "var(--ink)", text: t }), s("text", { x: x + w / 2, y: y + 37, "text-anchor": "middle", "font-size": 11, "font-family": "var(--mono)", fill: "var(--ink2)", text: sub })); };
   kb(20, 20, 200, "shared secret ss", "from ML-KEM, 32 B", "var(--blue)");
   kb(20, 120, 200, "transcript T", "all four flights so far");
   kb(280, 20, 200, "HKDF-Extract", "salt 0, ikm ss → PRK");
@@ -721,16 +739,16 @@ page("handshake", "3", "Handshake", 1, p => {
   ks.append(s("line", { x1: 220, y1: 43, x2: 278, y2: 43, stroke: "var(--ink2)", "stroke-width": 1.5 }), s("line", { x1: 220, y1: 143, x2: 278, y2: 143, stroke: "var(--ink2)", "stroke-width": 1.5 }));
   ["key_c2s", "iv_c2s", "key_s2c", "iv_s2c"].forEach((lab, i) => {
     const y = 8 + i * 45;
-    ks.append(s("rect", { x: 560, y, width: 320, height: 36, rx: 4, fill: "var(--block)", stroke: "var(--line)" }),
+    ks.append(s("rect", { x: 560, y, width: 320, height: 36, rx: 1.5, fill: "var(--block)", stroke: "var(--line)" }),
       s("text", { x: 572, y: y + 23, "font-size": 13, "font-family": "var(--mono)", fill: "var(--ink)", text: `Expand(PRK, "${lab}" ‖ T_hash)` }),
       s("line", { x1: 480, y1: i < 2 ? 43 : 143, x2: 558, y2: y + 18, stroke: "var(--ink3)", "stroke-width": 1.2 }));
   });
-  sec.appendChild(panel("DERIVE_SESSION_KEYS · slide 14, line for line", h("div", { class: "dwrap" }, ks),
+  sec.appendChild(panel("DERIVE_SESSION_KEYS (deck slide 14)", h("div", { class: "dwrap" }, ks),
     h("div", { class: "kv" }, h("span", { text: "k_c2s (this run)" }), h("span", { text: HS.full.k_c2s.slice(0, 32) + "…" }), h("span", { text: "k_s2c (this run)" }), h("span", { text: HS.full.k_s2c.slice(0, 32) + "…" }),
       h("span", { text: "both sides agree" }), h("span", null, h("b", { class: "pill " + (HS.full.same_keys ? "ok" : "bad"), text: HS.full.same_keys ? "same keys" : "mismatch" }))),
     h("p", { class: "note", text: "Because every key is bound to the transcript hash, changing any byte of any handshake message makes the two sides derive different keys, and the Finished check fails." })));
 
-  sec.appendChild(panel("What changed from the Review 1 design, and why",
+  sec.appendChild(panel("Changes from the Review 1 design",
     table([{ label: "", get: r => h("b", { text: r[0] }) }, { label: "Deck", get: r => r[1] }, { label: "Now", get: r => r[2] }, { label: "Why", get: r => r[3] }], [
       ["F1", "Server signs an uninitialised transcript", "ClientHello opens it with a fresh nonce and timestamp", "otherwise a recorded server flight can be replayed"],
       ["F2", "Only the server signs", "The client signs the transcript too (sig_C)", "otherwise a copied certificate is enough to impersonate a vehicle"],
@@ -746,14 +764,14 @@ page("handshake", "3", "Handshake", 1, p => {
 // =================================================================================
 page("records", "4", "Record layer", 1, p => {
   const sec = p.sec, RC = D.record;
-  sec.appendChild(pageHead("Module 4 · Track A · secure messages", "Every beacon is an encrypted, numbered record",
+  sec.appendChild(pageHead("Module 4 · Track A · secure messages", "Record layer",
     "After the handshake, each message is sealed with <b>AES-256-GCM</b>. The tag detects any change; the counter detects copies. Both are checked before the message is used.",
     ["qrcav/crypto/records.py", "qrcav/handshake.py (Session.seal / open)"], "python -m pytest tests/test_crypto.py -k record"));
   const hex = RC.record_hex, ctrHex = hex.slice(0, 16), tagHex = hex.slice(-32), ctHex = hex.slice(16, -32);
   const ctr = parseInt(ctrHex, 16);
   const pad = "00000000" + ctrHex;
   const nonce = RC.iv_hex.match(/../g).map((b, i) => (parseInt(b, 16) ^ parseInt(pad.slice(i * 2, i * 2 + 2), 16)).toString(16).padStart(2, "0")).join("");
-  sec.appendChild(panel(`One real record, sealed by the Python code · ${B(RC.record_bytes)}`,
+  sec.appendChild(panel(`A record sealed by records.py, ${B(RC.record_bytes)}`,
     h("div", { class: "bytebar" },
       h("div", { style: "flex:8;background:var(--ink2)", text: "ctr 8" }),
       h("div", { style: `flex:${ctHex.length / 2};background:var(--blue)`, text: `ciphertext ${ctHex.length / 2} B` }),
@@ -788,7 +806,7 @@ page("records", "4", "Record layer", 1, p => {
     }
     out.prepend(row);
   }
-  sec.appendChild(panel("Open it here, in your browser",
+  sec.appendChild(panel("Opening the record in the browser",
     h("p", { text: "Your browser's own AES-GCM implementation (WebCrypto) opens the record the Python code sealed, using the same key, nonce and associated data. The key is a throw-away one from a session that existed only while this page was generated." }),
     h("div", { class: "ctl" }, h("button", { class: "btn", type: "button", text: "Decrypt the record", onclick: () => openRecord(false) }),
       h("button", { class: "btn ghost", type: "button", text: "Flip one bit, then decrypt", onclick: () => openRecord(true) })),
@@ -826,12 +844,12 @@ page("records", "4", "Record layer", 1, p => {
     h("button", { class: "btn ghost", type: "button", text: "Jump 70 ahead", onclick: () => { nextCtr += 69; deliver(nextCtr++, "sent"); } }));
   for (let i = 0; i < 5; i++) deliver(nextCtr++, "sent");
   held.push(nextCtr++); deliver(nextCtr++, "sent"); deliver(nextCtr++, "sent");
-  sec.appendChild(panel("The 64-record replay window · try it",
+  sec.appendChild(panel("Replay window (64 records)",
     h("p", { text: "Radio delivers records out of order, so the receiver cannot simply demand the next number. It remembers which of the last 64 counters it has accepted (as in IPsec). This check runs before decryption, so a flood of replays costs a lookup, not an AES operation." }),
     btns, cells, status, log,
     h("p", { class: "note", text: "Each square is one counter; the outlined one is the highest accepted, older ones to its left. Same algorithm as RecordReceiver._seen and _mark." })));
 
-  sec.appendChild(panel("Rules the record layer enforces",
+  sec.appendChild(panel("Rules enforced by the record layer",
     notice(["<b>Counter 0 is reserved for Finished.</b> If data also started at 0, the first data record would reuse a (key, nonce) pair. Under GCM one reuse leaks the authentication key and lets an attacker forge records.",
       "<b>Separate keys per direction</b> (k_c2s, k_s2c), and the direction label is authenticated, so a record cannot be reflected back to its sender.",
       "<b>Rekey limit:</b> a session refuses to send after 2³² records; a new handshake is needed.",
@@ -843,7 +861,7 @@ page("records", "4", "Record layer", 1, p => {
 // =================================================================================
 page("attacks", "5", "Attacks", 1, p => {
   const sec = p.sec;
-  sec.appendChild(pageHead("Module 5 · Track A · security testing", "What an attacker tries, and what stops it",
+  sec.appendChild(pageHead("Module 5 · Track A · security testing", "Attack tests",
     "The attack harness runs each attack against the real code and records whether it was rejected and by which check. The panel's question <b>“what if someone …?”</b> has an answer here.",
     ["qrcav/eval/attacks.py", "results/attacks.csv"], "python scripts/run_evaluation.py"));
   const cat = a => /record|nonce reuse|^GCM/i.test(a) ? "Record layer" : /^cache/i.test(a) ? "Certificate cache" : /consensus|block|ledger/i.test(a) ? "Consensus and ledger" : /rogue|revoked|posing/i.test(a) ? "Identity (PKI)" : "Handshake";
@@ -854,14 +872,14 @@ page("attacks", "5", "Attacks", 1, p => {
   function render() {
     listBox.replaceChildren(...CATS.filter(c => filter === "All" || c === filter).map(c => {
       const rows = attacks.filter(a => cat(a.attack) === c);
-      return panel(`${c} · ${rows.length} attack${rows.length > 1 ? "s" : ""}`,
+      return panel(`${c} (${rows.length})`,
         table([{ label: "Attack", get: a => a.attack }, { label: "Stopped by", get: a => a.mechanism }, { label: "Result", get: a => h("span", { class: "pill " + (a.rejected ? "ok" : "bad"), text: a.rejected ? "rejected" : "accepted" }) }], rows),
-        h("button", { class: "go btn ghost", type: "button", style: "justify-self:start", text: "Open the module →", onclick: goto(MOD[c]) }));
+        h("button", { class: "go btn ghost", type: "button", style: "justify-self:start", text: "Go to " + (PAGES.find(x => x.id === MOD[c]) || {}).title, onclick: goto(MOD[c]) }));
     }));
   }
   sec.appendChild(h("div", { class: "ctl" }, seg([["All", "All"], ...CATS.map(c => [c, c])], "All", v => { filter = v; render(); })));
   const live = D.live_attacks || [];
-  sec.appendChild(panel(`Re-run live while this page was generated · ${live.filter(a => a.rejected).length} of ${live.length} rejected`,
+  sec.appendChild(panel(`Re-run while this page was generated: ${live.filter(a => a.rejected).length} of ${live.length} rejected`,
     table([{ label: "Attack", get: a => a.attack }, { label: "Check that fired", get: a => a.check }, { label: "Result", get: a => h("span", { class: "pill " + (a.rejected ? "ok" : "bad"), text: a.rejected ? "rejected" : "ACCEPTED" }) }], live)));
   sec.appendChild(listBox);
   render();
@@ -885,10 +903,10 @@ const PHASE = {
 };
 page("consensus", "6", "Consensus", 2, p => {
   const sec = p.sec, CN = D.consensus.normal, CV = D.consensus.viewchange;
-  sec.appendChild(pageHead("Module 6 · Track B · agreement", "AGS-PBFT: validators agree even when one lies",
+  sec.appendChild(pageHead("Module 6 · Track B · agreement", "AGS-PBFT consensus",
     "Critical events must be recorded identically everywhere, even if some validators are faulty or malicious. <b>PBFT</b> tolerates f faulty nodes out of 3f+1. <b>AGS</b> (adaptive grouping by score) keeps only a small, well-behaved group voting, and swaps nodes in and out by score.",
     ["qrcav/consensus/agspbft.py", "qrcav/consensus/messages.py", "qrcav/consensus/client.py", "qrcav/consensus/sim.py", "tests/test_consensus.py"], "python -m pytest tests/test_consensus.py"));
-  sec.appendChild(plain(`What you are watching: <b>8 real replicas</b> exchanging ML-DSA-signed messages in the project's discrete-event harness. Four vote (f = 1, quorum 3); four are candidates. <b>NODE_03 is configured to return a wrong result</b> on every request. Times are simulated, but each step's processing time is the measured time of the real Python code.`));
+  sec.appendChild(plain(`<b>Setup.</b> 8 replicas exchanging ML-DSA-signed messages in the project's discrete-event harness. Four vote (f = 1, quorum 3); four are candidates. <b>NODE_03 is configured to return a wrong result</b> on every request. Times are simulated, but each step's processing time is the measured time of the real Python code.`));
 
   const nodes = CN.nodes;
   const CX = 610, CY = 250, RAD = 170;
@@ -898,8 +916,8 @@ page("consensus", "6", "Consensus", 2, p => {
   const g = s("svg", { viewBox: "0 0 900 500", class: "diagram", role: "img", "aria-label": "Consensus message flow" });
   const linkL = s("g"), dotL = s("g"), nodeL = s("g");
   g.append(linkL, nodeL, dotL);
-  const mecBox = s("rect", { x: 60, y: 220, width: 120, height: 60, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
-  g.append(mecBox, s("text", { x: 120, y: 247, "text-anchor": "middle", "font-size": 16, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: "MEC_01" }),
+  const mecBox = s("rect", { x: 60, y: 220, width: 120, height: 60, rx: 1.5, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
+  g.append(mecBox, s("text", { x: 120, y: 247, "text-anchor": "middle", "font-size": 16, "font-weight": 800, "font-family": "var(--display)", fill: "var(--ink)", text: "MEC_01" }),
     s("text", { x: 120, y: 266, "text-anchor": "middle", "font-size": 11.5, fill: "var(--ink2)", text: "client" }));
   const N = {};
   nodes.forEach(n => {
@@ -912,7 +930,7 @@ page("consensus", "6", "Consensus", 2, p => {
     nodeL.append(ring, c, t, tag, x2);
     N[n] = { ring, c, t, tag, x2 };
   });
-  const phaseT = s("text", { x: CX, y: CY - 6, "text-anchor": "middle", "font-size": 17, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)" });
+  const phaseT = s("text", { x: CX, y: CY - 6, "text-anchor": "middle", "font-size": 17, "font-weight": 800, "font-family": "var(--display)", fill: "var(--ink)" });
   const phaseS = s("text", { x: CX, y: CY + 16, "text-anchor": "middle", "font-size": 12, "font-family": "var(--mono)", fill: "var(--ink2)" });
   g.append(phaseT, phaseS);
 
@@ -1046,7 +1064,7 @@ page("consensus", "6", "Consensus", 2, p => {
     panel(null, h("div", { class: "ctl" }, h("span", { class: "label", text: "Request" }), chips), plA.ui, h("div", { class: "dwrap" }, g),
       legend(Object.entries(MSGC).slice(0, 7).map(([k, c]) => [c, k]).concat([["var(--red)", "wrong result (NODE_03)"]]))),
     h("div", { class: "cols even" },
-      panel("What is happening", explain, tally),
+      panel("Current step", explain, tally),
       panel("Scores", scores, regroupNote)));
 
   // ---- scenario B: leader crash and view change ----
@@ -1079,7 +1097,7 @@ page("consensus", "6", "Consensus", 2, p => {
   const boxB = h("div", { style: "display:grid;gap:18px" },
     panel(null, plB.ui, h("p", { class: "note", text: `Voting set ${CV.initial_consensus.join(", ")}. ${CV.crashed} crashes at ${CV.crash_ms} ms, right after committing the first request. View-change timeout ${CV.timeout_ms} ms.` }),
       h("div", { class: "dwrap" }, g)),
-    h("div", { class: "cols even" }, panel("What is happening", vcExplain), panel("Committed so far", vcBlocks,
+    h("div", { class: "cols even" }, panel("Current step", vcExplain), panel("Committed so far", vcBlocks,
       h("p", { class: "note", text: `Result: ${CV.new_leader} leads view ${CV.view}; no request was lost and every honest ledger is ${CV.consistent ? "identical" : "NOT identical"}.` }))));
 
   let scen = "A";
@@ -1098,7 +1116,7 @@ page("consensus", "6", "Consensus", 2, p => {
   const sc = (R.consensus_scaling || []);
   const ns = [...new Set(sc.map(r => r.nodes))];
   const ser = (mode, col, dash) => ({ name: mode, color: col, dash, values: ns.map(n => (sc.find(r => r.nodes === n && r.mode === mode) || {}).msgs_per_req ?? null) });
-  sec.appendChild(panel("Why bother: messages per request against plain PBFT",
+  sec.appendChild(panel("Messages per request, AGS-PBFT against PBFT",
     lineChart({ xs: ns, series: [ser("pbft", "var(--red)"), ser("ags", "var(--accent)"), ser("ags-noshadow", "var(--accent)", "5 4")], xLabel: "validators in the network", yLabel: "signed messages per request" }),
     legend([["var(--red)", "PBFT: everyone votes, all-to-all"], ["var(--accent)", "AGS-PBFT (with candidate shadow responses)"], ["var(--accent)", "AGS-PBFT without shadows (dashed)"]]),
     h("p", { class: "note", text: "PBFT grows with the square of the network size. AGS-PBFT keeps a small voting group, so traffic grows far more slowly. The price is that fewer nodes vote, so the set must be kept honest by scoring." })));
@@ -1109,7 +1127,7 @@ page("consensus", "6", "Consensus", 2, p => {
 // =================================================================================
 page("ledger", "7", "Ledger", 2, p => {
   const sec = p.sec, blocks = D.consensus.normal.blocks;
-  sec.appendChild(pageHead("Module 7 · Track B · tamper-evident record", "A chain anyone can re-check",
+  sec.appendChild(pageHead("Module 7 · Track B · tamper-evident record", "Ledger",
     "Each committed event becomes a block holding the deck's three header fields <b>(B_ID, Pr_B_Hash, T_Block)</b> plus everything needed to verify it alone: the signed request, the agreed result, the commit certificate, the scores and the voting set.",
     ["qrcav/ledger.py", "qrcav/consensus/agspbft.py (verify_block, verify_chain)"], "python scripts/run_network.py   →   run/ledger/NODE_xx.jsonl"));
   let sel = 0, tampered = null;
@@ -1151,14 +1169,14 @@ page("ledger", "7", "Ledger", 2, p => {
       : `<b>Detected.</b> Changing block ${blocks[tampered].b_id} changes its content, so the leader's signature and the ${blocks[tampered].cert_n} signed responses no longer match it. Its hash changes too, so block ${blocks[tampered].b_id + 1 <= blocks.length ? blocks[tampered].b_id + 1 : "(next)"}'s Pr_B_Hash no longer points at it. To hide the edit an attacker would need the leader's and a quorum's private keys, and would have to rewrite every later block on every honest node. (The edit is shown in this page; the real check is verify_chain in agspbft.py.)`;
   }
   tamperBtn.addEventListener("click", () => { tampered = tampered === null ? sel : null; render(); });
-  sec.appendChild(panel(`The chain from the consensus run in module 6 · ${blocks.length} blocks · chain valid: ${D.consensus.normal.chain_valid ? "yes" : "no"}`, chain,
+  sec.appendChild(panel(`Chain from the consensus run in section 6: ${blocks.length} blocks, verify_chain ${D.consensus.normal.chain_valid ? "passes" : "FAILS"}`, chain,
     h("div", { class: "cols" }, detail, h("div", { style: "display:grid;gap:12px;align-content:start" }, tamperBtn, verdict))));
   render();
   if (netCommits.length) {
-    sec.appendChild(panel(`The chain from the 19-process run · ${netCommits.length} blocks, identical on every honest node`,
+    sec.appendChild(panel(`Chain from the 19-process run: ${netCommits.length} blocks, identical on every honest node`,
       table([{ label: "B_ID", num: 1, get: e => e.B_ID }, { label: "Pr_B_Hash", get: e => h("span", { class: "hex", text: e.Pr_B_Hash }) }, { label: "hash", get: e => h("span", { class: "hex", text: e.hash }) },
         { label: "view", num: 1, get: e => e.view }, { label: "leader", get: e => e.leader }, { label: "event", get: e => e.txn_id }], netCommits, { hl: e => e.view > 0 }),
-      h("p", { class: "note", text: "The highlighted block was committed in view 1, after the original leader crashed (module 8 replays that moment). Each node persists its chain as JSON lines in run/ledger/." })));
+      h("p", { class: "note", text: "The highlighted block was committed in view 1, after the original leader crashed (section 8 replays that moment). Each node persists its chain as JSON lines in run/ledger/." })));
   }
 });
 
@@ -1167,7 +1185,7 @@ page("ledger", "7", "Ledger", 2, p => {
 // =================================================================================
 page("system", "8", "Whole system", 2, p => {
   const sec = p.sec;
-  sec.appendChild(pageHead("Module 8 · Track B · the distributed system", "Replay of a real run: 19 processes, 50 seconds",
+  sec.appendChild(pageHead("Module 8 · Track B · the distributed system", "Distributed system run",
     "<code>scripts/run_network.py</code> starts every entity as its own operating-system process talking TCP: a TA, a cloud, an MEC, 8 validators, 3 RSUs and 5 vehicles. Each process writes a structured log. This page replays those logs on one timeline.",
     ["scripts/run_network.py", "config/demo.json", "qrcav/nodes/*.py", "qrcav/net/secure.py", "qrcav/nodes/report.py", "tests/test_network.py"], "python scripts/run_network.py"));
   if (!NET) { sec.appendChild(h("div", { class: "empty", text: "No run logs were found. Run python scripts/make_explorer.py --network." })); return; }
@@ -1251,19 +1269,19 @@ page("system", "8", "Whole system", 2, p => {
   g.append(bg, links, flowL, fg);
   const boxAt = (id, w, hh, t1, t2) => {
     const [x, y] = P[id];
-    const r = s("rect", { x: x - w / 2, y: y - hh / 2, width: w, height: hh, rx: 6, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
-    bg.append(r, s("text", { x, y: y - 2, "text-anchor": "middle", "font-size": 15, "font-weight": 700, "font-family": "var(--display)", fill: "var(--ink)", text: t1 }),
+    const r = s("rect", { x: x - w / 2, y: y - hh / 2, width: w, height: hh, rx: 1.5, fill: "var(--panel)", stroke: "var(--ink)", "stroke-width": 1.5 });
+    bg.append(r, s("text", { x, y: y - 2, "text-anchor": "middle", "font-size": 15, "font-weight": 800, "font-family": "var(--display)", fill: "var(--ink)", text: t1 }),
       s("text", { x, y: y + 15, "text-anchor": "middle", "font-size": 11, fill: "var(--ink2)", text: t2 }));
     return r;
   };
   boxAt("TA", 160, 56, "Trusted Authority", "registration · CRL");
   boxAt("CLOUD_01", 160, 56, "Cloud archive", "SQLite");
   boxAt("MEC_01", 170, 58, "MEC_01", "edge server");
-  bg.appendChild(s("rect", { x: 693, y: 140, width: 288, height: 210, rx: 8, fill: "var(--block)", stroke: "var(--line)" }));
+  bg.appendChild(s("rect", { x: 693, y: 140, width: 288, height: 210, rx: 1.5, fill: "var(--block)", stroke: "var(--line)" }));
   bg.appendChild(s("text", { x: 837, y: 162, "text-anchor": "middle", "font-size": 13, "font-weight": 600, "font-family": "var(--display)", fill: "var(--ink2)", text: "VALIDATORS · AGS-PBFT" }));
   const blockCount = s("text", { x: 837, y: 340, "text-anchor": "middle", "font-size": 12.5, "font-family": "var(--mono)", fill: "var(--ink)" });
   bg.appendChild(blockCount);
-  bg.appendChild(s("rect", { x: 40, y: 490, width: 920, height: 56, rx: 4, fill: "var(--road)" }));
+  bg.appendChild(s("rect", { x: 40, y: 490, width: 920, height: 56, rx: 1.5, fill: "var(--road)" }));
   bg.appendChild(s("line", { x1: 46, x2: 954, y1: 518, y2: 518, stroke: "var(--panel)", "stroke-width": 2, "stroke-dasharray": "14 12" }));
   bg.appendChild(s("text", { x: 48, y: 566, "font-size": 11, "font-family": "var(--mono)", fill: "var(--ink2)", text: "road · positions from each vehicle's beacons" }));
   const NN = {};
@@ -1277,13 +1295,13 @@ page("system", "8", "Whole system", 2, p => {
   });
   cfg.rsus.forEach(r => {
     const [x, y] = P[r.id];
-    fg.append(s("rect", { x: x - 24, y: y - 24, width: 48, height: 48, rx: 4, fill: "var(--ink)" }),
-      s("text", { x, y: y + 5, "text-anchor": "middle", "font-size": 13, "font-weight": 700, "font-family": "var(--display)", fill: "var(--panel)", text: r.id.replace("_0", " ") }));
+    fg.append(s("rect", { x: x - 24, y: y - 24, width: 48, height: 48, rx: 1.5, fill: "var(--ink)" }),
+      s("text", { x, y: y + 5, "text-anchor": "middle", "font-size": 13, "font-weight": 800, "font-family": "var(--display)", fill: "var(--panel)", text: r.id.replace("_0", " ") }));
   });
   const CV = {};
   cavs.forEach(id => {
     const grp = s("g");
-    const body = s("rect", { x: -17, y: -8, width: 34, height: 16, rx: 4 });
+    const body = s("rect", { x: -17, y: -8, width: 34, height: 16, rx: 1.5 });
     const lane2 = (cfg.cavs.find(c => c.id === id).start[1] || 0) > 1;
     const lab = s("text", { x: 0, y: lane2 ? 23 : -13, "text-anchor": "middle", "font-size": 11, "font-family": "var(--mono)", fill: "var(--ink)", text: id.replace("CAV_0", "CAV ") });
     grp.append(body, lab); fg.appendChild(grp); CV[id] = { grp, body };
@@ -1425,10 +1443,10 @@ page("system", "8", "Whole system", 2, p => {
     h("div", { class: "dwrap" }, g),
     legend([["var(--amber)", "registration, handshakes"], ["var(--blue)", "reports and V2V messages"], ["var(--violet)", "alerts"], ["var(--accent)", "secure sessions, commits"], ["var(--red)", "faulty node, revocation, rejection"]])));
   sec.appendChild(h("div", { class: "cols" },
-    panel("Event log · click a line to jump there", feed),
+    panel("Event log (click a line to jump to it)", feed),
     panel("At this moment", statBox)));
   const sm = NET.summary;
-  if (sm) sec.appendChild(panel("End-of-run check (qrcav/nodes/report.py)", notice([
+  if (sm) sec.appendChild(panel("End-of-run check, qrcav/nodes/report.py", notice([
     `${sm.handshakes} handshakes completed, ${sm.handshake_rejected} rejected (the revoked vehicle).`,
     `Event → alert at vehicles: median <b>${nf(median(sm.alert_latency_ms || []), 1)} ms</b> over ${(sm.alert_latency_ms || []).length} alerts. Safety alerts never wait for consensus.`,
     `Ledger heights ${Object.values(sm.ledger_heights || {}).join(", ")} (the crashed node stopped early); ledgers consistent: <b>${sm.ledgers_consistent}</b>; chain verifies from genesis: <b>${sm.ledger_verifies}</b>.`,
@@ -1443,7 +1461,7 @@ page("system", "8", "Whole system", 2, p => {
 // =================================================================================
 page("radio", "9", "Radio (ns-3)", 2, p => {
   const sec = p.sec, DATA = D.ns3;
-  sec.appendChild(pageHead("Module 9 · Track B · network simulation", "What happens on a real radio channel",
+  sec.appendChild(pageHead("Module 9 · Track B · network simulation", "ns-3 radio simulation",
     "The localhost run cannot show radio effects. <b>ns-3</b> simulates IEEE 802.11p (the vehicle safety radio, 6 Mb/s) on a 1.5 km city grid with 9 RSUs. Message sizes and processing times come from the real code; the simulator adds the air.",
     ["qrcav/sim/profile.py", "qrcav/sim/ns3_runner.py", "qrcav/sim/ns3_scenario.cc", "qrcav/eval/ns3_sweeps.py", "scripts/make_viewer.py"], "python scripts/make_viewer.py   (Linux / WSL2)"));
   if (!DATA || !DATA.scenarios) { sec.appendChild(h("div", { class: "empty", text: "No ns-3 trace found (results/viewer_data.json)." })); return; }
@@ -1516,9 +1534,9 @@ page("radio", "9", "Radio (ns-3)", 2, p => {
   sec.appendChild(h("div", { class: "cols" },
     panel(null, map, h("div", { class: "ctl" }, playBtn, speed, clock), scrub),
     h("div", { style: "display:grid;gap:18px;align-content:start" },
-      panel("Scenario · same vehicles, same seed", sg, suiteLab),
+      panel("Scenario (same vehicles and seed)", sg, suiteLab),
       panel("At this moment", live, h("div", { class: "label", text: "Channel airtime, every 0.5 s" }), air),
-      panel("Whole run, after a 5 s warm-up", runBox),
+      panel("Whole run, after 5 s warm-up", runBox),
       panel("Key", legend([["var(--accent)", "session up"], ["var(--amber)", "handshake in progress"], ["var(--ink3)", "no session"], ["var(--red)", "handshake just failed"], ["var(--violet)", "critical event (ring)"]])))));
   window.addEventListener("resize", () => { if (current === p) draw(); });
   p.onHide = () => { playing = false; playBtn.textContent = "Play"; cancelAnimationFrame(raf); };
@@ -1532,9 +1550,9 @@ page("radio", "9", "Radio (ns-3)", 2, p => {
   const series = key => [line("CLASSIC", 0, "var(--ink2)", null, key), line("L3", 0, "var(--blue)", null, key), line("DECK", 0, "var(--amber)", null, key), line("L5", 0, "var(--red)", null, key), line("DECK", 1, "var(--accent)", null, key)];
   const lg = legend([["var(--ink2)", "Classical"], ["var(--blue)", "L3"], ["var(--amber)", "DECK"], ["var(--red)", "L5"], ["var(--accent)", "DECK + certificate caching"]]);
   sec.appendChild(h("div", { class: "cols even" },
-    panel("Handshakes that complete, as traffic grows", lineChart({ xs: vs, series: series("handshake_success_pct"), xLabel: "vehicles on the grid", yLabel: "% completed", yMax: 100 }), lg),
-    panel("Event → alert, median", lineChart({ xs: vs, series: series("alert_p50_ms"), xLabel: "vehicles on the grid", yLabel: "milliseconds" }), lg.cloneNode(true))));
-  sec.appendChild(panel("What this shows", notice([
+    panel("Handshakes completed against vehicle count", lineChart({ xs: vs, series: series("handshake_success_pct"), xLabel: "vehicles on the grid", yLabel: "% completed", yMax: 100 }), lg),
+    panel("Event to alert, median", lineChart({ xs: vs, series: series("alert_p50_ms"), xLabel: "vehicles on the grid", yLabel: "milliseconds" }), lg.cloneNode(true))));
+  sec.appendChild(panel("Reading the sweep", notice([
     "Up to about 50 vehicles per 2.25 km², every suite completes its handshakes and alerts arrive in about 5 ms.",
     "Beyond that, the 20 KB post-quantum handshakes compete for one 6 Mb/s channel; completion drops and alerts slow down. Certificate caching halves the bytes and keeps DECK at 100 % at 100 vehicles.",
     "Alerts and beacons go out at the highest MAC priority (EDCA), and failed handshakes back off exponentially. Without those two measures alerts took about 400 ms instead of about 5 ms (ablation in results/ns3_variants.csv).",
@@ -1547,32 +1565,32 @@ page("radio", "9", "Radio (ns-3)", 2, p => {
 // =================================================================================
 page("results", "10", "Results", 3, p => {
   const sec = p.sec;
-  sec.appendChild(pageHead("Module 10 · evaluation", "The evidence in four charts",
+  sec.appendChild(pageHead("Evaluation · both tracks", "Evaluation results",
     "Every number comes from <code>results/*.csv</code>, written by the evaluation scripts. The report's tables are generated from the same files.",
     ["scripts/run_evaluation.py", "qrcav/eval/crypto_bench.py", "qrcav/eval/consensus_eval.py", "qrcav/eval/plots.py", "scripts/make_tables.py"], "python scripts/run_evaluation.py"));
   const bb = R.beacon_budget || [], suites = [...new Set(bb.map(r => r.suite))];
   const ft = R.fault_tolerance || [];
   const vc = R.view_change || [], tos = [...new Set(vc.map(r => r.vc_timeout_s))];
   sec.appendChild(h("div", { class: "cols even" },
-    panel("Beacons fit the 100 ms safety budget",
+    panel("Beacon cost against the 100 ms budget",
       barChart({ cats: suites, series: [{ color: "var(--accent)", values: suites.map(s2 => (bb.find(r => r.suite === s2 && r.mode.startsWith("AEAD")) || {}).total_p99_ms || 0) }, { color: "var(--violet)", values: suites.map(s2 => (bb.find(r => r.suite === s2 && r.mode.startsWith("signed")) || {}).total_p99_ms || 0) }],
         yLabel: "ms, crypto + airtime, p99", valueFmt: v => nf(v, 1), yMax: 16 }),
       legend([["var(--accent)", "AES-GCM record inside a session (135 B)"], ["var(--violet)", "individually signed broadcast"]]),
       h("p", { class: "note", text: "Vehicles send 10 beacons a second, so each must be ready within 100 ms. Inside a session a beacon costs under 0.5 ms whatever the suite; signing every beacon with ML-DSA is possible but up to 30 times slower and bigger." })),
-    panel("Safety and liveness with faulty validators",
+    panel("Commit rate with faulty validators",
       barChart({ cats: ft.map(r => String(r.byzantine)), series: [{ color: "var(--accent)", values: ft.map(r => r.commit_pct) }], yLabel: "% of requests committed", yMax: 100, valueFmt: v => nf(v, 0),
         refLine: null }),
       h("p", { class: "note", html: `Voting set of ${ft[0] ? ft[0].consensus_set : 7} (f = ${ft[0] ? ft[0].f : 2}). With up to f faulty nodes every request commits. With more, progress stops, but <b>nothing wrong is ever committed</b> (safety held in all ${ft.length} runs). x-axis: number of faulty nodes.` }))));
   sec.appendChild(h("div", { class: "cols even" },
-    panel("Recovery after the leader crashes",
+    panel("Recovery after a leader crash",
       barChart({ cats: tos.map(x => x + " s"), series: ["ags", "pbft"].map((m, j) => ({ color: j ? "var(--red)" : "var(--accent)", values: tos.map(x => ((vc.find(r => r.mode === m && r.vc_timeout_s === x) || {}).recovery_first_commit_ms || 0) / 1000) })),
         yLabel: "s until first commit after crash", valueFmt: v => nf(v, 1) }),
       legend([["var(--accent)", "AGS-PBFT"], ["var(--red)", "PBFT"]]),
       h("p", { class: "note", text: "x-axis: view-change timeout. Recovery is dominated by the timeout (it doubles on each failed view); both protocols recover the same way." })),
-    panel("Score dynamics: a faulty node is pushed out",
+    panel("Score dynamics over 60 blocks",
       scoreChart(R.score_dynamics),
       h("p", { class: "note", text: "Scores of every validator over successive blocks in the evaluation run. The wrong-result node loses 5 per block and drops below μ − σ at the next regroup; a silent node stops gaining, so it falls behind the honest nodes." }))));
-  sec.appendChild(panel("Where to find the rest",
+  sec.appendChild(panel("Other outputs",
     notice(["Figures fig1–fig11: <code>results/*.png</code> (also in the report, chapter 6).",
       "Report tables: <code>report/generated/*.tex</code>, built by <code>scripts/make_tables.py</code>.",
       "Unit and integration tests: <code>pytest</code> (55 tests, including a real multi-process run)."])));
@@ -1604,7 +1622,7 @@ groups.forEach(([label, ps]) => {
     h("span", { class: "n", text: pg.num }), h("span", { class: "t", text: pg.title }))));
   navBox.appendChild(grp);
 });
-document.getElementById("railnote").textContent = `Generated ${D.generated} from branch review2-complete by scripts/make_explorer.py. Track A: modules 1–5. Track B: 6–9.`;
+document.getElementById("railnote").textContent = `Generated ${D.generated} from branch review2-complete by scripts/make_explorer.py. Track A: sections 1–5. Track B: 6–9.`;
 show(location.hash.slice(1) || "overview");
 window.addEventListener("hashchange", () => { const id = location.hash.slice(1); if (id && (!current || id !== current.id) && PAGES.some(x => x.id === id)) show(id); });
 })();
