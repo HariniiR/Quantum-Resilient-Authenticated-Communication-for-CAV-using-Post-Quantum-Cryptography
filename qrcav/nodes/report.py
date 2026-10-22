@@ -49,7 +49,9 @@ def build_report(config_path: str) -> dict:
     rep["handshake_ms"] = [r["ms"] for r in hs]
     rep["handshake_bytes"] = sorted({r["bytes"] for r in hs})
     rep["handshake_rejected"] = len(all_ev("handshake-rejected"))
-    rep["beacons_received"] = sum(sum(r["counts"].values()) for r in all_ev("beacon-stats"))
+    # each RSU logs a running total every 5 s, so take each RSU's latest total
+    rep["beacons_received"] = sum(sum(recs[-1]["counts"].values()) for recs in
+                                  (ev(n, "beacon-stats") for n in logs) if recs)
     alerts = all_ev("alert")
     rep["alert_latency_ms"] = [r["latency_ms"] for r in alerts]
     rep["alerts_delivered"] = len(alerts)
