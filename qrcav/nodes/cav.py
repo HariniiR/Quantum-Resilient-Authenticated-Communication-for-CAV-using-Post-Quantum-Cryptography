@@ -40,6 +40,8 @@ class CAVNode(NodeBase):
         await self.preload_certs("RSU", expected=len(self.cfg["rsus"]))
         await self._associate(self.rsu)
         asyncio.ensure_future(self.script())
+        if self.hz <= 0:                       # beacons switched off (terminal demos)
+            await asyncio.Event().wait()
         period = 1.0 / self.hz
         nxt = time.time()
         while True:

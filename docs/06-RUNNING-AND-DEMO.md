@@ -50,7 +50,7 @@ python scripts/run_ns3_sweeps.py --quick       # ~3 min; checks the setup
 | Protocol walkthrough (viva) | `python scripts/demo_protocol.py` | 1 s |
 | One component on its own | `python scripts/demo_parts.py suites` (or `codec`, `kdf`, `records`, `pki`, `handshake`, `certcache`, `secure`, `attacks`, `all`) | 1 s each |
 | Two processes, two terminals | `python scripts/two_terminals.py setup`, then `... rsu` in one terminal and `... cav` in another | live |
-| Real TA / RSU / vehicles, one terminal each, every message traced | `python scripts/terminal_node.py TA`, then `RSU_01`, `CAV_01`, `CAV_02` (each in its own terminal); `revoke CAV_02` | live |
+| Real entities in separate terminals, every message traced | `python scripts/terminal_node.py TA`, then `NODES`, `MEC`, `RSU_01`, `CAV_01`, `CAV_02` (each in its own terminal); type `event collision_ahead` in a vehicle; `revoke CAV_02` | live |
 | Distributed system, 19 processes | `python scripts/run_network.py` | 50 s |
 | Same, classical crypto for comparison | `python scripts/run_network.py --suite CLASSIC` | 50 s |
 | Same, certificate caching off | set `"cert_cache": false` in `config/demo.json` | 50 s |

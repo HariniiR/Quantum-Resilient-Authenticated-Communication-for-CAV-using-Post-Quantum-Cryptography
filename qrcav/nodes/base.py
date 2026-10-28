@@ -269,11 +269,30 @@ class NodeBase:
             return
         t = obj.get("type", "?") if isinstance(obj, dict) else "?"
         keys = ("seq", "event_id", "msg_id", "src", "dst", "kind", "text", "b_id")
-        info = " ".join(f"{k}={obj[k]!r}" if k == "text" else f"{k}={obj[k]}"
-                        for k in keys if isinstance(obj, dict) and k in obj)
+        shown = obj
+        if isinstance(obj, dict) and isinstance(obj.get("event") or obj.get("record"), dict):
+            shown = obj.get("event") or obj.get("record")      # an event wrapped by the RSU / MEC
+        info = " ".join(f"{k}={shown[k]!r}" if k == "text" else f"{k}={shown[k]}"
+                        for k in keys if isinstance(shown, dict) and k in shown)
+        if isinstance(obj, dict) and "reporter_cert" in obj:
+            info += " +reporter certificate"
+        if t == "cons":                       # show the signed consensus message inside
+            try:
+                env = codec.decode(obj["raw"])
+                body = env.get("body", {})
+                t = env.get("t", "cons")
+                parts = [f"signed by {env.get('from')}"]
+                for k in ("v", "n", "txn_id", "B_ID"):
+                    if k in body:
+                        parts.append(f"{k}={body[k]}")
+                if t == "COMMIT" and "block" in body:
+                    parts.append("carries the certified block")
+                info = " ".join(parts)
+            except Exception:
+                pass
         arrow = "->" if direction == "send" else "<-"
         verb = "encrypted" if direction == "send" else "decrypted OK"
-        self.log("trace", f"{arrow} {ch.peer_id:<7} {t:<9} {info}   [{wire} {verb}]")
+        self.log("trace", f"{arrow} {ch.peer_id:<7} {t:<11} {info}   [{wire} {verb}]")
 
     async def _reader(self, ch: SecureChannel) -> None:
         try:
