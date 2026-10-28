@@ -95,6 +95,8 @@ class NodeBase:
         self.stopping = False
         # certificate cache (qrcav/certcache.py); off with "cert_cache": false
         self.cert_cache: CertCache | None = CertCache() if cfg.get("cert_cache", True) else None
+        # QRCAV_TRACE=1: print every record sent and received (for terminal demos)
+        self.trace_on = os.environ.get("QRCAV_TRACE") == "1"
 
     # -- bootstrap: preparation + registration phases -------------------------
 
@@ -220,6 +222,7 @@ class NodeBase:
                     ch = await secure_connect(host, port, self.identity, expected_role=role,
                                               expected_id=peer_id, cache=self.cert_cache)
                     self._log_handshake(ch, "initiator")
+                    self._attach_trace(ch)
                     self.channels[peer_id] = ch
                     asyncio.ensure_future(self._reader(ch))
                     return ch
@@ -246,6 +249,32 @@ class NodeBase:
             crypto_ms=s.crypto_ms, flights=s.flight_sizes, cert_cache=cc,
         )
 
+    def _attach_trace(self, ch: SecureChannel) -> None:
+        """With QRCAV_TRACE=1, log the handshake flights and every record on this channel."""
+        if not self.trace_on:
+            return
+        s = ch.session
+        flights = ", ".join(f"{k} {v} B" for k, v in s.flight_sizes.items())
+        mine = "k_c2s" if s.is_client else "k_s2c"
+        self.log("trace", f"   flights: {flights}")
+        self.log("trace", f"   ML-KEM shared secret -> HKDF -> session keys ({mine} {s.sender.key[:4].hex()}..., "
+                          f"transcript {s.t_hash[:4].hex()}...)")
+        ch.trace = lambda d, obj, rec, ch=ch: self._trace(ch, d, obj, rec)
+
+    def _trace(self, ch: SecureChannel, direction: str, obj: Any, rec: bytes) -> None:
+        ctr = int.from_bytes(rec[:8], "big") if len(rec) >= 8 else -1
+        wire = f"record ctr {ctr}, {len(rec)} B, ciphertext {rec[8:16].hex()}..."
+        if direction == "drop":
+            self.log("trace", f"<- {ch.peer_id:<7} DROPPED ({wire}): tag check failed or replayed")
+            return
+        t = obj.get("type", "?") if isinstance(obj, dict) else "?"
+        keys = ("seq", "event_id", "msg_id", "src", "dst", "kind", "text", "b_id")
+        info = " ".join(f"{k}={obj[k]!r}" if k == "text" else f"{k}={obj[k]}"
+                        for k in keys if isinstance(obj, dict) and k in obj)
+        arrow = "->" if direction == "send" else "<-"
+        verb = "encrypted" if direction == "send" else "decrypted OK"
+        self.log("trace", f"{arrow} {ch.peer_id:<7} {t:<9} {info}   [{wire} {verb}]")
+
     async def _reader(self, ch: SecureChannel) -> None:
         try:
             while not ch.closed:
@@ -264,6 +293,7 @@ class NodeBase:
 
     async def _on_inbound(self, ch: SecureChannel) -> None:
         self._log_handshake(ch, "responder")
+        self._attach_trace(ch)
         old = self.channels.get(ch.peer_id)
         if old is not None and old is not ch:
             old.close()

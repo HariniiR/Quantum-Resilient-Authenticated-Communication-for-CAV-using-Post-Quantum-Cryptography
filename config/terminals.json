@@ -1,0 +1,19 @@
+{
+  "_comment": "Separate-terminal demo: TA, one RSU (server) and two vehicles (clients), each started by hand with scripts/terminal_node.py. Ports 76xx so it can run beside the full demo.",
+  "suite": "DECK",
+  "host": "127.0.0.1",
+  "run_dir": "run_terminals",
+  "beacon_hz": 0.5,
+  "crl_interval": 1.0,
+  "ta": {"port": 7600, "use_roster": true, "revoke": []},
+  "cloud": {"id": "CLOUD_01", "port": 7610},
+  "mec": [{"id": "MEC_01", "port": 7620}],
+  "consensus": {"mode": "ags", "nodes": []},
+  "rsus": [
+    {"id": "RSU_01", "port": 7601, "pos": [0, 0], "mec": "MEC_01", "neighbours": []}
+  ],
+  "cavs": [
+    {"id": "CAV_01", "rsu": "RSU_01", "start": [10, 0], "speed": 13.9, "script": []},
+    {"id": "CAV_02", "rsu": "RSU_01", "start": [60, 3.5], "speed": 12.0, "script": []}
+  ]
+}

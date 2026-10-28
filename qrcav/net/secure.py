@@ -64,6 +64,9 @@ class SecureChannel:
         self.records_received = 0
         self.bytes_sent = 0
         self.bytes_received = 0
+        # optional observer, called as trace(direction, obj, record) for every
+        # record sent ("send"), opened ("recv") or discarded ("drop")
+        self.trace: Callable[[str, Any, bytes], None] | None = None
 
     @property
     def peer_id(self) -> str:
@@ -85,6 +88,8 @@ class SecureChannel:
             await write_frame(self.writer, rec)
             self.records_sent += 1
             self.bytes_sent += len(rec) + 4
+            if self.trace:
+                self.trace("send", obj, rec)
 
     async def recv(self) -> Any:
         """Next valid record. Tampered or replayed records are dropped silently."""
@@ -94,8 +99,12 @@ class SecureChannel:
             try:
                 obj = self.session.open(rec)
             except Exception:
+                if self.trace:
+                    self.trace("drop", None, rec)
                 continue  # slide 17 steps 8-9: discard invalid or replayed records
             self.records_received += 1
+            if self.trace:
+                self.trace("recv", obj, rec)
             return obj
 
     def close(self) -> None:

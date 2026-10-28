@@ -17,3 +17,4 @@ node_modules/
 *.vrb
 *.synctex.gz
 run_two/
+run_terminals/
