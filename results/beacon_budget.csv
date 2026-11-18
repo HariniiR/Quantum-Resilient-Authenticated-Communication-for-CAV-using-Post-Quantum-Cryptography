@@ -1,11 +1,5 @@
 suite,mode,bytes,frames,crypto_mean_ms,crypto_p99_ms,airtime_ms,total_p99_ms,fits_100ms
 CLASSIC,AEAD (session),135,1,0.0281,0.0597,0.344,0.404,True
 CLASSIC,signed (broadcast),234,1,0.1532,0.3982,0.48,0.878,True
-L1,AEAD (session),135,1,0.0322,0.0967,0.344,0.441,True
-L1,signed (broadcast),2583,2,0.9179,1.7777,3.776,5.554,True
-L3,AEAD (session),135,1,0.0292,0.0632,0.344,0.407,True
-L3,signed (broadcast),3472,3,1.362,4.744,5.128,9.872,True
 DECK,AEAD (session),135,1,0.0279,0.0628,0.344,0.407,True
 DECK,signed (broadcast),3472,3,1.3516,4.3778,5.128,9.506,True
-L5,AEAD (session),135,1,0.0375,0.1298,0.344,0.474,True
-L5,signed (broadcast),4790,4,1.8606,5.5545,7.048,12.602,True
