@@ -26,8 +26,8 @@ import hmac
 from dataclasses import dataclass
 
 from Crypto.Cipher import AES
-from dilithium_py.ml_dsa import ML_DSA_44, ML_DSA_65, ML_DSA_87
-from kyber_py.ml_kem import ML_KEM_512, ML_KEM_768, ML_KEM_1024
+from dilithium_py.ml_dsa import ML_DSA_65
+from kyber_py.ml_kem import ML_KEM_1024
 
 # ---------------------------------------------------------------------------
 # Published system parameters (paper section 5.1, Table 5)
@@ -35,11 +35,9 @@ from kyber_py.ml_kem import ML_KEM_512, ML_KEM_768, ML_KEM_1024
 
 SYSTEM_PARAMS = {"n": 256, "k": 4, "q": 3329, "eta1": 2, "eta2": 2}
 
-# Named suites so the evaluation can sweep security levels (objective 7).
+# DECK for the prototype; the evaluation measures the classical baseline separately.
 SUITES = {
-    "L1": ("ML-KEM-512", ML_KEM_512, "ML-DSA-44", ML_DSA_44),
-    "L3": ("ML-KEM-768", ML_KEM_768, "ML-DSA-65", ML_DSA_65),
-    "L5": ("ML-KEM-1024", ML_KEM_1024, "ML-DSA-87", ML_DSA_87),
+    "DECK": ("ML-KEM-1024", ML_KEM_1024, "ML-DSA-65", ML_DSA_65),
 }
 
 # The paper's own configuration: Table 5 is ML-KEM-1024.
@@ -166,7 +164,7 @@ def channel_pair(shared_secret: bytes, transcript_hash: bytes) -> tuple[SecureCh
 # Artifact sizes, for the size/bandwidth analysis
 # ---------------------------------------------------------------------------
 
-def artifact_sizes(suite: str = "L3") -> dict[str, int]:
+def artifact_sizes(suite: str = "DECK") -> dict[str, int]:
     kem_name, kem, sig_name, sig = SUITES[suite]
     ek, dk = kem.keygen()
     _, ct = kem.encaps(ek)

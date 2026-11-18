@@ -12,6 +12,8 @@ from pathlib import Path
 
 import matplotlib
 
+from ..crypto import SUITE_DEFS
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
@@ -20,17 +22,14 @@ INK = "#0b0b0b"
 INK2 = "#52514e"
 GRID = "#e4e3df"
 # fixed categorical order (validated reference palette, light mode)
-SUITE_COLOR = {"CLASSIC": "#2a78d6", "L1": "#eb6834", "L3": "#1baf7a", "DECK": "#eda100", "L5": "#e87ba4",
+SUITE_COLOR = {"CLASSIC": "#2a78d6", "DECK": "#eda100",
                "DECK+cache": "#4a3aa7"}
 SUITE_LABEL = {
     "CLASSIC": "Classical ECDH+ECDSA P-256",
-    "L1": "L1 ML-KEM-512+ML-DSA-44",
-    "L3": "L3 ML-KEM-768+ML-DSA-65",
     "DECK": "Deck ML-KEM-1024+ML-DSA-65",
-    "L5": "L5 ML-KEM-1024+ML-DSA-87",
     "DECK+cache": "Deck + certificate caching",
 }
-ORDER = ["CLASSIC", "L1", "L3", "DECK", "L5"]
+ORDER = ["CLASSIC", "DECK"]
 NS3_ORDER = ORDER + ["DECK+cache"]
 MODE_COLOR = {"ags": "#2a78d6", "ags-noshadow": "#1baf7a", "pbft": "#eb6834"}
 MODE_LABEL = {"ags": "AGS-PBFT", "ags-noshadow": "AGS-PBFT, no shadow validation", "pbft": "PBFT"}
@@ -52,7 +51,7 @@ def read_csv(p: Path) -> list[dict]:
     if not p.exists():
         return []
     with p.open() as f:
-        rows = list(csv.DictReader(f))
+        rows = [r for r in csv.DictReader(f) if r.get("suite", "DECK") in SUITE_DEFS]
     for r in rows:
         for k, v in r.items():
             try:
@@ -81,7 +80,7 @@ def fig_handshake_time(res: Path, out: Path):
                 fmt="none", ecolor=INK2, capsize=4, lw=1, label="up to p95")
     for i, (m, p) in enumerate(zip(means, p95)):
         ax.text(i, p + 0.3, f"{m:.1f}", ha="center", fontsize=8.5, color=INK)
-    ax.set_xticks(range(len(suites)), [s if s != "L1" else "L1\n(KEM in kyber-py)" for s in suites])
+    ax.set_xticks(range(len(suites)), suites)
     ax.set_ylabel("full handshake, ms")
     ax.set_ylim(0, max(p95) * 1.25)
     ax.set_title("Full mutual handshake: compute time, both sides")

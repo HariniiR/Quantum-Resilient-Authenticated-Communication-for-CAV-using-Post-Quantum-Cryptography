@@ -45,7 +45,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", default=str(ROOT / "config" / "demo.json"))
     ap.add_argument("--duration", type=float, default=50.0)
-    ap.add_argument("--suite", help="override suite: DECK, L1, L3, L5, CLASSIC")
+    ap.add_argument("--suite", help="override suite: DECK or CLASSIC")
     ap.add_argument("--keep", action="store_true", help="do not wipe the run directory first")
     ap.add_argument("--quiet", action="store_true", help="only print the final summary")
     args = ap.parse_args()

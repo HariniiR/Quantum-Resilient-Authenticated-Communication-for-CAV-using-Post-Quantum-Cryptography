@@ -49,15 +49,10 @@ distributed system (`scripts/run_network.py`).
 | Suite | KEM | Signature | Why it exists |
 |---|---|---|---|
 | `DECK` (default) | ML-KEM-1024 | ML-DSA-65 | the parameter choice on the Review 1 slides |
-| `L1` | ML-KEM-512 | ML-DSA-44 | NIST category 1/2 |
-| `L3` | ML-KEM-768 | ML-DSA-65 | NIST category 3, matched levels |
-| `L5` | ML-KEM-1024 | ML-DSA-87 | NIST category 5, matched levels |
 | `CLASSIC` | ECDH P-256 (as a KEM) | ECDSA P-256 | what V2X uses today: the baseline |
 
 `DECK` pairs a category-5 KEM with a category-3 signature, so its overall
-strength is category 3. That pairing is legitimate (it is what the Olushola and
-Meenakshi paper uses), but `L3` gives the same security with a smaller KEM. Say
-this if asked.
+strength is category 3.
 
 ECDH is wrapped as a KEM (ephemeral-static DH, the DHKEM construction of RFC
 9180). The classical baseline therefore runs through **exactly the same protocol
@@ -67,12 +62,6 @@ code** as the post-quantum suites, so the comparison is like-for-like.
 
 Every algorithm comes from `cryptography` ≥ 47, which bundles OpenSSL ≥ 3.5
 with native, constant-time ML-KEM and ML-DSA (ML-DSA-65 signs in about 1 ms).
-
-One exception: the library exposes ML-KEM-768 and ML-KEM-1024 but not
-ML-KEM-512 (OpenSSL itself implements it), so `L1` takes its KEM from
-`kyber-py`, a pure-Python implementation of FIPS 203. Same sizes and
-encodings, but slower and not constant-time, which is why L1's handshake is
-the slowest of the five suites.
 
 ### Hash and KDF
 
@@ -424,7 +413,7 @@ are evaluated by ablation (`results/ns3_variants.csv`, Figure 10):
 | Script | Produces |
 |---|---|
 | `scripts/run_evaluation.py` | primitives, sizes (full and cached), handshake timing, beacon budget, 21 attacks, consensus scaling, throughput, fault tolerance, view change, score dynamics; all figures |
-| `scripts/run_ns3_sweeps.py` | density sweep for 5 suites + DECK with certificate caching × 50–200 vehicles, signed vs AEAD beacons, EDCA/backoff ablation |
+| `scripts/run_ns3_sweeps.py` | density sweep for CLASSIC, DECK, and DECK with certificate caching × 50–200 vehicles, signed vs AEAD beacons, EDCA/backoff ablation |
 | `scripts/make_viewer.py` | `results/viewer.html`: browser replay of one traced ns-3 run per scenario (classical, PQ, PQ + cache) |
 | `scripts/run_network.py` | the distributed system run, with the end-to-end report |
 | `scripts/demo_protocol.py` | step-by-step protocol walkthrough for the viva |

@@ -37,7 +37,7 @@ from .handshake import HandshakeError, establish
 from .ledger import Transaction
 from .network import Link80211p
 
-OUT = Path("results")
+OUT = Path("results") / "review1"
 BEACON_BUDGET_MS = 100.0
 
 
@@ -54,7 +54,7 @@ def bench(fn, n: int = 100, warmup: int = 10) -> tuple[float, float]:
 
 
 # ---------------------------------------------------------------------------
-# 1. Primitive microbenchmarks across all three security levels
+# 1. Primitive microbenchmarks for DECK
 # ---------------------------------------------------------------------------
 
 def benchmark_primitives() -> list[dict]:
@@ -132,7 +132,7 @@ def benchmark_sizes() -> list[dict]:
             "airtime_ms": round(link.airtime_ms(flight, 100, 5), 2),
         })
     rows.append({
-        "level": "classical", "kem": "ECDH P-256", "sig": "ECDSA P-256",
+        "level": "CLASSIC", "kem": "ECDH P-256", "sig": "ECDSA P-256",
         "kem_pk": 65, "kem_ct": 65, "sig_len": 72,
         "handshake_flight_bytes": 65 + 65 + 144,
         "frames_1500B": 1,
@@ -371,7 +371,7 @@ def attack_tests() -> list[dict]:
 # ---------------------------------------------------------------------------
 
 def write_csv(name: str, rows: list[dict]) -> Path:
-    OUT.mkdir(exist_ok=True)
+    OUT.mkdir(parents=True, exist_ok=True)
     path = OUT / name
     if rows:
         with path.open("w", newline="") as f:

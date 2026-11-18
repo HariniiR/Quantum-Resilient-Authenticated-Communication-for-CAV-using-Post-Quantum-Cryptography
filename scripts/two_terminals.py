@@ -235,7 +235,7 @@ async def cav_main(ident: str, port: int, auto: bool) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("role", choices=["setup", "rsu", "cav"])
-    ap.add_argument("--suite", default="DECK", help="for setup: DECK, L1, L3, L5, CLASSIC")
+    ap.add_argument("--suite", default="DECK", help="for setup: DECK or CLASSIC")
     ap.add_argument("--id", default="CAV_01", help="for cav: CAV_01, or CAV_02 (revoked)")
     ap.add_argument("--port", type=int, default=7401)
     ap.add_argument("--auto", action="store_true", help="for cav: run b, e, t, r, text, q by itself")

@@ -83,7 +83,7 @@ certificate & \V{classic-cert} B & \V{deck-cert} B \\
 \textbf{Status}
 \begin{itemize}
 \item[\textcolor{teal}{\checkmark}] Distributed system: 19 processes over TCP
-\item[\textcolor{teal}{\checkmark}] ns-3: 5 suites + caching $\times$ 50--200 vehicles $\times$ \V{ns3-seeds} seeds
+\item[\textcolor{teal}{\checkmark}] ns-3: CLASSIC, DECK and DECK with caching $\times$ 50--200 vehicles $\times$ \V{ns3-seeds} seeds
 \item[\textcolor{teal}{\checkmark}] \V{attacks-total} attacks, \V{attacks-rejected} rejected
 \item[\textcolor{teal}{\checkmark}] 55 automated tests
 \item[\textcolor{teal}{\checkmark}] New: certificate caching (handshake $-$\V{deck-cache-saving}\,\%)
@@ -249,9 +249,8 @@ radio frames & \V{deck-hs-frames} & \V{deck-cached-frames} \\
 \textbf{Stack}
 \begin{itemize}
 \item Python, \code{cryptography} (OpenSSL 3.5: native ML-KEM / ML-DSA)
-\item \code{kyber-py}: ML-KEM-512 only (not exposed by \code{cryptography})
 \item ns-3 3.44 (C++ scenario via Python bindings)
-\item 5 suites: Classical, L1, L3, DECK (1024/65), L5
+\item Two suites: CLASSIC (P-256) and DECK (1024/65)
 \item Classical runs through the \textbf{same protocol code}
 \end{itemize}
 \end{column}
@@ -303,7 +302,7 @@ ML-DSA-65 signs in \V{deck-sign-native}\,ms (p99 \V{deck-sign-native-p99}\,ms): 
 \centering
 \includegraphics[width=0.92\textwidth]{fig8_ns3_success_airtime.png}
 
-\small Classical: \V{ns3-success-classic-200}\,\% at 200 vehicles. DECK: \V{ns3-success-deck-100}\,\% at 100, \V{ns3-success-deck-200}\,\% at 200. Roughly in order of size (L3 $\approx$ DECK, within seed noise). \textbf{The limit is the channel, not the CPU.}
+\small Classical: \V{ns3-success-classic-200}\,\% at 200 vehicles. DECK: \V{ns3-success-deck-100}\,\% at 100, \V{ns3-success-deck-200}\,\% at 200. \textbf{The limit is the channel, not the CPU.}
 \end{frame}
 
 % -----------------------------------------------------------------------------
@@ -385,7 +384,7 @@ Revocation & session closed, reconnection rejected \\
 \item \textbf{Per message, post-quantum V2X fits} the 100\,ms budget at every security level.
 \item \textbf{Bandwidth is the binding constraint}: a PQ handshake is $\sim$20$\times$ classical, and dense cells saturate.
 \item \textbf{Certificate caching halves the handshake}; exponential backoff prevents congestion collapse.
-\item \textbf{DECK = category 3}: L3 gives the same security with a smaller KEM.
+\item \textbf{DECK = category 3}: ML-DSA-65 sets the overall strength.
 \item \textbf{AGS-PBFT}: far fewer messages; slower; never on the safety path.
 \end{enumerate}
 \end{frame}

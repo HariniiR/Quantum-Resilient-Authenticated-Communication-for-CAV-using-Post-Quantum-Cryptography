@@ -2,7 +2,7 @@
 Step-by-step walkthrough of the protocol for a viva or review, in one process.
 
     python scripts/demo_protocol.py               # ML-KEM-1024 + ML-DSA-65 (the deck's suite)
-    python scripts/demo_protocol.py --suite L3
+    python scripts/demo_protocol.py --suite CLASSIC
 
 Prints every phase of the deck (preparation, registration, handshake,
 communication) with real sizes, timings and key material, then shows a few

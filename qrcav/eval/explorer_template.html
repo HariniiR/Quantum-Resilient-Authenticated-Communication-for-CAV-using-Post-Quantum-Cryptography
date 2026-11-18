@@ -506,7 +506,7 @@ page("suites", "1", "Crypto suites", 1, p => {
   const sec = p.sec;
   sec.appendChild(pageHead("Module 1 · Track A · crypto foundation", "Cipher suites",
     "A <b>suite</b> picks one key-exchange algorithm (a KEM) and one signature algorithm. The same handshake code runs with any of them, so the post-quantum suites and today's classical baseline are compared like for like.",
-    ["qrcav/crypto/suites.py", "qrcav/crypto/kdf.py", "qrcav/codec.py", "tests/test_crypto.py"], "python scripts/demo_protocol.py --suite L3"));
+    ["qrcav/crypto/suites.py", "qrcav/crypto/kdf.py", "qrcav/codec.py", "tests/test_crypto.py"], "python scripts/demo_protocol.py --suite CLASSIC"));
   sec.appendChild(plain("<b>Why the change.</b> Shor's algorithm on a large quantum computer solves the elliptic-curve problems behind ECDH and ECDSA. Traffic recorded today could be decrypted later, and signatures could be forged. <b>ML-KEM</b> (FIPS 203) and <b>ML-DSA</b> (FIPS 204) rest on lattice problems for which no efficient quantum attack is known. The cost is size: keys and signatures are tens of times larger."));
   const timing = Object.fromEntries((R.handshake_timing || []).map(r => [r.suite, r]));
   const rows = (R.sizes || []);
@@ -521,7 +521,7 @@ page("suites", "1", "Crypto suites", 1, p => {
       { label: "Frames", num: 1, get: r => `${r.frames} → ${r.frames_cached}` },
       { label: "Compute p50", num: 1, get: r => timing[r.suite] ? nf(timing[r.suite].p50_ms, 2) + " ms" : "–" },
     ], rows, { hl: r => r.suite === SUITE }),
-    h("p", { class: "note", html: "<b>DECK</b> is the pairing on the Review 1 slides (ML-KEM-1024 with ML-DSA-65); overall it is category 3, the strength of its weaker half. <b>L3</b> gives the same security with a smaller KEM. <b>L1</b> takes ML-KEM-512 from the pure-Python <code>kyber-py</code> because the <code>cryptography</code> library does not expose it, which is why its compute time is the highest. Frames are 1,400-byte radio chunks." })));
+    h("p", { class: "note", html: "<b>DECK</b> is the pairing on the Review 1 slides (ML-KEM-1024 with ML-DSA-65); overall it is category 3, the strength of its weaker half. Frames are 1,400-byte radio chunks." })));
 
   const cats = rows.map(r => r.suite);
   sec.appendChild(h("div", { class: "cols even" },
@@ -1547,8 +1547,8 @@ page("radio", "9", "Radio (ns-3)", 2, p => {
   const dens = R.ns3_density || [];
   const vs = [...new Set(dens.map(r => r.vehicles))].sort((a, b) => a - b);
   const line = (suite, cache, col, dash, key) => ({ color: col, dash, values: vs.map(v => (dens.find(r => r.suite === suite && r.cert_cache === cache && r.vehicles === v) || {})[key] ?? null) });
-  const series = key => [line("CLASSIC", 0, "var(--ink2)", null, key), line("L3", 0, "var(--blue)", null, key), line("DECK", 0, "var(--amber)", null, key), line("L5", 0, "var(--red)", null, key), line("DECK", 1, "var(--accent)", null, key)];
-  const lg = legend([["var(--ink2)", "Classical"], ["var(--blue)", "L3"], ["var(--amber)", "DECK"], ["var(--red)", "L5"], ["var(--accent)", "DECK + certificate caching"]]);
+  const series = key => [line("CLASSIC", 0, "var(--ink2)", null, key), line("DECK", 0, "var(--amber)", null, key), line("DECK", 1, "var(--accent)", null, key)];
+  const lg = legend([["var(--ink2)", "Classical"], ["var(--amber)", "DECK"], ["var(--accent)", "DECK + certificate caching"]]);
   sec.appendChild(h("div", { class: "cols even" },
     panel("Handshakes completed against vehicle count", lineChart({ xs: vs, series: series("handshake_success_pct"), xLabel: "vehicles on the grid", yLabel: "% completed", yMax: 100 }), lg),
     panel("Event to alert, median", lineChart({ xs: vs, series: series("alert_p50_ms"), xLabel: "vehicles on the grid", yLabel: "milliseconds" }), lg.cloneNode(true))));

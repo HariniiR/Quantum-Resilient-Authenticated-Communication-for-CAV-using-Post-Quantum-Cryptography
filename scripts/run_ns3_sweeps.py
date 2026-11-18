@@ -2,7 +2,7 @@
 Run the ns-3 experiments and write results/ns3_*.csv plus the raw samples
 used by the figures.
 
-    python scripts/run_ns3_sweeps.py              # full: 5 suites + DECK with certificate caching
+    python scripts/run_ns3_sweeps.py              # full: CLASSIC and DECK, plus DECK with certificate caching
                                                   # x 50-200 vehicles (~30 min on 2 cores)
     python scripts/run_ns3_sweeps.py --quick      # 2 suites x 50,100 vehicles
     python scripts/run_ns3_sweeps.py --vehicles 50 100 200 300
@@ -21,6 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from qrcav.crypto import SUITE_DEFS  # noqa: E402
 from qrcav.eval.ns3_sweeps import density_jobs, run_many, write_rows  # noqa: E402
 from qrcav.sim.ns3_runner import ns3_available  # noqa: E402
 from qrcav.sim.profile import load_or_build, profile_path  # noqa: E402
@@ -30,7 +31,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true")
     ap.add_argument("--vehicles", type=int, nargs="*")
-    ap.add_argument("--suites", nargs="*")
+    ap.add_argument("--suites", nargs="+", type=str.upper, choices=sorted(SUITE_DEFS))
     ap.add_argument("--sim-time", type=float, default=30.0)
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--out", default=str(ROOT / "results"))
@@ -45,7 +46,7 @@ def main() -> None:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     prof_dir = out / "profiles"
-    suites = args.suites or (["CLASSIC", "DECK"] if args.quick else ["CLASSIC", "L1", "L3", "DECK", "L5"])
+    suites = list(dict.fromkeys(args.suites)) if args.suites else sorted(SUITE_DEFS)
     vehicles = args.vehicles or ([50, 100] if args.quick else [50, 100, 150, 200])
 
     t0 = time.time()
@@ -76,11 +77,8 @@ def main() -> None:
     jobs = density_jobs(paths, vehicles, args.sim_time) + cached()
     mid = vehicles[min(1, len(vehicles) - 1)]
     extra = []
-    if not args.no_cache_runs:
-        if "DECK" in paths:     # upper bound: every certificate already cached
-            extra.append((paths["DECK"], {"n_vehicles": mid, "sim_time": args.sim_time, "cert_cache": 2}))
-        if "L3" in paths:
-            extra.append((paths["L3"], {"n_vehicles": mid, "sim_time": args.sim_time, "cert_cache": 1}))
+    if not args.no_cache_runs and "DECK" in paths:  # every certificate already cached
+        extra.append((paths["DECK"], {"n_vehicles": mid, "sim_time": args.sim_time, "cert_cache": 2}))
     for s in [x for x in ("CLASSIC", "DECK") if x in paths]:     # broadcast-signed beacons
         extra.append((paths[s], {"n_vehicles": mid, "sim_time": args.sim_time, "signed_beacons": True}))
     if "DECK" in paths:

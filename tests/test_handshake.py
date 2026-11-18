@@ -57,7 +57,7 @@ def test_identity_persistence(tmp_path, net):
 
 # ---- handshake -----------------------------------------------------------------
 
-@pytest.mark.parametrize("name", ["DECK", "L1", "L3", "L5", "CLASSIC"])
+@pytest.mark.parametrize("name", ["DECK", "CLASSIC"])
 def test_handshake_all_suites(name):
     ta = TrustedAuthority(get_suite(name))
     ids = enrol_all(ta, [("CAV_01", "CAV"), ("RSU_01", "RSU")])

@@ -15,7 +15,7 @@ from ..crypto.suites import get_suite
 from ..handshake import handshake_in_memory
 from ..pki import TrustedAuthority, enrol_all
 
-SUITES = ["CLASSIC", "L1", "L3", "DECK", "L5"]
+SUITES = ["CLASSIC", "DECK"]
 CHUNK = 1400            # application bytes per 802.11p frame (as in the ns-3 scenario)
 PHY_RATE = 6e6          # 802.11p default data rate, 10 MHz channel
 OVERHEAD_BYTES = 24 + 8 + 20 + 8 + 28   # app hdr + UDP + IPv4 + LLC/SNAP + MAC/FCS

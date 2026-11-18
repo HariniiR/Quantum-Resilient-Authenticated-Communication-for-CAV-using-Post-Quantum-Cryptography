@@ -17,6 +17,8 @@ import random
 import statistics
 from pathlib import Path
 
+from ..crypto import get_suite
+
 _HERE = Path(__file__).resolve().parent
 _LIB = None
 
@@ -132,6 +134,7 @@ def run_scenario(
     cert_cache: int = 0,
     trace: bool = False,
 ) -> dict:
+    suite = get_suite(profile["suite"]).name
     lib = _lib()
     std = lib._std
     lib.reset()
@@ -176,7 +179,7 @@ def run_scenario(
     measured = C.get("measured_s", sim_time - warmup)
     slots = C.get("beacon_slots", 0.0)
     res = {
-        "suite": profile["suite"], "vehicles": n_vehicles,
+        "suite": suite, "vehicles": n_vehicles,
         "rsus": len(rsus), "area_km2": width * height / 1e6, "signed_beacons": signed_beacons,
         "consensus": "pbft" if pbft else "ags", "edca": edca, "backoff": backoff,
         "cert_cache": cert_cache,

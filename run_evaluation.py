@@ -4,13 +4,14 @@ Run the full evaluation.
 
     ./.venv/bin/python run_evaluation.py
 
-Writes CSV files and figures to results/.
+Writes CSV files and figures to results/review1/.
 """
 
 from __future__ import annotations
 
 from cavpqc import PAPER_CITATION
 from cavpqc.benchmark import (
+    OUT,
     attack_tests,
     benchmark_beacon_path,
     benchmark_classical,
@@ -104,7 +105,7 @@ def main() -> None:
     # -- figures ---------------------------------------------------------
     try:
         make_figures(prim, sizes, beacon, cons, ft, rows)
-        print("\nFigures written to results/")
+        print("\nFigures written to results/review1/")
     except Exception as e:  # pragma: no cover
         print(f"\n(figure generation skipped: {e})")
 
@@ -114,8 +115,8 @@ def main() -> None:
     print(f"Beacon, AEAD only        : {aead['total_ms']:.2f} ms   fits 100 ms: {aead['fits_100ms']}")
     for s in signed:
         print(f"Beacon, {s['mode']:<17}: {s['total_ms']:.2f} ms   fits 100 ms: {s['fits_100ms']}")
-    print(f"\nHandshake flight (L3)    : {sizes[1]['handshake_flight_bytes']} B "
-          f"= {sizes[1]['frames_1500B']} frames")
+    print(f"\nHandshake flight (DECK)    : {sizes[0]['handshake_flight_bytes']} B "
+          f"= {sizes[0]['frames_1500B']} frames")
     print(f"Classical equivalent     : {sizes[-1]['handshake_flight_bytes']} B "
           f"= {sizes[-1]['frames_1500B']} frame")
     print(f"Consensus message saving : {cons[-1]['msg_reduction_pct']}% at "
@@ -128,9 +129,8 @@ def make_figures(prim, sizes, beacon, cons, ft, sweep_rows) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    from pathlib import Path
-    out = Path("results")
-    out.mkdir(exist_ok=True)
+    out = OUT
+    out.mkdir(parents=True, exist_ok=True)
     NAVY, CYAN, AMBER = "#0B1437", "#29D3F2", "#FFB000"
 
     def style(ax, title, xl, yl):
@@ -140,10 +140,10 @@ def make_figures(prim, sizes, beacon, cons, ft, sweep_rows) -> None:
         ax.grid(alpha=0.25, linestyle=":")
         ax.tick_params(labelsize=8)
 
-    # Figure 1 - primitive cost by security level
+    # Figure 1 - primitive cost for DECK
     fig, ax = plt.subplots(figsize=(9, 4.2))
     ops = ["keygen", "encaps", "decaps", "sign", "verify"]
-    levels = ["L1", "L3", "L5"]
+    levels = ["DECK"]
     width = 0.26
     for i, lv in enumerate(levels):
         vals = []
@@ -152,10 +152,10 @@ def make_figures(prim, sizes, beacon, cons, ft, sweep_rows) -> None:
             vals.append(match[0]["mean_ms"] if match else 0)
         ax.bar([x + i * width for x in range(len(ops))], vals, width,
                label=lv, color=[NAVY, CYAN, AMBER][i])
-    ax.set_xticks([x + width for x in range(len(ops))])
+    ax.set_xticks(range(len(ops)))
     ax.set_xticklabels(ops)
-    style(ax, "Post-quantum primitive cost by security level", "operation", "mean time (ms)")
-    ax.legend(fontsize=8, title="NIST level")
+    style(ax, "Post-quantum primitive cost for DECK", "operation", "mean time (ms)")
+    ax.legend(fontsize=8, title="Suite")
     fig.tight_layout(); fig.savefig(out / "fig1_primitives.png", dpi=160); plt.close(fig)
 
     # Figure 2 - the key figure: beacon path against the 100 ms budget
@@ -177,7 +177,7 @@ def make_figures(prim, sizes, beacon, cons, ft, sweep_rows) -> None:
     fig, ax = plt.subplots(figsize=(9, 4.2))
     lv = [s["level"] for s in sizes]
     by = [s["handshake_flight_bytes"] for s in sizes]
-    bars = ax.bar(lv, by, 0.55, color=[NAVY, NAVY, NAVY, AMBER])
+    bars = ax.bar(lv, by, 0.55, color=[NAVY, AMBER])
     for b, s in zip(bars, sizes):
         ax.text(b.get_x() + b.get_width() / 2, b.get_height() + 150,
                 f"{s['frames_1500B']} frame(s)", ha="center", fontsize=8)

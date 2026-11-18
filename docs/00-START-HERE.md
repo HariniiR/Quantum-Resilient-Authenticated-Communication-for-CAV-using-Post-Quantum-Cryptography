@@ -30,8 +30,7 @@ above are current.
    802.11p channel saturates.
 3. **Certificate caching halves the handshake**; EDCA priority and
    exponential backoff keep the channel usable.
-4. **DECK (ML-KEM-1024 + ML-DSA-65) is category 3**, set by its signature; L3
-   gives the same security with a smaller KEM.
+4. **DECK (ML-KEM-1024 + ML-DSA-65) is category 3**, set by its signature.
 5. **AGS-PBFT sends far fewer messages than PBFT but is not faster**, and the
    safety path never waits for it.
 

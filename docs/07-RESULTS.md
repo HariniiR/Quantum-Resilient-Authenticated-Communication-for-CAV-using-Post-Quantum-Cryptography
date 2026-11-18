@@ -20,35 +20,25 @@ benchmarks were run with the CPU otherwise idle.
 |---|---|---|---|---|---|---|
 | Classical (ECDH/ECDSA P-256) | 0.024 | 0.12 | 0.091 | 0.031 | 0.072 | 0.12 |
 | DECK (ML-KEM-1024 / ML-DSA-65) | 0.23 | 0.067 | 0.052 | 1.28 | 4.38 | 0.23 |
-| L1 (ML-KEM-512 in kyber-py / ML-DSA-44) | 1.80 | 2.70 | 3.63 | 1.27 | 3.32 | 0.16 |
 
-Full table: `results/primitives.csv` (all five suites).
+Full table: `results/primitives.csv` (DECK and CLASSIC).
 
 **What it means.**
 - **Every operation is fast; signing is the most expensive and the most
   variable.** ML-DSA's rejection sampling gives a long tail: p99 is 2.5–3.5×
   the mean. Verification is deterministic.
-- **L1's ML-KEM-512 is the outlier** (2.7 ms per encapsulation against
-  0.07 ms for native ML-KEM-1024) because it runs in pure Python: the
-  `cryptography` library does not expose ML-KEM-512.
 
 ### Handshake (Figures 1, 2)
 
 | Suite | Bytes | Frames | Airtime at 6 Mb/s | Bytes, cached certs | Frames | Compute |
 |---|---|---|---|---|---|---|
 | Classical | 1,043 | 4 | 2.05 ms | 691 | 4 | 1.2 ms |
-| L1 | 14,373 | 13 | 21.3 ms | 6,825 | 8 | 11.6 ms* |
-| L3 | 19,913 | 17 | 29.4 ms | 9,307 | 10 | 4.8 ms |
 | DECK | 20,779 | 17 | 30.5 ms | 10,173 | 10 | 4.8 ms |
-| L5 | 27,329 | 22 | 40.1 ms | 12,807 | 12 | 5.7 ms |
-
-\* L1's KEM runs in pure Python (`kyber-py`): the `cryptography` library
-exposes no ML-KEM-512.
 
 **What it means.**
-- **A post-quantum handshake is 14–26× the bytes of a classical one.** An
+- **A DECK handshake is about 20× the size of a CLASSIC handshake.** An
   ML-DSA-65 certificate is 5,355 B and each side sends one.
-- **Certificate caching removes 51–53 %** of every post-quantum handshake
+- **Certificate caching removes 51 %** of the DECK handshake
   (DECK: 20,779 → 10,173 B, 17 → 10 frames). See `docs/05` §4 for the design
   and its security argument.
 - **Computation is not the problem.** About 5 ms for a complete DECK
@@ -64,7 +54,6 @@ p99 crypto plus airtime, against the 100 ms beacon interval:
 |---|---|---|
 | Classical | 0.40 ms (135 B) | 0.88 ms (234 B) |
 | DECK | 0.41 ms (135 B) | 9.5 ms (3,472 B, 3 frames) |
-| L5 | 0.47 ms (135 B) | 12.6 ms (4,790 B, 4 frames) |
 
 **What it means.** The base paper folds the one-off handshake into its
 per-message latency. Separated, the per-beacon cost of the session design is
@@ -104,21 +93,21 @@ certificates resolved from the MEC directory after the first session.
 
 ### Handshakes completed (%)
 
-| Vehicles (per km²) | Classical | L1 | L3 | DECK | L5 | DECK + cache |
-|---|---|---|---|---|---|---|
-| 50 (22) | 100 | 100 | 99 | 100 | 99 | 100 |
-| 100 (44) | 100 | 97 | 70 | 74 | 56 | **98** |
-| 150 (67) | 100 | 54 | 40 | 38 | 32 | **80** |
-| 200 (89) | 100 | 39 | 27 | 27 | 22 | **57** |
+| Vehicles (per km²) | Classical | DECK | DECK + cache |
+| --- | --- | --- | --- |
+| 50 (22) | 100 | 100 | 100 |
+| 100 (44) | 100 | 74 | **98** |
+| 150 (67) | 100 | 38 | **80** |
+| 200 (89) | 100 | 27 | **57** |
 
 ### Median handshake completion (ms)
 
-| Vehicles | Classical | L1 | L3 | DECK | L5 | DECK + cache |
-|---|---|---|---|---|---|---|
-| 50 | 7 | 73 | 88 | 90 | 139 | 54 |
-| 100 | 8 | 109 | 288 | 285 | 482 | 73 |
-| 150 | 10 | 575 | 651 | 636 | 750 | 197 |
-| 200 | 12 | 763 | 760 | 795 | 844 | 417 |
+| Vehicles | Classical | DECK | DECK + cache |
+| --- | --- | --- | --- |
+| 50 | 7 | 90 | 54 |
+| 100 | 8 | 285 | 73 |
+| 150 | 10 | 636 | 197 |
+| 200 | 12 | 795 | 417 |
 
 ### Other measures at 100 vehicles
 
@@ -134,22 +123,18 @@ Alerts at 200 vehicles: 5.7 ms classical, 218 ms DECK, 33 ms DECK + cache.
 
 ### What it means
 
-1. **Post-quantum V2X fails on bandwidth, not compute.** Every PQ suite
+1. **Post-quantum V2X fails on bandwidth, not compute.** DECK
    degrades with density while classical stays at 100 % (99.9 % at 200 vehicles). Handshake airtime
    pushes the channel into saturation (160 % aggregate airtime for DECK at
    100 vehicles against 41 % classical), losses trigger retransmissions, and
    the retransmissions add load.
-2. **Roughly in order of size.** L1 (14 KB) holds up longest, L5 (27 KB)
-   fails first. L3 and DECK differ by under 1 KB and are within seed-to-seed
-   variation of each other: DECK's category-5 KEM buys nothing over L3,
-   because the category-3 signature sets the suite's strength.
-3. **Certificate caching recovers most of it up to 100 vehicles** (74 → 98 %
+2. **Certificate caching recovers most of it up to 100 vehicles** (74 → 98 %
    completed, 285 → 73 ms median, airtime 160 → 68 %) and doubles completion
    at 200 vehicles (27 → 57 %). It does not close the gap: a cached DECK
    handshake is still about 10× a classical one (KEM key, ciphertext, two
    signatures).
-4. **A saturated channel delays alerts too.** Up to 100 vehicles the median
-   alert stays below 20 ms for every suite (5.4 ms classical to 16.5 ms L5);
+3. **A saturated channel delays alerts too.** Up to 100 vehicles the median
+   alert takes 5.4 ms with CLASSIC and 7.6 ms with DECK at 100 vehicles;
    at 200 vehicles DECK alerts take 218 ms (33 ms with caching).
 
 ### Variants (seed 1, 100 vehicles; `results/ns3_variants.csv`, Figure 10)
@@ -162,7 +147,6 @@ Alerts at 200 vehicles: 5.7 ms classical, 218 ms DECK, 33 ms DECK + cache.
 | DECK, backoff only | 77 % | 291 ms | 85 % | 8.9 ms |
 | DECK + cache (directory) | 100 % | 68 ms | 98 % | 5.5 ms |
 | DECK + cache (all warm) | 97 % | 66 ms | 99 % | 6.0 ms |
-| L3 + cache (directory) | 100 % | 76 ms | 97 % | 5.9 ms |
 | DECK, signed beacons | 23 % | 704 ms | 46 % | 233 ms |
 | Classical, signed beacons | 100 % | 9 ms | 100 % | 5.4 ms |
 
@@ -271,14 +255,13 @@ Review 1 slide design**, which has no client signature (F2).
 ## 6. Answers to the questions a panel will ask
 
 **"Does post-quantum fit the 100 ms budget?"**
-Per message, yes, at every security level, provided beacons travel inside a
+Per message, yes, with DECK, provided beacons travel inside a
 session (0.4 ms) or signed individually with ML-DSA (≈ 10 ms). The
 real limit is channel capacity during handshakes in dense traffic.
 
 **"Why ML-KEM-1024 with ML-DSA-65?"**
 That is the deck's choice and the supporting paper's. Its overall strength is
-category 3, set by the signature. L3 (ML-KEM-768) gives the same security with
-866 fewer bytes, and in ns-3 it performs the same.
+category 3, set by the signature.
 
 **"What did you add beyond the paper?"**
 Certificate caching: 32-byte references instead of 5.3 KB certificates, with

@@ -4,11 +4,8 @@
 Suite & KEM keygen & encaps & decaps & sign & sign p99 & verify \\
 \midrule
 Classical & 0.024 & 0.12 & 0.091 & 0.031 & 0.072 & 0.12 \\
-L1 (KEM in kyber-py) & 1.80 & 2.70 & 3.63 & 1.27 & 3.32 & 0.16 \\
-L3 & 0.14 & 0.052 & 0.041 & 1.30 & 4.60 & 0.23 \\
 DECK & 0.23 & 0.067 & 0.052 & 1.28 & 4.38 & 0.23 \\
-L5 & 0.20 & 0.067 & 0.052 & 1.48 & 5.19 & 0.42 \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\par\smallskip{\footnotesize Mean of 200 runs after warm-up, in ms. All operations use OpenSSL through the \texttt{cryptography} library, except L1's ML-KEM-512, which that library does not expose; it comes from \texttt{kyber-py} (pure Python).}
+\par\smallskip{\footnotesize Mean of 200 runs after warm-up, in ms. All operations use OpenSSL through the \texttt{cryptography} library.}

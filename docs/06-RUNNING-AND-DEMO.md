@@ -159,7 +159,7 @@ Everything is in `config/demo.json`:
 - **A crash:** `"crash_at": 30` on a node.
 - **Faster regrouping:** `"regroup_interval"` (the paper uses 50).
 - **Plain PBFT instead of AGS-PBFT:** `"consensus": {"mode": "pbft", ...}`.
-- **Another suite:** `"suite": "L3"` (or pass `--suite` on the command line).
+- **Another suite:** `"suite": "CLASSIC"` (or pass `--suite` on the command line).
 
 ## 6. Troubleshooting
 

@@ -1,17 +1,11 @@
 """
 Cryptographic suites: one KEM plus one signature scheme.
 
-Implementation: the `cryptography` library (version 47 or later), which bundles
-OpenSSL 3.5 with native, constant-time ML-KEM and ML-DSA. One exception: the
-library exposes only ML-KEM-768 and ML-KEM-1024, so the L1 suite takes its
-ML-KEM-512 from `kyber-py`, a pure-Python implementation of FIPS 203.
+Post-quantum primitives use native OpenSSL via cryptography.
 
 Suites
 ------
   DECK     ML-KEM-1024 + ML-DSA-65   the parameter choice on the Review 1 slides
-  L1       ML-KEM-512  + ML-DSA-44   NIST category 1 / 2
-  L3       ML-KEM-768  + ML-DSA-65   NIST category 3
-  L5       ML-KEM-1024 + ML-DSA-87   NIST category 5
   CLASSIC  ECDH-P256   + ECDSA-P256  what V2X uses today (IEEE 1609.2); the baseline
 
 ECDH is wrapped as a KEM (ephemeral-static Diffie-Hellman, as in RFC 9180's
@@ -37,7 +31,6 @@ except ImportError as e:  # pragma: no cover - depends on the installed version
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-from kyber_py.ml_kem import ML_KEM_512
 
 
 # ---------------------------------------------------------------------------
@@ -69,55 +62,19 @@ class KEM:
         return self._decaps(dk, ct)
 
 
-_KEM_SIZES = {
-    "ML-KEM-512": (800, 768),
-    "ML-KEM-768": (1184, 1088),
-    "ML-KEM-1024": (1568, 1568),
-}
-
-
-def _mlkem_kem(name: str) -> KEM:
-    """ML-KEM-768 / ML-KEM-1024 through OpenSSL."""
-    cls_priv = {
-        "ML-KEM-768": _mlkem.MLKEM768PrivateKey,
-        "ML-KEM-1024": _mlkem.MLKEM1024PrivateKey,
-    }[name]
-    cls_pub = {
-        "ML-KEM-768": _mlkem.MLKEM768PublicKey,
-        "ML-KEM-1024": _mlkem.MLKEM1024PublicKey,
-    }[name]
-
+def _mlkem1024_kem() -> KEM:
     def keygen():
-        dk = cls_priv.generate()
+        dk = _mlkem.MLKEM1024PrivateKey.generate()
         return dk.public_key().public_bytes_raw(), dk
 
     def encaps(ek):
-        ss, ct = cls_pub.from_public_bytes(ek).encapsulate()
+        ss, ct = _mlkem.MLKEM1024PublicKey.from_public_bytes(ek).encapsulate()
         return ss, ct
 
     def decaps(dk, ct):
         return dk.decapsulate(ct)
 
-    pk, ct = _KEM_SIZES[name]
-    return KEM(name, pk, ct, keygen, encaps, decaps)
-
-
-def _mlkem512_kem() -> KEM:
-    """ML-KEM-512 from kyber-py (the `cryptography` library does not expose it)."""
-
-    def keygen():
-        ek, dk = ML_KEM_512.keygen()
-        return ek, dk
-
-    def encaps(ek):
-        ss, ct = ML_KEM_512.encaps(ek)
-        return ss, ct
-
-    def decaps(dk, ct):
-        return ML_KEM_512.decaps(dk, ct)
-
-    pk, ct = _KEM_SIZES["ML-KEM-512"]
-    return KEM("ML-KEM-512", pk, ct, keygen, encaps, decaps)
+    return KEM("ML-KEM-1024", 1568, 1568, keygen, encaps, decaps)
 
 
 def _ecdh_kem() -> KEM:
@@ -189,28 +146,14 @@ class Signature:
         return self._sk_from_bytes(raw)
 
 
-_SIG_SIZES = {
-    "ML-DSA-44": (1312, 2420),
-    "ML-DSA-65": (1952, 3309),
-    "ML-DSA-87": (2592, 4627),
-}
-
 # FIPS 204 context string. Domain-separates this protocol's signatures from any
 # other use of the same key.
 SIG_CONTEXT = b"qrcav-v1"
 
 
-def _mldsa_sig(name: str) -> Signature:
-    priv = {
-        "ML-DSA-44": _mldsa.MLDSA44PrivateKey,
-        "ML-DSA-65": _mldsa.MLDSA65PrivateKey,
-        "ML-DSA-87": _mldsa.MLDSA87PrivateKey,
-    }[name]
-    pub = {
-        "ML-DSA-44": _mldsa.MLDSA44PublicKey,
-        "ML-DSA-65": _mldsa.MLDSA65PublicKey,
-        "ML-DSA-87": _mldsa.MLDSA87PublicKey,
-    }[name]
+def _mldsa65_sig() -> Signature:
+    priv = _mldsa.MLDSA65PrivateKey
+    pub = _mldsa.MLDSA65PublicKey
 
     def keygen():
         sk = priv.generate()
@@ -226,9 +169,8 @@ def _mldsa_sig(name: str) -> Signature:
         except InvalidSignature:
             return False
 
-    pk, sl = _SIG_SIZES[name]
     return Signature(
-        name, pk, sl, keygen, sign, verify,
+        "ML-DSA-65", 1952, 3309, keygen, sign, verify,
         lambda sk: sk.private_bytes_raw(),          # 32-byte seed
         lambda raw: priv.from_seed_bytes(raw),
     )
@@ -270,9 +212,6 @@ def _ecdsa_sig() -> Signature:
 
 SUITE_DEFS = {
     "DECK": ("ML-KEM-1024", "ML-DSA-65"),
-    "L1": ("ML-KEM-512", "ML-DSA-44"),
-    "L3": ("ML-KEM-768", "ML-DSA-65"),
-    "L5": ("ML-KEM-1024", "ML-DSA-87"),
     "CLASSIC": ("ECDH-P256", "ECDSA-P256"),
 }
 
@@ -294,29 +233,17 @@ class Suite:
         return self.name != "CLASSIC"
 
 
-def _make_kem(name: str) -> KEM:
-    if name == "ECDH-P256":
-        return _ecdh_kem()
-    if name == "ML-KEM-512":
-        return _mlkem512_kem()
-    return _mlkem_kem(name)
-
-
-def _make_sig(name: str) -> Signature:
-    if name == "ECDSA-P256":
-        return _ecdsa_sig()
-    return _mldsa_sig(name)
-
-
 _cache: dict[str, Suite] = {}
 
 
 def get_suite(name: str | None = None) -> Suite:
-    """Return a suite by name ('DECK', 'L1', 'L3', 'L5', 'CLASSIC')."""
+    """Return a suite by name ('DECK' or 'CLASSIC')."""
     name = (name or DEFAULT_SUITE).upper()
     if name not in SUITE_DEFS:
         raise ValueError(f"unknown suite {name!r}; choose from {sorted(SUITE_DEFS)}")
     if name not in _cache:
-        kem_name, sig_name = SUITE_DEFS[name]
-        _cache[name] = Suite(name, _make_kem(kem_name), _make_sig(sig_name))
+        if name == "DECK":
+            _cache[name] = Suite(name, _mlkem1024_kem(), _mldsa65_sig())
+        else:
+            _cache[name] = Suite(name, _ecdh_kem(), _ecdsa_sig())
     return _cache[name]

@@ -34,12 +34,10 @@ Module & Responsibility \\
 
 \section{Cryptographic suites}
 
-A \emph{suite} pairs a KEM with a signature scheme. Five are implemented:
+A \emph{suite} pairs a KEM with a signature scheme. Two are implemented:
 \textbf{DECK} (ML-KEM-1024 + ML-DSA-65, the pairing in our Review~1 design and
-in~\cite{olushola}), \textbf{L1} (512/44), \textbf{L3} (768/65), \textbf{L5}
-(1024/87), and \textbf{CLASSIC} (ECDH P-256 + ECDSA P-256, as in IEEE~1609.2).
-DECK pairs a category-5 KEM with a category-3 signature, so its overall
-strength is category~3, the same as L3.
+in~\cite{olushola}), and \textbf{CLASSIC} (ECDH P-256 + ECDSA P-256, as in IEEE~1609.2).
+The category-3 signature sets DECK's overall strength.
 
 ECDH is wrapped as a KEM with the DHKEM construction of RFC~9180~\cite{hpke}:
 \textsf{Encaps} generates an ephemeral key pair, computes the Diffie--Hellman
@@ -50,12 +48,7 @@ post-quantum suites, which makes the comparison like-for-like.
 
 All algorithms come from the \code{cryptography} library (version 47 or
 later), which bundles OpenSSL~3.5 with native, constant-time ML-KEM and
-ML-DSA, as a deployment would use. One exception: the library exposes
-ML-KEM-768 and ML-KEM-1024 but not ML-KEM-512, so the L1 suite takes its KEM
-from \code{kyber-py}, a pure-Python implementation of FIPS~203. It produces
-the same sizes and encodings, but it is slower and, as its authors state, not
-constant-time, which is why L1's handshake is the slowest in
-Section~\ref{ch:results}.
+ML-DSA.
 
 \section{Distributed system}
 
@@ -166,7 +159,7 @@ drops the message.
 \item \textbf{Consensus}: real replicas with real ML-DSA signatures in a
 discrete-event loop, for 8--24 nodes, AGS-PBFT with and without shadow
 validation against PBFT; fault tolerance; view change; score dynamics.
-\item \textbf{ns-3 sweeps}: five suites and DECK with caching at 50--200
+\item \textbf{ns-3 sweeps}: CLASSIC, DECK, and DECK with caching at 50--200
 vehicles over three seeds, plus single-seed variants.
 \end{itemize}
 Timing measurements were taken with the machine otherwise idle, because
@@ -175,7 +168,7 @@ benchmarks run alongside ns-3 inflated latencies.
 \section{Testing}
 
 55 automated tests (\code{pytest}) cover the codec, FIPS key and signature sizes, key derivation (output lengths and transcript binding), record
-counters and replay window, ML-KEM-512 sizes, registration (proof of
+counters and replay window, DECK parameter sizes, registration (proof of
 possession, roster, duplicate keys), handshakes for all suites, role checks,
 certificate caching (savings, fallback, revocation, substituted references,
 forged HelloRetry), AGS-PBFT (normal case, scoring, regrouping, view change,

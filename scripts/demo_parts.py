@@ -12,7 +12,7 @@ Run one part of Phases 2-3 on its own, so each component can be shown separately
     python scripts/demo_parts.py attacks      # the attack harness
     python scripts/demo_parts.py all          # every part in order
 
-Add --suite L1 / L3 / L5 / CLASSIC to change the suite (default DECK).
+Add --suite CLASSIC to change the suite (default DECK).
 Every part builds only what it needs, so each can be run without the others.
 """
 

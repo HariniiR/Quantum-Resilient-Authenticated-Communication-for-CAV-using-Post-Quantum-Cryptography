@@ -53,7 +53,7 @@ script are in [`docs/06-RUNNING-AND-DEMO.md`](docs/06-RUNNING-AND-DEMO.md).
 
 ```
 qrcav/                         the system (v2)
-  crypto/suites.py             ML-KEM / ML-DSA suites (OpenSSL; kyber-py for ML-KEM-512 only); ECDH/ECDSA baseline
+  crypto/suites.py             DECK (ML-KEM-1024 / ML-DSA-65) and CLASSIC (ECDH / ECDSA P-256)
   crypto/kdf.py                SHAKE-256, HKDF-SHA3-256, DERIVE_SESSION_KEYS (deck slide 14)
   crypto/records.py            AES-256-GCM <ctr, ciphertext, tag> records, replay window (slide 17)
   pki.py                       Trusted Authority, certificates, signed CRL, registry DB (slides 12-13)
@@ -76,7 +76,7 @@ slides/                        Review 2 deck (Beamer)
 results/                       CSVs, figures, viewer.html, explorer.html (results/review1/ holds the Review 1 outputs)
 
 cavpqc/, demo.py, handshake.py, run_evaluation.py, why_composition_matters.py
-                               the Review 1 prototype, kept unchanged for reference
+                               the Review 1 prototype, with DECK and the classical benchmark
 ```
 
 ---
@@ -145,8 +145,7 @@ ns-3 figures are the mean of 3 seeds over 1.5 km × 1.5 km with 9 RSUs.
    fit (9.5 ms p99) but are 3 frames each and collapse coverage in
    ns-3.
 3. **Dense traffic breaks post-quantum handshakes, roughly in order of size.**
-   At 100 vehicles: L1 97 %, DECK 74 %, L3 70 %, L5 56 %; classical 100 %.
-   (L3 and DECK differ by under 1 KB and are within seed-to-seed noise.)
+   At 100 vehicles: DECK 74 %, classical 100 %.
 4. **Certificate caching recovers most of it.** At 100 vehicles DECK goes from
    74 % to 98 % completed and from 285 ms to 73 ms median; at 200 vehicles
    from 27 % to 57 %. Exponential backoff after failed handshakes is what

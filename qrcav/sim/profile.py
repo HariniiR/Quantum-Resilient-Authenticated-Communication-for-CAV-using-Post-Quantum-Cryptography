@@ -121,10 +121,13 @@ def profile_path(suite_name: str, cache_dir: Path) -> Path:
 
 
 def load_or_build(suite_name: str, cache_dir: Path, **kw) -> dict:
+    suite_name = get_suite(suite_name).name
     cache_dir.mkdir(parents=True, exist_ok=True)
     p = profile_path(suite_name, cache_dir)
     if p.exists():
-        return json.loads(p.read_text())
+        cached = json.loads(p.read_text())
+        if cached["suite"] == suite_name:
+            return cached
     prof = build_profile(suite_name, **kw)
     p.write_text(json.dumps(prof))
     return prof

@@ -5,12 +5,12 @@ data produced by the real code, not by hand-written examples.
 
     python scripts/make_explorer.py                 # uses run/logs if present, else runs the network
     python scripts/make_explorer.py --network       # re-run the distributed system first (about 60 s)
-    python scripts/make_explorer.py --suite L3      # a different suite for the walkthrough
+    python scripts/make_explorer.py --suite CLASSIC      # a different suite for the walkthrough
 
 What the page shows, and where each part's data comes from:
 
   Overview          architecture, the problem, headline numbers      results/*.csv
-  1 Crypto suites   five suites, key / ciphertext / signature sizes  results/sizes.csv, primitives.csv
+  1 Crypto suites   two suites, key / ciphertext / signature sizes  results/sizes.csv, primitives.csv
   2 PKI             TA set-up, registration with proof of possession, certificate fields
                     -> a real TrustedAuthority and Identity, run here
   3 Handshake       the four flights field by field, full and cached -> a real ClientHandshake / ServerHandshake
@@ -46,7 +46,7 @@ sys.path.insert(0, str(ROOT))
 
 from qrcav import codec  # noqa: E402
 from qrcav.certcache import CertCache, cert_ref  # noqa: E402
-from qrcav.crypto import get_suite  # noqa: E402
+from qrcav.crypto import SUITE_DEFS, get_suite  # noqa: E402
 from qrcav.crypto.records import RecordError  # noqa: E402
 from qrcav.handshake import ClientHandshake, HandshakeError, ServerHandshake  # noqa: E402
 from qrcav.pki import Identity, TrustedAuthority  # noqa: E402
@@ -67,7 +67,7 @@ def read_csv(name: str) -> list[dict]:
     if not p.exists():
         return []
     with p.open(newline="") as f:
-        rows = list(csv.DictReader(f))
+        rows = [r for r in csv.DictReader(f) if r.get("suite", "DECK") in SUITE_DEFS]
     out = []
     for r in rows:
         d = {}
@@ -254,9 +254,9 @@ def collect_live_attacks(suite, ta, cav, rsu, c_sess, s_sess) -> list[dict]:
     def downgrade():
         c2, s2 = ClientHandshake(cav), ServerHandshake(rsu)
         d = codec.decode(c2.client_hello())
-        d["suite"] = "CLASSIC"
+        d["suite"] = "CLASSIC" if suite.is_post_quantum else "DECK"
         s2.on_client_hello(codec.encode(d))
-    run("downgrade the suite to classical crypto", "suite must match exactly and is signed", downgrade)
+    run("substitute a different suite in ClientHello", "suite must match exactly and is signed", downgrade)
 
     def ch_replay():
         c2, s2 = ClientHandshake(cav), ServerHandshake(rsu)

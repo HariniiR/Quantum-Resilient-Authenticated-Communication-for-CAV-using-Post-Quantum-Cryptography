@@ -20,8 +20,8 @@ ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "results"
 OUT = ROOT / "report" / "generated"
 
-SUITES = ["CLASSIC", "L1", "L3", "DECK", "L5"]
-SUITE_TEX = {"CLASSIC": "Classical", "L1": "L1", "L3": "L3", "DECK": "DECK", "L5": "L5",
+SUITES = ["CLASSIC", "DECK"]
+SUITE_TEX = {"CLASSIC": "Classical", "DECK": "DECK",
              "DECK+cache": "DECK + cache"}
 
 
@@ -30,7 +30,7 @@ def rd(name: str) -> list[dict]:
     if not p.exists():
         return []
     with p.open() as f:
-        return list(csv.DictReader(f))
+        return [r for r in csv.DictReader(f) if r.get("suite", "DECK") in SUITES]
 
 
 def num(x, d=0) -> str:
@@ -105,12 +105,8 @@ def main() -> None:
         V[f"{k}-fs"] = num(r["server_finished"])
         V[f"{k}-ch-cached"] = num(r["client_hello_cached"])
         V[f"{k}-sh-cached"] = num(r["server_hello_cached"])
-    V["pq-cache-lo"] = num(min(float(sz[x]["cache_saving_pct"]) for x in SUITES[1:]), 0)
-    V["pq-cache-hi"] = num(max(float(sz[x]["cache_saving_pct"]) for x in SUITES[1:]), 0)
-    V["pq-size-ratio-lo"] = num(min(float(sz[s]["handshake_total"]) for s in SUITES[1:]) /
-                                float(sz["CLASSIC"]["handshake_total"]), 0)
-    V["pq-size-ratio-hi"] = num(max(float(sz[s]["handshake_total"]) for s in SUITES[1:]) /
-                                float(sz["CLASSIC"]["handshake_total"]), 0)
+    V["deck-size-ratio"] = num(float(sz["DECK"]["handshake_total"]) /
+                               float(sz["CLASSIC"]["handshake_total"]), 0)
 
     # ---- primitives -----------------------------------------------------------------
     prim = rd("primitives.csv")
@@ -125,19 +121,15 @@ def main() -> None:
     for s in SUITES:
         kg = next(float(r["mean_ms"]) for r in prim if r["suite"] == s
                   and ("KEM" in r["operation"] or "ECDH" in r["operation"]) and r["operation"].endswith("keygen"))
-        rows.append([SUITE_TEX[s] + (" (KEM in kyber-py)" if s == "L1" else ""), ms(kg), ms(p(s, "encaps")),
+        rows.append([SUITE_TEX[s], ms(kg), ms(p(s, "encaps")),
                      ms(p(s, "decaps")), ms(p(s, "sign")), ms(p(s, "sign", "p99_ms")), ms(p(s, "verify"))])
     table("primitives", "lrrrrrr", ["Suite", "KEM keygen", "encaps", "decaps", "sign", "sign p99", "verify"], rows,
-          "Mean of 200 runs after warm-up, in ms. All operations use OpenSSL through the \\texttt{cryptography} "
-          "library, except L1's ML-KEM-512, which that library does not expose; it comes from \\texttt{kyber-py} "
-          "(pure Python).")
+          "Mean of 200 runs after warm-up, in ms. All operations use OpenSSL through the \\texttt{cryptography} library.")
     V["deck-sign-native"] = ms(p("DECK", "ML-DSA-65 sign"))
     V["deck-sign-native-p99"] = ms(p("DECK", "ML-DSA-65 sign", "p99_ms"))
     V["deck-verify-native"] = ms(p("DECK", "ML-DSA-65 verify"))
     V["deck-encaps-native"] = ms(p("DECK", "ML-KEM-1024 encaps"))
     V["deck-decaps-native"] = ms(p("DECK", "ML-KEM-1024 decaps"))
-    V["l1-encaps"] = ms(p("L1", "ML-KEM-512 encaps"))
-    V["l1-decaps"] = ms(p("L1", "ML-KEM-512 decaps"))
     V["classic-sign"] = ms(p("CLASSIC", "ECDSA-P256 sign"))
 
     # ---- handshake timing -------------------------------------------------------------
@@ -241,7 +233,6 @@ def main() -> None:
         ("DECK + cache (directory)", vpick(suite="DECK", signed_beacons="False", edca="True",
                                            backoff="True", cert_cache="1")),
         ("DECK + cache (all warm)", vpick(suite="DECK", cert_cache="2")),
-        ("L3 + cache (directory)", vpick(suite="L3", cert_cache="1")),
         ("--mid--", None),
         ("DECK, signed beacons", vpick(suite="DECK", signed_beacons="True")),
         ("Classical, signed beacons", vpick(suite="CLASSIC", signed_beacons="True")),

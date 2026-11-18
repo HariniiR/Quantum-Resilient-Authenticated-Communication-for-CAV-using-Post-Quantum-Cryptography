@@ -9,7 +9,7 @@ from qrcav.crypto import (
 )
 from qrcav.crypto.records import WINDOW
 
-SUITES = ["DECK", "L1", "L3", "L5", "CLASSIC"]
+SUITES = ["DECK", "CLASSIC"]
 
 
 # ---- codec -------------------------------------------------------------------
@@ -47,13 +47,10 @@ def test_kem_and_signature_roundtrip(name):
     assert not s.sig.verify(pk, b"hello", sig[:-1] + bytes([sig[-1] ^ 1]))
 
 
-def test_l1_mixes_kyber_py_kem_with_native_signature():
-    """ML-KEM-512 comes from kyber-py; its sizes follow FIPS 203 and it works in a handshake suite."""
-    s = get_suite("L1")
-    ek, dk = s.kem.keygen()
-    assert (len(ek), s.kem.ct_len) == (800, 768)
-    ss, ct = s.kem.encaps(ek)
-    assert len(ct) == 768 and s.kem.decaps(dk, ct) == ss
+@pytest.mark.parametrize("name", ["L1", "L3", "L5"])
+def test_removed_suite_is_rejected(name):
+    with pytest.raises(ValueError, match="unknown suite"):
+        get_suite(name)
 
 
 def test_fips_sizes():

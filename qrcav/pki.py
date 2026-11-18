@@ -45,8 +45,6 @@ DEFAULT_VALIDITY_S = 365 * 24 * 3600
 # ML-KEM public parameters published by the TA (FIPS 203, Table 2). These are
 # fixed by the standard; publishing them is informational.
 MLKEM_PARAMS = {
-    "ML-KEM-512": {"n": 256, "q": 3329, "k": 2, "eta1": 3, "eta2": 2},
-    "ML-KEM-768": {"n": 256, "q": 3329, "k": 3, "eta1": 2, "eta2": 2},
     "ML-KEM-1024": {"n": 256, "q": 3329, "k": 4, "eta1": 2, "eta2": 2},
 }
 
