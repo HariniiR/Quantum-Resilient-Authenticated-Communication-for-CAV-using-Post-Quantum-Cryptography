@@ -29,10 +29,37 @@ def _worker(args):
     return r
 
 
+def _progress(i: int, total: int, r: dict) -> None:
+    name = r.get("profile", "").replace("profile_", "").replace("_auto", "").replace("_pure", " (pure)")
+    tags = []
+    cache = int(r.get("cert_cache", 0) or 0)
+    if cache:
+        tags.append("RSU certs pre-distributed" if cache == 1 else "warm certificate caches")
+    if r.get("edca") is not None and not (r.get("edca") and r.get("backoff")):
+        tags.append(f"edca={int(bool(r.get('edca')))} backoff={int(bool(r.get('backoff')))}")
+    tag = f"  [{'; '.join(tags)}]" if tags else ""
+    print(f"[ns3] {i:>2}/{total}  {name:<12} {r.get('vehicles', '?'):>4} vehicles  "
+          f"handshake {r.get('hs_mean_ms', 0):>7.1f} ms  success {r.get('handshake_success_pct', 0):>5.1f}%  "
+          f"beacon PDR {r.get('beacon_pdr_pct', 0):>5.1f}%  airtime {r.get('airtime_pct', 0):>6.1f}%{tag}",
+          flush=True)
+
+
+def _indexed_worker(item):
+    idx, job = item
+    return idx, _worker(job)
+
+
 def run_many(jobs: list[tuple[str, dict]], workers: int = 2) -> list[dict]:
+    """Run every scenario in a worker pool and print one line as each one finishes."""
     ctx = mp.get_context("spawn")
+    results: list[dict | None] = [None] * len(jobs)
+    done = 0
     with ctx.Pool(workers, maxtasksperchild=1) as pool:
-        return pool.map(_worker, jobs, chunksize=1)
+        for idx, r in pool.imap_unordered(_indexed_worker, list(enumerate(jobs))):
+            results[idx] = r
+            done += 1
+            _progress(done, len(jobs), r)
+    return results
 
 
 def write_rows(path: Path, rows: list[dict]) -> None:

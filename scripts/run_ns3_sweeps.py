@@ -46,10 +46,13 @@ def main() -> None:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     prof_dir = out / "profiles"
-    suites = list(dict.fromkeys(args.suites)) if args.suites else sorted(SUITE_DEFS)
+    suites = list(dict.fromkeys(args.suites)) if args.suites else ["CLASSIC", "DECK"]
     vehicles = args.vehicles or ([50, 100] if args.quick else [50, 100, 150, 200])
 
     t0 = time.time()
+    print("[ns3] each scenario simulates 30 s of traffic on a 1.5 km x 1.5 km grid with 9 RSUs:", flush=True)
+    print("[ns3]   vehicles beacon, drive into RSU range, run the handshake, send events and alerts,", flush=True)
+    print("[ns3]   and the MEC commits critical events through consensus. One line per finished scenario.", flush=True)
     print(f"[ns3] building measurement profiles for {suites} ...", flush=True)
     paths = {}
     for s in suites:
